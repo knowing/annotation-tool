@@ -26,6 +26,7 @@ public class EvalGUI extends JFrame implements ComponentListener{
   private final EmbeddedMediaPlayerComponent mediaPlayerComponent;
   JPanel panelNorth;
   JPanel panelSouth;
+  JFrame dataDialog;
   
   // Menu bar
   JMenuBar menubar;
@@ -100,7 +101,6 @@ public class EvalGUI extends JFrame implements ComponentListener{
     panelNorth = new JPanel();
     panelNorth.setLayout(new BorderLayout());
     panelNorth.add(mediaPlayerComponent, BorderLayout.CENTER);
-    panelNorth.add(new JLabel("Test"), BorderLayout.EAST);
     
     // Create layout
     panelSouth = new JPanel();
@@ -164,13 +164,28 @@ public class EvalGUI extends JFrame implements ComponentListener{
     stop.addActionListener(menlis);
     skipframe.addActionListener(menlis);
     
+    /*
+     * Not needed as tracks are displayed in a seperate window
+     * 
     // Add north and south panel to a new SplitPane
-    JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, panelNorth, panelSouth);
-    splitPane.setOneTouchExpandable(false);
-    splitPane.setDividerLocation(200);
-
-    // Set splitPane as content pane
-    this.setContentPane(splitPane);
+	    JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, panelNorth, panelSouth);
+	    splitPane.setOneTouchExpandable(false);
+	    splitPane.setDividerLocation(200);
+	
+	    // Set splitPane as content pane
+	    this.setContentPane(splitPane);
+    */
+    
+    /*
+     * JDialog holds tracks
+     */
+    this.setContentPane(panelNorth);
+    dataDialog = new JFrame();
+    dataDialog.setSize(800, 600);
+    dataDialog.setTitle("Data tracks");
+    dataDialog.setContentPane(panelSouth);
+    dataDialog.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    dataDialog.setVisible(true);
     
     // Start thread to synchronize playback positions and information
     VideoInfo vi = new VideoInfo(position, model.getLoadedDataTracks());
@@ -192,12 +207,20 @@ public class EvalGUI extends JFrame implements ComponentListener{
   public void updatePanelSouth(){
 	  panelSouth.removeAll();
 	  
-	  // Create GridLayout with a row for every track
-	  panelSouth.setLayout(new GridLayout(model.getLoadedDataTracks().size(), 1));
-	  
-	  // Add all tracks
-	  for(int i = 0; i < model.getLoadedDataTracks().size(); i++){
-		  panelSouth.add(model.getLoadedDataTracks().get(i).getVisualization());
+	  if(model.getLoadedDataTracks().size() == 0){
+		  panelSouth.setVisible(false);
+	  }
+	  else{
+		  // Create GridLayout with a row for every track
+		  panelSouth.setLayout(new GridLayout(model.getLoadedDataTracks().size(), 1));
+		  
+		  
+		  // Add all tracks
+		  for(int i = 0; i < model.getLoadedDataTracks().size(); i++){
+			  panelSouth.add(model.getLoadedDataTracks().get(i).getVisualization());
+		  }
+		  
+		  panelSouth.validate();
 	  }
   }
   

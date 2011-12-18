@@ -32,7 +32,7 @@ public class DataModel {
 		loadedDataTracks.remove(d);
 		
 		for(int i = 0; i < loadedDataTracks.size(); i++){
-			if(loadedDataTracks.size()%2 == 0)
+			if(i%2 == 0)
 				loadedDataTracks.get(i).getVisualization().setAlternativeColorScheme(true);
 			else
 				loadedDataTracks.get(i).getVisualization().setAlternativeColorScheme(false);
@@ -48,7 +48,7 @@ public class DataModel {
 	public void addDataTrack(String src){
 		// Do the magic
 		// While magic is unavailable, just create random tracks
-		int length = 180000;
+		int length = 80000;
 		SensorData s = new SensorData(this, length);
 		
 		// Generate random data
