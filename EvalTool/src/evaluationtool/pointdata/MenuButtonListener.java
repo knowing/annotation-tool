@@ -3,6 +3,8 @@ package evaluationtool.pointdata;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import evaluationtool.gui.TrackOptionsDialog;
+
 public class MenuButtonListener implements ActionListener{
 
 	SensorDataVisualization source;
@@ -17,6 +19,9 @@ public class MenuButtonListener implements ActionListener{
 		}
 		else if(ae.getActionCommand().equals("Remove")){
 			source.remove();
+		}
+		else if(ae.getActionCommand().equals("options")){
+			source.showOptionsDialog();
 		}
 	}
 }

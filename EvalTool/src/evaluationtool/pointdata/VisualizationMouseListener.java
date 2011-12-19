@@ -31,9 +31,9 @@ public class VisualizationMouseListener implements MouseWheelListener, MouseList
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		// Do not allow zoomlevel to get < 1 or > 3e8f
 		if(e.getWheelRotation() < 0)
-			source.setZoomlevel(Math.min(3e8f, source.getZoomlevel() * 1.3f));
+			source.setZoomlevel(source.getZoomlevel() * 1.3f);
 		else if(e.getWheelRotation() > 0)
-			source.setZoomlevel(Math.max(1, source.getZoomlevel() / 1.3f));
+			source.setZoomlevel(source.getZoomlevel() / 1.3f);
 	}
 
 	/**

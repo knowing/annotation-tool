@@ -11,6 +11,7 @@ import java.awt.geom.RoundRectangle2D;
 
 import javax.swing.*;
 
+import evaluationtool.gui.TrackOptionsDialog;
 import evaluationtool.gui.Visualization;
 
 public class SensorDataVisualization extends Visualization implements ComponentListener {
@@ -19,7 +20,7 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 	JPanel menu = new JPanel();
 	JButton remove = new JButton("Remove");
 	JButton toggleView = new JButton("Compact view");
-	JLabel dataInfo = new JLabel("info");
+	JButton trackParameters = new JButton("");
 	
 	// Track 
 	TrackVisualization trackvis;
@@ -29,6 +30,9 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 	
 	// Listener for menu
 	MenuButtonListener menulistener = new MenuButtonListener(this);
+	
+	// options dialog
+	TrackOptionsDialog to;
 	
 	SensorDataVisualization(SensorData sd){
 		dataSource = sd;
@@ -45,20 +49,32 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 		this.addComponentListener(this);
 		remove.addActionListener(menulistener);
 		toggleView.addActionListener(menulistener);
+		trackParameters.addActionListener(menulistener);
+		trackParameters.setActionCommand("options");
 		
 		// Add tracks
+		menu.setPreferredSize(new Dimension(200, this.getHeight()));
 		this.add(menu, BorderLayout.WEST);
 		this.add(trackvis, BorderLayout.CENTER);
+		
+		// Info dialog
+		to = new TrackOptionsDialog(null, dataSource);
+		updateInfo();
+		
+		// Update Layout
+		updateLayout();
 	}
 	
 	private void updateLayout(){
 		if(menu != null){
+			menu.setPreferredSize(new Dimension(200, this.getHeight()));
+			
 			menu.removeAll();
 			// Create menu
 			menu.setLayout(new GridLayout(Math.max(3, this.getHeight() / 30), 1));
 			menu.add(remove);
 			menu.add(toggleView);
-			menu.add(dataInfo);
+			menu.add(trackParameters);
 		}
 	}
 	
@@ -85,6 +101,15 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 	
 	protected float getZoomlevel(){
 		return trackvis.getZoomlevel();
+	}
+	
+	public void updateInfo(){
+		trackParameters.setText("Offset: " + dataSource.getOffset() + ", speed: " + dataSource.getPlaybackSpeed() + "X");
+	}
+	
+	public void showOptionsDialog(){
+		to.refresh();
+		to.setVisible(true);
 	}
 
 	/**

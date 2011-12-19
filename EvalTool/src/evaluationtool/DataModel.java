@@ -54,8 +54,7 @@ public class DataModel {
 		// Generate random data
 		for(int i = 0; i < length; i++){
 			// Generate a value every 10 milliseconds
-			s.setDataAt(i, new DataSet(i*10, new int[]{(int)(Math.random() * 255 - 128),
-												  (int)(Math.random() * 255 - 128),
+			s.setDataAt(i, new DataSet(i*10, new int[]{(int)(Math.random() * 255 - 128),(int)(Math.random() * 255 - 128),
 												  (int)(Math.random() * 255 - 128)}));
 		}
 		

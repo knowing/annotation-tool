@@ -10,6 +10,17 @@ import evaluationtool.gui.Visualization;
  *
  */
 public interface Data {
+	// Returns a JComponent that represents the loaded data
 	public Visualization getVisualization();
+	
+	// Filename
 	public String getSource();
+	
+	public float getPlaybackSpeed();
+	public void setPlaybackSpeed(float f);
+	public void setOffset(long ms);
+	public long getOffset();
+	
+	// Filename extensions this class can handle
+	public String getFilenameExtensions();
 }

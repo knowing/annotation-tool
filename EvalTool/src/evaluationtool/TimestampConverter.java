@@ -8,6 +8,16 @@ package evaluationtool;
 public class TimestampConverter {
 	
 	public static String getVideoTimestamp(long time){
+		
+		boolean pos = false;
+		
+		if(time >= 0){
+			pos = true;
+		}
+		else{
+			time = -time;
+		}
+		
 		// Time is in ms
 		long ms 	= time % 1000;
 		
@@ -23,17 +33,23 @@ public class TimestampConverter {
 		long s		= time - min * 60;
 		
 		// Build String
+		String sH = "";
+		if(h > 0)
+			sH = h + ":";
+		
 		String sMin;
-		if(min < 10)
-			sMin = "0" + min;
+		if(h == 0 && min == 0)
+			sMin = "";
+		else if(min < 10)
+			sMin = "0" + min + ":";
 		else
-			sMin = ""  + min;
+			sMin = ""  + min + ":";
 		
 		String sSec;
 		if(s < 10)
-			sSec = "0" + s;
+			sSec = "0" + s + ".";
 		else
-			sSec = ""  + s;
+			sSec = ""  + s + ".";
 		
 		String sMinsec;
 		if(ms < 10)
@@ -43,6 +59,9 @@ public class TimestampConverter {
 		else
 			sMinsec = ""  + ms;
 		
-		return (h + ":" + sMin + ":" + sSec + "." + sMinsec);
+		if(pos)
+			return (sH + sMin + sSec + sMinsec);
+		else
+			return ("-" + h + sMin + sSec + sMinsec);
 	}
 }

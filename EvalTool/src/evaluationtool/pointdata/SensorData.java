@@ -51,10 +51,14 @@ public class SensorData implements Data{
 	
 	public void setOffset(long o){
 		offset = o;
+		vis.updateInfo();
+		getVisualization().repaint();
 	}
 	
 	public void setPlaybackSpeed(float p){
-		playbackSpeed = p;
+		playbackSpeed = Math.max(p, 0.0001f);
+		vis.updateInfo();
+		getVisualization().repaint();
 	}
 	
 	/*
@@ -75,13 +79,12 @@ public class SensorData implements Data{
 	 * @return
 	 */
 	public float getTimeAt(int pos){
-		return (playbackSpeed * (data[pos].time + offset));
+		return ((data[pos].time + offset) / playbackSpeed);
 	}
 	
 	/*
 	 * Getter methods for X, Y and Z values at a specified position
 	 */
-	
 	public int getValueAt(int dimension, int position){
 		return data[position].values[dimension];
 	}
@@ -97,7 +100,7 @@ public class SensorData implements Data{
 	 * @return The length of the track in ms
 	 */
 	public float getDataLength(){
-		return (data[data.length - 1].time - data[0].time) * playbackSpeed;
+		return getTimeAt(data.length - 1) - getTimeAt(0);
 	}
 	
 	/**
@@ -122,5 +125,12 @@ public class SensorData implements Data{
 		if(data != null)
 			return data[0].values.length;
 		else return 0;
+	}
+	
+	/**
+	 * This class will be able to import csv and sdr data
+	 */
+	public String getFilenameExtensions(){
+	return "sdr, csv";
 	}
 }

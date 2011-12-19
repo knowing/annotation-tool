@@ -18,6 +18,7 @@ public class TrackVisualization extends JPanel{
 		private int dataDimension = 1;
 		private float pixelsPerMillisecond = 0;		// in pixels/millisecond
 		private int N_BARS = 10;
+		private int dataResolution = 256;
 		
 		// Data arrays
 		SensorData dataSource;
@@ -118,17 +119,29 @@ public class TrackVisualization extends JPanel{
 		}
 		else{
 			for(int d = 0; d < dataDimension; d++){
-				g2d.drawLine(0, (this.getHeight() - TIMELINE_HEIGHT) * (2 * d + 1) / 6, this.getWidth(), (this.getHeight() - TIMELINE_HEIGHT) * (2 * d + 1) / 6);
+				g2d.drawLine(0, (this.getHeight() - TIMELINE_HEIGHT) * (2 * d + 1) / (2 * dataDimension), this.getWidth(), (this.getHeight() - TIMELINE_HEIGHT) * (2 * d + 1) / (2 * dataDimension));
 			}
 		}
 		
-		// Temporary values
-		float horizontalCoordinate = 0;
-		float verticalCoordinate[] = new float[dataDimension];
-		float tempHorizontalCoordinate = 0;
-		float tempVerticalCoordinate[] = new float[dataDimension];
-		
 		if(first != -1){
+			
+			// Temporary values
+			float horizontalCoordinate = 0;
+			float verticalCoordinate[] = new float[dataDimension];
+			float tempHorizontalCoordinate = 0;
+			float tempVerticalCoordinate[] = new float[dataDimension];
+			
+			if(compactView){
+				// Go through dimensions
+				for(int d = 0; d < dataDimension; d++){
+					tempVerticalCoordinate[d]  = (this.getHeight() - TIMELINE_HEIGHT) 	/ 2f + ((this.getHeight() - TIMELINE_HEIGHT) / (1.1f * dataResolution)) * dataSource.getValueAt(d, first);
+				}
+			}
+			else{
+				for(int d = 0; d < dataDimension; d++){
+					tempVerticalCoordinate[d]  = (this.getHeight() - TIMELINE_HEIGHT) * (2 * d + 1) / (2f * dataDimension) + ((this.getHeight() - TIMELINE_HEIGHT) / (3.1f * dataResolution)) * dataSource.getValueAt(d, first);
+				}
+			}
 			
 			// If data does not start at 0
 			tempHorizontalCoordinate = mapTimeToPixel(dataSource.getTimeAt(first), pixelsPerMillisecond);
@@ -145,12 +158,12 @@ public class TrackVisualization extends JPanel{
 				if(compactView){
 					// Go through dimensions
 					for(int d = 0; d < dataDimension; d++){
-						verticalCoordinate[d]  = (this.getHeight() - TIMELINE_HEIGHT) 	/ 2f + ((this.getHeight() - TIMELINE_HEIGHT) / (1.1f * 256f)) * dataSource.getValueAt(d, i);
+						verticalCoordinate[d]  = (this.getHeight() - TIMELINE_HEIGHT) 	/ 2f + ((this.getHeight() - TIMELINE_HEIGHT) / (1.1f * dataResolution)) * dataSource.getValueAt(d, i);
 					}
 				}
 				else{
 					for(int d = 0; d < dataDimension; d++){
-						verticalCoordinate[d]  = (this.getHeight() - TIMELINE_HEIGHT) * (2 * d + 1) / 6f + ((this.getHeight() - TIMELINE_HEIGHT) / (3.1f * 256f)) * dataSource.getValueAt(d, i);
+						verticalCoordinate[d]  = (this.getHeight() - TIMELINE_HEIGHT) * (2 * d + 1) / (2f * dataDimension) + ((this.getHeight() - TIMELINE_HEIGHT) / ((dataDimension + 0.1f) * dataResolution)) * dataSource.getValueAt(d, i);
 					}
 				}
 				
@@ -300,7 +313,7 @@ public class TrackVisualization extends JPanel{
 	 * @param z
 	 */
 	protected void setZoomlevel(float z){
-		zoomlevel = Math.max(1, z);
+		zoomlevel = Math.max(0.0001f, z);
 		repaint();
 	}
 	
