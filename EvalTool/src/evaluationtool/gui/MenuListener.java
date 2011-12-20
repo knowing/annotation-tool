@@ -26,6 +26,9 @@ public class MenuListener implements ActionListener {
 		else if(ae.getActionCommand().equals("skipframe")){
 			gui.skipFrame();
 		}
+		else if(ae.getActionCommand().equals("mute")){
+			gui.mute();
+		}
 	}
 	
 }

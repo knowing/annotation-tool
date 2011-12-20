@@ -40,6 +40,7 @@ public class EvalGUI extends JFrame implements ComponentListener{
   JButton playpause;
   JButton stop;
   JButton skipframe;
+  JButton mute;
   
   /**
    * Sets VLC path
@@ -124,7 +125,7 @@ public class EvalGUI extends JFrame implements ComponentListener{
     
     	// File menu
 	    file 			= new JMenu("File");
-	    openfile 		= new JMenuItem("Open file");
+	    openfile 		= new JMenuItem("Import file");
 	    exit 			= new JMenuItem("Exit");
 	    
 	    file.add(openfile);
@@ -136,6 +137,7 @@ public class EvalGUI extends JFrame implements ComponentListener{
 	    playpause 		= new JButton("Pause");
 	    stop 			= new JButton("Stop");
 	    skipframe 		= new JButton("Skip");
+	    mute 			= new JButton("Mute");
 	    position 		= new JLabel("-");
     
     
@@ -145,9 +147,7 @@ public class EvalGUI extends JFrame implements ComponentListener{
 	    menubar.add(playpause);
 	    menubar.add(stop);
 	    menubar.add(skipframe);
-    
-    
-    this.setJMenuBar(menubar);
+	    menubar.add(mute);
     
     // Set action commands for buttons
     openfile.setActionCommand("openfile");
@@ -155,6 +155,7 @@ public class EvalGUI extends JFrame implements ComponentListener{
     playpause.setActionCommand("playpause");
     stop.setActionCommand("stop");
     skipframe.setActionCommand("skipframe");
+    mute.setActionCommand("mute");
     
     // Add MenuListener to all buttons
     MenuListener menlis = new MenuListener(this);
@@ -163,6 +164,7 @@ public class EvalGUI extends JFrame implements ComponentListener{
     playpause.addActionListener(menlis);
     stop.addActionListener(menlis);
     skipframe.addActionListener(menlis);
+    mute.addActionListener(menlis);
     
     /*
      * Not needed as tracks are displayed in a seperate window
@@ -182,10 +184,14 @@ public class EvalGUI extends JFrame implements ComponentListener{
     this.setContentPane(panelNorth);
     dataDialog = new JFrame();
     dataDialog.setSize(800, 600);
-    dataDialog.setTitle("Data tracks");
+    dataDialog.setTitle("EvalTool - Data tracks");
+    
+    dataDialog.setJMenuBar(menubar);
+    
     dataDialog.setContentPane(panelSouth);
     dataDialog.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     dataDialog.setVisible(true);
+    
     
     // Start thread to synchronize playback positions and information
     VideoInfo vi = new VideoInfo(position, model.getLoadedDataTracks());
@@ -232,7 +238,7 @@ public class EvalGUI extends JFrame implements ComponentListener{
    * Loads a new video and initializes it
    * @param mrl
    */
-  private void loadVideo(String mrl) {
+  public void loadVideo(String mrl) {
 	 // End old playback
 	 stop();
 	  
@@ -271,6 +277,21 @@ public class EvalGUI extends JFrame implements ComponentListener{
 	  if(mediaPlayerComponent.getMediaPlayer().isPlaying())
 	  		mediaPlayerComponent.getMediaPlayer().pause();
 	  mediaPlayerComponent.getMediaPlayer().setPosition(0);
+  }
+  
+  /**
+   * Mutes and unmutes the video
+   */
+  public void mute(){
+	  // Mute
+	  mediaPlayerComponent.getMediaPlayer().mute();
+	  
+	  if(mediaPlayerComponent.getMediaPlayer().isMute()){
+		  mute.setText("Unmute");
+	  }
+	  else{
+		  mute.setText("Mute");
+	  }
   }
   
   /**

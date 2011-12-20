@@ -130,7 +130,12 @@ public class SensorData implements Data{
 	/**
 	 * This class will be able to import csv and sdr data
 	 */
-	public String getFilenameExtensions(){
-	return "sdr, csv";
+	public static boolean canPlayFile(String extension){
+		
+		if(	extension.equals("csv") ||
+			extension.equals("sdr"))
+				return true;
+		
+		return false;
 	}
 }

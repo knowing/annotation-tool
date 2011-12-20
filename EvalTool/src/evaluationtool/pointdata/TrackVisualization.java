@@ -213,10 +213,15 @@ public class TrackVisualization extends JPanel{
 		
 		// Draw information on current mouse position
 		if(coordinatesPopup != null){
+			String timestamp = TimestampConverter.getVideoTimestamp((long)(coordinatesPopup.x / pixelsPerMillisecond - offset));
+			
+			//Adjust length of popup to text
+			coordinatesPopup.width = g2d.getFontMetrics(g2d.getFont()).stringWidth(timestamp) + 10;
+			
 			g2d.setColor(timelineColorTrack);
 			g2d.fill(coordinatesPopup);
 			g2d.setColor(fontColorTrack);
-			g2d.drawString(TimestampConverter.getVideoTimestamp((long)(coordinatesPopup.x / pixelsPerMillisecond - offset)), coordinatesPopup.x + 5, coordinatesPopup.y + coordinatesPopup.height - 3);
+			g2d.drawString(timestamp, coordinatesPopup.x + 5, coordinatesPopup.y + coordinatesPopup.height - 3);
 			g2d.setColor(Color.BLACK);
 			g2d.draw(coordinatesPopup);
 			}

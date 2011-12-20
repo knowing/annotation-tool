@@ -41,8 +41,36 @@ public class DataModel {
 		gui.updatePanelSouth();
 	}
 	
+	/**
+	 * Handles new files by deciding the type
+	 * @param src
+	 */
+	public void loadFile(String src){
+		StringTokenizer st = new StringTokenizer(src, ".");
+		String fileExtension = "";
+		
+		while(st.hasMoreElements()){
+			fileExtension = st.nextToken();
+		}
+		
+		if(SensorData.canPlayFile(fileExtension))
+			addDataTrack(src);
+		// If it is not a readable data track, try to open as video
+		else
+			gui.loadFile();
+			
+	}
+	
+	/**
+	 * Returns a linked list of currently loaded data tracks
+	 * @return
+	 */
 	public LinkedList<Data> getLoadedDataTracks(){
 		return loadedDataTracks;
+	}
+	
+	public void setVideoTrack(String src){
+		gui.loadVideo(src);
 	}
 	
 	public void addDataTrack(String src){

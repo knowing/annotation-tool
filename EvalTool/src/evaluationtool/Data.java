@@ -20,7 +20,4 @@ public interface Data {
 	public void setPlaybackSpeed(float f);
 	public void setOffset(long ms);
 	public long getOffset();
-	
-	// Filename extensions this class can handle
-	public String getFilenameExtensions();
 }
