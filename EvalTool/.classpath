@@ -5,9 +5,13 @@
 	<classpathentry kind="var" path="VLC_HOME/jna.jar"/>
 	<classpathentry kind="var" path="VLC_HOME/vlcj-1.2.2.jar"/>
 	<classpathentry kind="var" path="WEKA_HOME/weka.jar"/>
-	<classpathentry kind="var" path="JODA_TIME/joda-time-2.0.jar"/>
+	<classpathentry kind="var" path="JODA_HOME/joda-time-2.0.jar"/>
 	<classpathentry kind="var" path="KNOWING_HOME/de.lmu.ifi.dbs.knowing.core_0.1.0.201111241009.jar"/>
 	<classpathentry kind="var" path="SCALA_HOME/scala-library.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.7.0_02 32bit"/>
+	<classpathentry kind="var" path="JODA_HOME"/>
+	<classpathentry kind="var" path="KNOWING_HOME"/>
+	<classpathentry kind="var" path="SCALA_HOME"/>
+	<classpathentry kind="var" path="WEKA_HOME"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
