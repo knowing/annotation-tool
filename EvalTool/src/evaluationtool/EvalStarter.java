@@ -10,6 +10,9 @@ public class EvalStarter {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 			} 
 	    catch (Exception e) {/* Never mind */}
+	    
+	    System.load("/home/muki/Development/vlcj/libvlccore.so");
+	    System.load("/home/muki/Development/vlcj/libvlc.so");
 		EvalGUI gui = new EvalGUI(new DataModel());
 	}
 }
