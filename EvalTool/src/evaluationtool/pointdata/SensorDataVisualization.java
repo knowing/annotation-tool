@@ -63,6 +63,8 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 		
 		// Update Layout
 		updateLayout();
+		
+		System.out.println("Visualization created");
 	}
 	
 	private void updateLayout(){

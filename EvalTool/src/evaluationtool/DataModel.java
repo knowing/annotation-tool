@@ -1,6 +1,14 @@
 package evaluationtool;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
+
+import javax.swing.JOptionPane;
+
+import weka.core.Instances;
+
+import de.sendsor.SDRConverter;
 
 import evaluationtool.gui.EvalGUI;
 import evaluationtool.pointdata.SensorData;
@@ -15,7 +23,7 @@ import evaluationtool.pointdata.DataSet;
  *
  */
 public class DataModel {
-	String video = "U:\\Video\\Top Gear\\Series 12\\Top Gear - S12E01.avi";
+	String video = "";
 	LinkedList<Data> loadedDataTracks = new LinkedList<Data>();
 	
 	EvalGUI gui;
@@ -29,6 +37,7 @@ public class DataModel {
 	}
 	
 	public void removeTrack(Data d){
+		System.out.println("Removing data track");
 		loadedDataTracks.remove(d);
 		
 		for(int i = 0; i < loadedDataTracks.size(); i++){
@@ -53,11 +62,18 @@ public class DataModel {
 			fileExtension = st.nextToken();
 		}
 		
-		if(SensorData.canPlayFile(fileExtension))
-			addDataTrack(src);
+		if(SensorData.canOpenFile(fileExtension))
+			try{
+			addDataTrack(src, fileExtension);
+			}
+		catch(IOException ioe){
+			JOptionPane.showMessageDialog(gui, "Could not read from file.", "Error", JOptionPane.ERROR_MESSAGE);
+		}
 		// If it is not a readable data track, try to open as video
-		else
-			gui.loadFile();
+		else{
+			video = src;
+			gui.loadVideo(src);
+		}
 			
 	}
 	
@@ -73,24 +89,51 @@ public class DataModel {
 		gui.loadVideo(src);
 	}
 	
-	public void addDataTrack(String src){
-		// Do the magic
-		// While magic is unavailable, just create random tracks
-		int length = 80000;
-		SensorData s = new SensorData(this, length);
+	/**
+	 * Determins file types and adds data track
+	 * @param src
+	 * @param fileExtension
+	 * @throws IOException
+	 */
+	public void addDataTrack(String src, String fileExtension) throws IOException{
+	
+		Data newData = null;
 		
-		// Generate random data
-		for(int i = 0; i < length; i++){
-			// Generate a value every 10 milliseconds
-			s.setDataAt(i, new DataSet(i*10, new int[]{(int)(Math.random() * 255 - 128),(int)(Math.random() * 255 - 128),
-												  (int)(Math.random() * 255 - 128)}));
+		// Load sdr file with SDRConverter
+		if(fileExtension.equals("sdr")){
+			SDRConverter sdrc = new SDRConverter();
+			sdrc.setRelativeTimestamp(true);
+			sdrc.setAggregate(SDRConverter.AGGREGATE_NONE);
+			
+			sdrc.setFile(new File(src));
+			Instances ins = sdrc.getDataSet();
+			
+			long firstTimestamp = (long)ins.get(0).value(0);
+			
+			newData = new SensorData(this, ins.size());	
+
+			for(int i = 0; i < ins.size(); i++){
+					((SensorData)newData).setDataAt(i, new DataSet((long)ins.get(i).value(0) - firstTimestamp, 
+										 new int[]{(int)ins.get(i).value(1), 
+												   (int)ins.get(i).value(2), 
+												   (int)ins.get(i).value(3)}));
+			}
 		}
 		
-		if(loadedDataTracks.size()%2 == 0)
-			s.getVisualization().setAlternativeColorScheme(true);
-		else
-			s.getVisualization().setAlternativeColorScheme(false);
-		// Add to list
-		loadedDataTracks.add(s);
+		System.out.println("Added track");
+		
+		if(newData != null){
+			if(loadedDataTracks.size()%2 == 0)
+				newData.getVisualization().setAlternativeColorScheme(true);
+			else
+				newData.getVisualization().setAlternativeColorScheme(false);
+			
+			// Add to list
+			loadedDataTracks.add(newData);
+			gui.updatePanelSouth();
+		}
+		else{
+			System.err.println("Error loading file");
+		}
 	}
 }

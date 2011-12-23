@@ -68,7 +68,9 @@ public class TrackVisualization extends JPanel{
 		Graphics2D g2d = (Graphics2D) g;
 		
 		// synchronize data
-		dataDimension = dataSource.getDataDimension();
+		dataDimension 	= dataSource.getDataDimension();
+		// Get data length
+		dataLength 		= dataSource.getDataLength();
 		
 		// Draw background
 		g2d.setColor(backgroundColorTrack);
@@ -88,10 +90,8 @@ public class TrackVisualization extends JPanel{
 	 * @param g2d
 	 */
 	private void paintTracks(Graphics2D g2d){
-		g2d.setStroke(new BasicStroke(1));
 		
-		// Get data length
-		dataLength = dataSource.getDataLength();
+		g2d.setStroke(new BasicStroke(1));
 		
 		/*
 		 * For zoom level 1f, the whole length points must fit in  	 	 		 this.getWidth()				pixels.
@@ -123,6 +123,7 @@ public class TrackVisualization extends JPanel{
 			}
 		}
 		
+		// Draw data
 		if(first != -1){
 			
 			// Temporary values
@@ -192,7 +193,7 @@ public class TrackVisualization extends JPanel{
 		
 		// Determine grid resolution
 		float i = -offset;
-		float distanceBetweenLines = (this.getWidth() /pixelsPerMillisecond) / N_BARS;
+		float timeBetweenBars = (this.getWidth() / pixelsPerMillisecond) / N_BARS;
 		
 		float xCoord = mapTimeToPixel(i, pixelsPerMillisecond);
 		while(xCoord < this.getWidth()){
@@ -202,9 +203,10 @@ public class TrackVisualization extends JPanel{
 			g2d.drawString(TimestampConverter.getVideoTimestamp((long)i), xCoord, this.getHeight() - 2);
 			
 			// Update xCoord
-			i += distanceBetweenLines;
+			i += timeBetweenBars;
 			xCoord = mapTimeToPixel(i, pixelsPerMillisecond);
 		}
+
 		
 		// Draw cursor to indicate current position
 		g2d.setColor(Color.BLACK);
@@ -215,7 +217,7 @@ public class TrackVisualization extends JPanel{
 		if(coordinatesPopup != null){
 			String timestamp = TimestampConverter.getVideoTimestamp((long)(coordinatesPopup.x / pixelsPerMillisecond - offset));
 			
-			//Adjust length of popup to text
+			// Adjust length of popup to text
 			coordinatesPopup.width = g2d.getFontMetrics(g2d.getFont()).stringWidth(timestamp) + 10;
 			
 			g2d.setColor(timelineColorTrack);
@@ -230,15 +232,15 @@ public class TrackVisualization extends JPanel{
 	/**
 	 * 
 	 * @param time Timestamp to be mapped
-	 * @param pixelsPerMilliseconds Scaling factor 
+	 * @param pixelsPerMillisecond Scaling factor 
 	 * @return Position on x-axis for time
 	 */
-	private float mapTimeToPixel(float time, float pixelsPerMilliseconds){
+	private float mapTimeToPixel(float time, float pixelsPerMillisecond){
 		/*
-		 * Position from 0:		 (time 			 * pixelsPerMilliseconds
-		 * Add offset:		   	 (time + offset) * pixelsPerMilliseconds
+		 * Position from 0:		 (time 			 * pixelsPerMillisecond
+		 * Add offset:		   	 (time + offset) * pixelsPerMillisecond
 		 */
-		return (time + offset) * pixelsPerMilliseconds;
+		return (time + offset) * pixelsPerMillisecond;
 	}
 	
 	/**
@@ -247,14 +249,31 @@ public class TrackVisualization extends JPanel{
 	 * @return The first time-values pair that does not have negative coordinates
 	 */
 	private int calculateFirstDisplayedValue(float pixelsPerMilliseconds){
-		int i = 0;
-		while(i < dataSource.getNValues()){
-			if(mapTimeToPixel(dataSource.getTimeAt(i), pixelsPerMilliseconds) > 0)
-				return i;
+
+		// Binary search for first value to display
+		int start = 0;
+		int end = dataSource.getNValues() - 1;
+		int partLength = end - start;
+		
+		// Cancel if nothing is visible
+		if		   (mapTimeToPixel(dataSource.getTimeAt(end), 	pixelsPerMilliseconds) < 0 
+				|| 	mapTimeToPixel(dataSource.getTimeAt(start),	pixelsPerMilliseconds) > this.getWidth()){
 			
-			i++;
+			return -1;
 		}
-		return -1;
+
+		// While start and end are different, move closer to the value
+		while(start != end && partLength > 1){
+			
+			if	(mapTimeToPixel(dataSource.getTimeAt(start + partLength / 2), pixelsPerMilliseconds) > 0)
+						end 	= start + partLength / 2;
+			else
+						start	= start + partLength / 2;
+			
+			partLength = end - start;
+		}
+
+		return start;
 	}
 	
 	/**
@@ -318,7 +337,9 @@ public class TrackVisualization extends JPanel{
 	 * @param z
 	 */
 	protected void setZoomlevel(float z){
-		zoomlevel = Math.max(0.0001f, z);
+		// Limit bounds
+		zoomlevel = Math.min(Math.max(0.0001f, z), 3e8f);
+		System.out.println(zoomlevel);
 		repaint();
 	}
 	

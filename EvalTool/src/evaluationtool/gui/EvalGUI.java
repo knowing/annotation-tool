@@ -3,6 +3,8 @@ package evaluationtool.gui;
 import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.LinkedList;
 
 import javax.swing.*;
@@ -15,7 +17,7 @@ import evaluationtool.TimestampConverter;
 
 import uk.co.caprica.vlcj.component.*;
 
-public class EvalGUI extends JFrame implements ComponentListener{
+public class EvalGUI extends JFrame implements ComponentListener, WindowListener{
 
   String windowTitle = "EvalTool";
   
@@ -23,7 +25,7 @@ public class EvalGUI extends JFrame implements ComponentListener{
   DataModel model;
 	
   String mrl;
-  private final EmbeddedMediaPlayerComponent mediaPlayerComponent;
+  private EmbeddedMediaPlayerComponent mediaPlayerComponent;
   JPanel panelNorth;
   JPanel panelSouth;
   JFrame dataDialog;
@@ -42,14 +44,15 @@ public class EvalGUI extends JFrame implements ComponentListener{
   JButton skipframe;
   JButton mute;
   
+  VideoInfo vi;
+  
   /**
    * Sets VLC path
    */
   private void initLibVlc(){
-	 // JFileChooser chooser = new JFileChooser();
-	 // chooser.showOpenDialog(null);	 
 	  
-	  NativeLibrary.addSearchPath("libvlc",  "C:\\Users\\anfi\\Desktop\\vlc-1.2.0-pre2-20111201-0302"); 
+	  NativeLibrary.addSearchPath("libvlc",  ""); 
+	  NativeLibrary.addSearchPath("libvlc",  "C:\\Users\\anfi\\Downloads\\vlc-1.2.0-pre2-20111202-0202"); 
  }
   
   /**
@@ -62,8 +65,7 @@ public class EvalGUI extends JFrame implements ComponentListener{
 	  // If ok has been clicked, load the file
 	  if(chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION){	 
 		  String path = chooser.getSelectedFile().getAbsolutePath();
-		  loadVideo(path);
-		  this.setTitle(windowTitle + " - " + path);
+		  model.loadFile(path);
 	  }
   }
 
@@ -90,8 +92,12 @@ public class EvalGUI extends JFrame implements ComponentListener{
     this.setLocation(100, 100);
     this.setSize(800, 600);
     
+    // Create second Frame
+    dataDialog = new JFrame();
+    
     // Exit immediately when user clicks the X
     this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    this.addWindowListener(this);
     
     // Add ComponentListener
     this.addComponentListener(this);
@@ -110,15 +116,6 @@ public class EvalGUI extends JFrame implements ComponentListener{
 	Dimension minimumSize = new Dimension(100, 100);
 	mediaPlayerComponent.setMinimumSize(minimumSize);
 	panelSouth.setMinimumSize(minimumSize);
-      
-    // South panel
-    model.addDataTrack("Test");
-    model.addDataTrack("Test2");
-    model.addDataTrack("Test3");
-    model.addDataTrack("Test4");
-    model.addDataTrack("Test5");
-    model.addDataTrack("Test6"); 
-    updatePanelSouth();
     
     // Create menu structure
     menubar = new JMenuBar();
@@ -182,7 +179,7 @@ public class EvalGUI extends JFrame implements ComponentListener{
      * JDialog holds tracks
      */
     this.setContentPane(panelNorth);
-    dataDialog = new JFrame();
+    
     dataDialog.setSize(800, 600);
     dataDialog.setTitle("EvalTool - Data tracks");
     
@@ -190,15 +187,17 @@ public class EvalGUI extends JFrame implements ComponentListener{
     
     dataDialog.setContentPane(panelSouth);
     dataDialog.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    dataDialog.setVisible(true);
     
     
     // Start thread to synchronize playback positions and information
-    VideoInfo vi = new VideoInfo(position, model.getLoadedDataTracks());
+    vi = new VideoInfo(position, model.getLoadedDataTracks());
     vi.start();
     
     // Show window
     this.setVisible(true);
+    
+    // Show panelSouth only of there are tracks to show
+    updatePanelSouth();
     
     // Load video
     if(model.getVideoPath() != null){
@@ -213,19 +212,31 @@ public class EvalGUI extends JFrame implements ComponentListener{
   public void updatePanelSouth(){
 	  panelSouth.removeAll();
 	  
-	  if(model.getLoadedDataTracks().size() == 0){
-		  panelSouth.setVisible(false);
+	  if(model.getLoadedDataTracks().size() == 0 && this.isVisible()){
+		  System.out.println("No data tracks but video, data frame invisible");
+		  this.setJMenuBar(menubar);
+		  dataDialog.setJMenuBar(null);
+		  dataDialog.setVisible(false);
 	  }
 	  else{
+		  System.out.println(model.getLoadedDataTracks().size() + " data tracks, showing frame");
+		  this.setJMenuBar(null);
+		  this.revalidate();
+		  dataDialog.setJMenuBar(menubar);
 		  // Create GridLayout with a row for every track
-		  panelSouth.setLayout(new GridLayout(model.getLoadedDataTracks().size(), 1));
-		  
+		  panelSouth.setLayout(new GridLayout(model.getLoadedDataTracks().size(), 1)); 
 		  
 		  // Add all tracks
 		  for(int i = 0; i < model.getLoadedDataTracks().size(); i++){
-			  panelSouth.add(model.getLoadedDataTracks().get(i).getVisualization());
+			  if(model.getLoadedDataTracks().get(i).getVisualization() == null){
+				  System.err.println("No visualization");
+			  }
+			  else{		
+				  panelSouth.add(model.getLoadedDataTracks().get(i).getVisualization());
+			  }
 		  }
 		  
+		  dataDialog.setVisible(true);
 		  panelSouth.validate();
 	  }
   }
@@ -363,9 +374,15 @@ public class EvalGUI extends JFrame implements ComponentListener{
 			  tempPos = pos;
 			  
 			  // Read values
+			  try{
 			  pos 		= mediaPlayerComponent.getMediaPlayer().getPosition();
 			  length 	= mediaPlayerComponent.getMediaPlayer().getLength();
-			  
+			  }
+			  catch(NullPointerException ne){
+				  // In case our mediaPlayer vanished
+				  setRunning(false);
+				  return;
+			  }
 			  // Check if user moved slider
 			  if(tempSliderValue != positionslider.getValue()){
 				  // If slider has been moved, jump to new position
@@ -395,4 +412,22 @@ public class EvalGUI extends JFrame implements ComponentListener{
   public void componentMoved(ComponentEvent e) {}
   public void componentResized(ComponentEvent e) {}
   public void componentShown(ComponentEvent e) {}
+
+
+public void windowActivated(WindowEvent arg0) {}
+public void windowClosed(WindowEvent arg0) {}
+public void windowClosing(WindowEvent arg0) {
+
+	// Stop media player properly
+	mediaPlayerComponent.getMediaPlayer().stop();
+	mediaPlayerComponent.getMediaPlayer().release();
+	mediaPlayerComponent.release();
+	
+	vi.setRunning(false);
+	mediaPlayerComponent = null;
+}
+public void windowDeactivated(WindowEvent arg0) {}
+public void windowDeiconified(WindowEvent arg0) {}
+public void windowIconified(WindowEvent arg0) {}
+public void windowOpened(WindowEvent arg0) {}
 }
