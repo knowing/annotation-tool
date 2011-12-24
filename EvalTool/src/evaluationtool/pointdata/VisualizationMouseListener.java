@@ -50,8 +50,18 @@ public class VisualizationMouseListener implements MouseWheelListener, MouseList
 		source.showCoordinates(null);
 		dragging = false;
 	}
-	public void mousePressed(MouseEvent e) {}
-	public void mouseReleased(MouseEvent e) {}
+	public void mousePressed(MouseEvent e) {
+		if(e.getButton() == MouseEvent.BUTTON3)
+			dragging = true;
+			tempMouseX = e.getX();
+	}
+	public void mouseReleased(MouseEvent e) {
+		if(dragging && e.getButton() == MouseEvent.BUTTON3){
+			source.setOffset((long)(source.getOffset() + (e.getX() - tempMouseX) / source.getPixelsPerMillisecond()));
+			dragging = false;
+			source.repaint();
+		}
+	}
 	public void mouseDragged(MouseEvent e) {}
 	public void mouseMoved(MouseEvent e) {
 		source.showCoordinates(new RoundRectangle2D.Float((float)e.getX(), (float)e.getY() - 15f, 80f, 15f, 10f, 10f));

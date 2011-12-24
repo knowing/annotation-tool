@@ -35,6 +35,8 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
   
   JMenu file;
   JMenuItem openfile;
+  JMenuItem save;
+  JMenuItem saveNewProject;
   JMenuItem exit;
   
   JLabel position;
@@ -47,12 +49,29 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
   VideoInfo vi;
   
   /**
-   * Sets VLC path
+	  * Set VLC path. 
+	  * Needed files are (Windows):
+	  * - libvlc.dll
+	  * - libvlccore.dll
+	  * - /plugins
    */
   private void initLibVlc(){
 	  
-	  NativeLibrary.addSearchPath("libvlc",  ""); 
-	  NativeLibrary.addSearchPath("libvlc",  "C:\\Users\\anfi\\Downloads\\vlc-1.2.0-pre2-20111202-0202"); 
+	  JFileChooser chooser = new JFileChooser();
+	  // We need a directory
+	  chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+	  
+	  // If ok has been clicked, load the file
+	  if(chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION){	 
+		  String path = chooser.getSelectedFile().getAbsolutePath();
+		  NativeLibrary.addSearchPath("libvlc",  path);
+		  model.setVLCPath(path);
+	  }  
+	  else{
+		  System.exit(0);
+	  }
+	 
+	 //  NativeLibrary.addSearchPath("libvlc",  "C:\\Users\\anfi\\Downloads\\vlc-1.2.0-pre2-20111202-0202"); 
  }
   
   /**
@@ -69,23 +88,29 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
 	  }
   }
 
+  public DataModel getModel(){
+	  return model;
+  }
+  
   /**
    * Initializes the GUI with a DataModel
    * @param m
    */
   public EvalGUI(DataModel m) {
-	 /*
-	  * Set VLC path. 
-	  * Needed files are (Windows):
-	  * - libvlc.dll
-	  * - libvlccore.dll
-	  * - /plugins
-	  */
-	 initLibVlc();
 	
 	// Reference the model
 	model = m;
 	m.setGUI(this);
+	
+	model.loadVLCPath();
+	
+	if(model.getVLCPath().equals("")){
+		initLibVlc();
+	}
+	else{
+		System.out.println("Adding path " + model.getVLCPath());
+		NativeLibrary.addSearchPath("libvlc",  model.getVLCPath());
+	}
 	 
 	// Set window properties
 	this.setTitle(windowTitle);
@@ -103,7 +128,15 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
     this.addComponentListener(this);
     
     // North panel
-    mediaPlayerComponent = new VideoComponent();
+    while(mediaPlayerComponent == null){
+	    try{
+	    mediaPlayerComponent = new VideoComponent();
+	    }
+	    catch(Exception e){
+	    	initLibVlc();
+	    }
+    }
+    
     mediaPlayerComponent.addKeyListener(new VideoFrameListener(this));
     panelNorth = new JPanel();
     panelNorth.setLayout(new BorderLayout());
@@ -123,9 +156,15 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
     	// File menu
 	    file 			= new JMenu("File");
 	    openfile 		= new JMenuItem("Import file");
+	    save 			= new JMenuItem("Save project");
+	    saveNewProject 	= new JMenuItem("Save project as");
 	    exit 			= new JMenuItem("Exit");
 	    
 	    file.add(openfile);
+	    file.add(new JSeparator());
+	    file.add(save);
+	    file.add(saveNewProject);
+	    file.add(new JSeparator());
 	    file.add(exit);
     
 	    // Playback controls
@@ -147,6 +186,8 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
 	    menubar.add(mute);
     
     // Set action commands for buttons
+	save.setActionCommand("save");
+	saveNewProject.setActionCommand("saveas");
     openfile.setActionCommand("openfile");
     exit.setActionCommand("exit");
     playpause.setActionCommand("playpause");
@@ -156,6 +197,8 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
     
     // Add MenuListener to all buttons
     MenuListener menlis = new MenuListener(this);
+    save.addActionListener(menlis);
+    saveNewProject.addActionListener(menlis);
     openfile.addActionListener(menlis);
     exit.addActionListener(menlis);
     playpause.addActionListener(menlis);
@@ -199,11 +242,8 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
     // Show panelSouth only of there are tracks to show
     updatePanelSouth();
     
-    // Load video
-    if(model.getVideoPath() != null){
-    	loadVideo(model.getVideoPath());
-    	this.setTitle(windowTitle + " - " + model.getVideoPath());
-    	}
+    // Load configuration (last project)
+ 	m.loadConfiguration();
   }
   
   /**
@@ -425,6 +465,16 @@ public void windowClosing(WindowEvent arg0) {
 	
 	vi.setRunning(false);
 	mediaPlayerComponent = null;
+	
+	// Save config and wait for error message
+	String s  = model.saveConfiguration();
+	
+	// If there is an error, create a message dialog
+	if(s != null){
+		JOptionPane.showMessageDialog(this, "Error saving configuration: " + s, "File error", JOptionPane.ERROR_MESSAGE);
+	}
+	else
+		System.out.println("Wrote config");
 }
 public void windowDeactivated(WindowEvent arg0) {}
 public void windowDeiconified(WindowEvent arg0) {}

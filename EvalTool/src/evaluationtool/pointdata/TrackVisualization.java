@@ -324,6 +324,10 @@ public class TrackVisualization extends JPanel{
 		offset = Math.max(0, o);
 	}
 	
+	protected float getOffset(){
+		return offset;
+	}
+
 	protected float getZoomlevel(){
 		return zoomlevel;
 	}
@@ -339,7 +343,6 @@ public class TrackVisualization extends JPanel{
 	protected void setZoomlevel(float z){
 		// Limit bounds
 		zoomlevel = Math.min(Math.max(0.0001f, z), 3e8f);
-		System.out.println(zoomlevel);
 		repaint();
 	}
 	

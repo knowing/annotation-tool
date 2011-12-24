@@ -24,7 +24,7 @@ public class SensorData implements Data{
 	DataSet[] data;
 	
 	// Source file
-	String source;
+	String source = "";
 	
 	// Visualization track
 	SensorDataVisualization vis;
@@ -33,8 +33,9 @@ public class SensorData implements Data{
 	 * Initializes the data array
 	 * @param length The number of three dimensional values
 	 */
-	public SensorData(DataModel model, int length){
+	public SensorData(DataModel model, int length, String src){
 		data = new DataSet[length];
+		source = src;
 		this.model = model;
 		
 		// Create visualization

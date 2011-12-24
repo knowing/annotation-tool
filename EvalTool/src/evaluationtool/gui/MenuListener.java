@@ -3,6 +3,8 @@ package evaluationtool.gui;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import evaluationtool.projecthandling.ProjectFileHandler;
+
 public class MenuListener implements ActionListener {
 
 	EvalGUI gui;
@@ -28,6 +30,19 @@ public class MenuListener implements ActionListener {
 		}
 		else if(ae.getActionCommand().equals("mute")){
 			gui.mute();
+		}
+		else if(ae.getActionCommand().equals("save")){
+			// If there is no project path yet, ask for one
+			if(gui.getModel().getProjectPath().equals("")){
+				String projectpath = ProjectFileHandler.showSaveDialog(gui);	
+				gui.getModel().setProjectPath(projectpath);
+			}
+			else{
+				ProjectFileHandler.saveCurrentProject(gui);
+			}
+		}
+		else if(ae.getActionCommand().equals("saveas")){
+			ProjectFileHandler.showSaveDialog(gui);
 		}
 	}
 	

@@ -105,6 +105,14 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 		return trackvis.getZoomlevel();
 	}
 	
+	protected float getOffset(){
+		return trackvis.getOffset();
+	}
+	
+	protected float getPixelsPerMillisecond(){
+		return trackvis.getPixelsPerMillisecond();
+	}
+	
 	public void updateInfo(){
 		trackParameters.setText("Offset: " + dataSource.getOffset() + ", speed: " + dataSource.getPlaybackSpeed() + "X");
 	}
@@ -121,6 +129,11 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 	protected void setZoomlevel(float z){
 		trackvis.setZoomlevel(z);
 	}
+	
+	protected void setOffset(float o){
+		trackvis.setOffset(o);
+	}
+	
 	/**
 	 * Removes the track from gui
 	 */
