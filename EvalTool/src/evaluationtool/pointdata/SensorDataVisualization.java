@@ -63,11 +63,9 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 		
 		// Update Layout
 		updateLayout();
-		
-		System.out.println("Visualization created");
 	}
 	
-	private void updateLayout(){
+	public void updateLayout(){
 		if(menu != null){
 			menu.setPreferredSize(new Dimension(200, this.getHeight()));
 			

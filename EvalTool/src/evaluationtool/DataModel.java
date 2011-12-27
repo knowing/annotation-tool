@@ -30,7 +30,7 @@ import evaluationtool.projecthandling.ProjectFileHandler;
 public class DataModel {
 	String projectfile = "";
 	String vlcdir = "";
-	String video = "";
+	String videofile = "";
 	
 	public final String CONFIG_PATH = "config.cfg";
 	public final String VLCPATH_LINE = "$VLCDIR=";
@@ -54,7 +54,7 @@ public class DataModel {
 	}
 	
 	public String getVideoPath(){
-		return video;
+		return videofile;
 	}
 	
 	public String getVLCPath(){
@@ -72,7 +72,7 @@ public class DataModel {
 				loadedDataTracks.get(i).getVisualization().setAlternativeColorScheme(false);
 		}
 		
-		gui.updatePanelSouth();
+		gui.updateDataFrame();
 	}
 	
 	/**
@@ -84,7 +84,7 @@ public class DataModel {
 		String fileExtension = "";
 		
 		// Check for duplicate and do not add track if it already exists
-		if(ProjectFileHandler.getFilenameFromPath(src).equals(ProjectFileHandler.getFilenameFromPath(video))){
+		if(ProjectFileHandler.getFilenameFromPath(src).equals(ProjectFileHandler.getFilenameFromPath(getVideoPath()))){
 			return;
 		}
 		for(int i = 0; i < loadedDataTracks.size(); i++){
@@ -105,10 +105,21 @@ public class DataModel {
 		catch(IOException ioe){
 			JOptionPane.showMessageDialog(gui, "Could not read from file.", "Error", JOptionPane.ERROR_MESSAGE);
 		}
+		else if(ProjectFileHandler.canOpenFile(fileExtension)){
+			ProjectFileHandler.loadProjectFile(src, this);
+			// Save config and wait for error message
+			String s  = saveConfiguration();
+						
+			// If there is an error, create a message dialog
+				if(s != null){
+					JOptionPane.showMessageDialog(this.getGUI(), "Error saving configuration: " + s, "File error", JOptionPane.ERROR_MESSAGE);
+				}
+				else
+						System.out.println("Wrote config");
+		}
 		// If it is not a readable data track, try to open as video
 		else{
-			video = src;
-			gui.loadVideo(src);
+			setVideoTrack(src);
 		}
 			
 	}
@@ -122,7 +133,8 @@ public class DataModel {
 	}
 	
 	public void setVideoTrack(String src){
-		video = src;
+		videofile = src;
+		gui.loadVideo(src);
 	}
 	
 	public void setVLCPath(String path){
@@ -146,21 +158,23 @@ public class DataModel {
 		File f = new File(CONFIG_PATH);
 		
 		try(FileWriter fw = new FileWriter(f)){
-		if(!f.canWrite()){
-			throw new IOException("File is read-only");
-		}
-		
-		// Delete file and recreate
-		if(f.exists())
-			f.delete();
-		f.createNewFile();		
-		
-		// Save vlc directory
-		fw.write("# Path to VLC home directory\n");
-		fw.write("\n" + VLCPATH_LINE + vlcdir + "\n\n");
-		
-		fw.write("# Path to current project file\n");
-		fw.write("\n" + PROJECTPATH_LINE + projectfile + "\n\n");
+			if(!f.canWrite()){
+				throw new IOException("File is read-only");
+			}
+			
+			// Delete file and recreate
+			if(f.exists())
+				f.delete();
+			f.createNewFile();		
+			
+			// Save vlc directory
+			fw.write("# Path to VLC home directory\n");
+			fw.write("\n" + VLCPATH_LINE + vlcdir + "\n\n");
+			
+			fw.write("# Path to current project file\n");
+			fw.write("\n" + PROJECTPATH_LINE + projectfile + "\n\n");
+			
+			System.out.println(vlcdir + ", " + projectfile);
 		}
 		catch(IOException ioe){
 			return ioe.getMessage();
@@ -171,14 +185,13 @@ public class DataModel {
 	
 	public void reset(){
 		projectfile = "";
-		vlcdir = "";
-		video = "";
+		setVideoTrack(null);
 		
 		loadedDataTracks.clear();
 	}
 	
 	/**
-	 * Restores the VLCPath and last project
+	 * Restores the last project
 	 */
 	public void loadConfiguration(){
 		File f = new File(CONFIG_PATH);
@@ -260,7 +273,7 @@ public class DataModel {
 			}
 		}
 		
-		System.out.println("Added track");
+		// Add track to list and to layout
 		
 		if(newData != null){
 			if(loadedDataTracks.size()%2 == 0)
@@ -270,7 +283,7 @@ public class DataModel {
 			
 			// Add to list
 			loadedDataTracks.add(newData);
-			gui.updatePanelSouth();
+			gui.updateDataFrame();
 		}
 		else{
 			System.err.println("Error loading file");

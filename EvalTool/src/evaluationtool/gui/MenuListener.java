@@ -3,6 +3,8 @@ package evaluationtool.gui;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JFileChooser;
+
 import evaluationtool.projecthandling.ProjectFileHandler;
 
 public class MenuListener implements ActionListener {
@@ -14,8 +16,17 @@ public class MenuListener implements ActionListener {
 	}
 	public void actionPerformed(ActionEvent ae) {
 		if(ae.getActionCommand().equals("openfile")){
-			gui.loadFile();
-		}
+			/**
+			  * Show a JFileChooser and load the selected file
+			  */
+				  JFileChooser chooser = new JFileChooser();
+
+				  // If ok has been clicked, load the file
+				  if(chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION){	 
+					  String path = chooser.getSelectedFile().getAbsolutePath();
+					  gui.getModel().loadFile(path);
+				  }
+			  }
 		else if(ae.getActionCommand().equals("exit")){
 			System.exit(0);
 		}
@@ -42,7 +53,8 @@ public class MenuListener implements ActionListener {
 			}
 		}
 		else if(ae.getActionCommand().equals("saveas")){
-			ProjectFileHandler.showSaveDialog(gui);
+			String projectpath = ProjectFileHandler.showSaveDialog(gui);	
+			gui.getModel().setProjectPath(projectpath);
 		}
 	}
 	

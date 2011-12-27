@@ -20,6 +20,8 @@ public class EvalStarter {
 		// Ubuntu 64 bit
 		// System.load("/home/muki/Development/vlcj/libvlccore.so");
 		// System.load("/home/muki/Development/vlcj/libvlc.so");
-		EvalGUI gui = new EvalGUI(new DataModel());
+		DataModel model = new DataModel();
+		EvalGUI gui = new EvalGUI(model);
+		model.loadConfiguration();
 	}
 }

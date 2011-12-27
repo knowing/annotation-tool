@@ -19,6 +19,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import com.sun.media.sound.Toolkit;
+
 import evaluationtool.DataModel;
 import evaluationtool.gui.EvalGUI;
 
@@ -27,8 +29,8 @@ public class ProjectFileHandler {
 	public static String loadProjectFile(String path, DataModel model){
 		
 		// Extract archive into a temporary folder
-		File f = new File("/temp");
-		System.out.println("Working in: " + f.getAbsolutePath());
+		File f = new File("\\temp");
+		f.deleteOnExit();
 		
 		// Create temp directory if it does not exist
 		f.mkdir();
@@ -58,10 +60,9 @@ public class ProjectFileHandler {
 		            FileOutputStream fos = new 
 		            FileOutputStream("\\temp\\" + entry.getName());
 		            
-		            dest = new 
-		              BufferedOutputStream(fos, 1024);
-		            while ((count = zis.read(data, 0, 1024)) 
-		              != -1) {
+		            dest = new BufferedOutputStream(fos, 1024);
+		            
+		            while ((count = zis.read(data, 0, 1024)) != -1) {
 		               dest.write(data, 0, count);
 		            }
 		            
@@ -83,6 +84,8 @@ public class ProjectFileHandler {
 		 model.reset();
 		 model.setProjectPath(path);
 		 
+		 String videoPath = "";
+		 
 		 // Read project.cfg
 		 try(BufferedReader br = new BufferedReader(new FileReader(f))){
 				String line = br.readLine();
@@ -91,10 +94,10 @@ public class ProjectFileHandler {
 					if	(line.startsWith(model.VIDEOPATH_LINE)){
 						// Absolute path
 						if(line.contains("\\"))
-							model.setVideoTrack(line.substring(model.VIDEOPATH_LINE.length()));
+							videoPath = line.substring(model.VIDEOPATH_LINE.length());
 						// Relative path
 						else
-							model.setVideoTrack("\\temp\\" + line.substring(model.VIDEOPATH_LINE.length()));
+							videoPath = "\\temp\\" + line.substring(model.VIDEOPATH_LINE.length());
 					}
 					else if (line.startsWith(model.DATAPATH_LINE)){
 						StringTokenizer st = new StringTokenizer(line, ".");
@@ -110,11 +113,15 @@ public class ProjectFileHandler {
 						model.getLoadedDataTracks().getLast().setOffset(Long.parseLong(line.substring(model.OFFSET_LINE.length())));
 					}
 					else if (line.startsWith(model.SPEED_LINE)){
-						model.getLoadedDataTracks().getLast().setPlaybackSpeed(Long.parseLong(line.substring(model.SPEED_LINE.length())));
+						model.getLoadedDataTracks().getLast().setPlaybackSpeed(Float.parseFloat(line.substring(model.SPEED_LINE.length())));
 					}
 					
 					line = br.readLine();
-				}					
+				}	
+				
+				// Convert path to system standard
+				File videoFile = new File(videoPath);
+				model.setVideoTrack(videoFile.getAbsolutePath());
 			}
 			catch(IOException ioe){
 				System.err.println("Project file error: " + ioe.getMessage());
@@ -256,7 +263,16 @@ public class ProjectFileHandler {
 	 * @return
 	 */
 	public static String getFilenameFromPath(String path){
+		
+		if(path == null || path.equals("")){
+			return "";
+		}
+		else if(!path.contains("\\")){
+			return path;
+		}
+		
 		String filename = null;
+		
 		// filename is the last part of a path
 		StringTokenizer st = new StringTokenizer(path, "\\");
 		while(st.hasMoreTokens()){
@@ -340,4 +356,11 @@ public class ProjectFileHandler {
 			  String result = loadProjectFile(path, model);
 		}
 	}
+	
+	public static boolean canOpenFile(String extension){
+		if(extension.equals("zip"))
+				return true;
+			else 
+				return false;
+		}
 }
