@@ -27,6 +27,9 @@ public class MenuListener implements ActionListener {
 					  gui.getModel().loadFile(path);
 				  }
 			  }
+		else if(ae.getActionCommand().equals("createtrack")){
+			gui.getModel().addIntervalTrack();
+		}
 		else if(ae.getActionCommand().equals("exit")){
 			System.exit(0);
 		}

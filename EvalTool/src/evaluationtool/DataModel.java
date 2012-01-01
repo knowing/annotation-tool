@@ -15,6 +15,7 @@ import weka.core.Instances;
 import de.sendsor.SDRConverter;
 
 import evaluationtool.gui.EvalGUI;
+import evaluationtool.intervaldata.IntervalData;
 import evaluationtool.pointdata.SensorData;
 import evaluationtool.pointdata.DataSet;
 import evaluationtool.projecthandling.ProjectFileHandler;
@@ -288,5 +289,14 @@ public class DataModel {
 		else{
 			System.err.println("Error loading file");
 		}
+	}
+	
+	/**
+	 * Adds an empty interval track for annotations
+	 */
+	public void addIntervalTrack(){
+		// Add empty interval track for annotations
+		loadedDataTracks.add(new IntervalData(this, ""));
+		gui.updateDataFrame();
 	}
 }

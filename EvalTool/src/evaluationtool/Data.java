@@ -20,4 +20,5 @@ public interface Data {
 	public void setPlaybackSpeed(float f);
 	public void setOffset(long ms);
 	public long getOffset();
+	public void remove();
 }

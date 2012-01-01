@@ -35,6 +35,7 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
   JMenuBar menubar;
   
   JMenu file;
+  JMenuItem createtrack;
   JMenuItem openfile;
   JMenuItem save;
   JMenuItem saveNewProject;
@@ -196,11 +197,13 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
 	    	// File menu
 		    file 			= new JMenu("File");
 		    openfile 		= new JMenuItem("Import file");
+		    createtrack		= new JMenuItem("Create annotation track");
 		    save 			= new JMenuItem("Save project");
 		    saveNewProject 	= new JMenuItem("Save project as");
 		    exit 			= new JMenuItem("Exit");
 		    
 		    file.add(openfile);
+		    file.add(createtrack);
 		    file.add(new JSeparator());
 		    file.add(save);
 		    file.add(saveNewProject);
@@ -229,6 +232,7 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
 		save.setActionCommand("save");
 		saveNewProject.setActionCommand("saveas");
 	    openfile.setActionCommand("openfile");
+	    createtrack.setActionCommand("createtrack");
 	    exit.setActionCommand("exit");
 	    playpause.setActionCommand("playpause");
 	    stop.setActionCommand("stop");
@@ -240,6 +244,7 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
 	    save.addActionListener(menlis);
 	    saveNewProject.addActionListener(menlis);
 	    openfile.addActionListener(menlis);
+	    createtrack.addActionListener(menlis);
 	    exit.addActionListener(menlis);
 	    playpause.addActionListener(menlis);
 	    stop.addActionListener(menlis);

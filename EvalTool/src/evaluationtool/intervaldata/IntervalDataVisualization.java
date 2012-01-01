@@ -1,20 +1,20 @@
-package evaluationtool.pointdata;
-
+package evaluationtool.intervaldata;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.geom.RoundRectangle2D;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JPanel;
 
 import evaluationtool.gui.TrackOptionsDialog;
 import evaluationtool.gui.Visualization;
 
-public class SensorDataVisualization extends Visualization implements ComponentListener {
+
+public class IntervalDataVisualization extends Visualization implements ComponentListener {
 	
 	// Menu
 	JPanel menu = new JPanel();
@@ -26,7 +26,7 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 	TrackVisualization trackvis;
 	
 	// Data arrays
-	SensorData dataSource;
+	IntervalData dataSource;
 	
 	// Listener for menu
 	MenuButtonListener menulistener = new MenuButtonListener(this);
@@ -34,7 +34,7 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 	// options dialog
 	TrackOptionsDialog to;
 	
-	SensorDataVisualization(SensorData sd){
+	IntervalDataVisualization(IntervalData sd){
 		dataSource = sd;
 		trackvis = new TrackVisualization(sd, this);
 		
@@ -88,14 +88,14 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 	/**
 	 * Toggles the view mode
 	 */
-	public void toggleCompactView(){
-		trackvis.toggleCompactView();
+	protected void toggleEditable(){
+		trackvis.toggleEditable();
 		
 		// Set correct button text
-		if(trackvis.isCompactView())
-			toggleView.setText("Expanded view");
+		if(trackvis.isEditable())
+			toggleView.setText("Editable");
 		else
-			toggleView.setText("Compact view");
+			toggleView.setText("Not editable");
 	}
 	
 	
@@ -135,7 +135,7 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 	/**
 	 * Removes the track from gui
 	 */
-	public void remove(){
+	protected void remove(){
 		dataSource.remove();
 	}
 
