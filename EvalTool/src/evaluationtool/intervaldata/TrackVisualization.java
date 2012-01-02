@@ -8,6 +8,7 @@ import java.awt.RenderingHints;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
+import java.util.LinkedList;
 
 import javax.swing.JPanel;
 
@@ -16,6 +17,9 @@ import evaluationtool.TimestampConverter;
 public class TrackVisualization extends JPanel{
 	
 		private float pixelsPerMillisecond = 0;		// in pixels/millisecond
+		private int n_events = 0;
+		private int n_activities = 1;
+		private DataSet[] events = null;
 		private int N_BARS = 10;
 		
 		// Data arrays
@@ -51,7 +55,7 @@ public class TrackVisualization extends JPanel{
 			dataSource = sd;
 			
 			// Add listener with reference to visualization main component
-			listener = new VisualizationMouseListener(sdv);
+			listener = new VisualizationMouseListener(sdv, this);
 			
 			addMouseWheelListener(listener);
 			addMouseListener(listener);
@@ -75,6 +79,11 @@ public class TrackVisualization extends JPanel{
 		
 		N_BARS = this.getWidth() / 100;
 		
+		// Update data reference
+		events = dataSource.getEvents();
+		n_events = events.length;
+		n_activities = DataSet.ACTIVITIES.length;
+		
 		paintTracks(g2d);
 	}
 	
@@ -95,15 +104,39 @@ public class TrackVisualization extends JPanel{
 		
 		
 		// Check if cursor gets out of view
-		if(mapTimeToPixel(position, pixelsPerMillisecond) > this.getWidth() * 9 / 10 || 
-		   mapTimeToPixel(position, pixelsPerMillisecond) < 0){
+		if(mapTimeToPixel(position) > this.getWidth() * 9 / 10 || 
+		   mapTimeToPixel(position) < 0){
 			offset = -(position - 0.1f/pixelsPerMillisecond * this.getWidth());
 		}	
 		
-		// Draw x-axis
-		g2d.setColor(Color.BLACK);
+		// Draw data
 		
-		//TODO Draw data
+		g2d.setColor(new Color(0, 255, 0, 150));
+		
+		int currentActivity = DataSet.NO_ACTIVITY;
+		long beginCurrentActivity = 0;
+		
+		for(int i = 0; i < n_events; i++){
+			if(events[i].activitytype == DataSet.NO_ACTIVITY){
+				g2d.fillRect((int)mapTimeToPixel((float)beginCurrentActivity),  currentActivity 		/ n_activities * this.getHeight(), 
+							 (int)mapTimeToPixel((float)events[i].timestamp),  	(currentActivity + 1)	/ n_activities * this.getHeight());
+			}
+			else{
+				beginCurrentActivity = events[i].timestamp;
+				currentActivity = events[i].activitytype;
+			}	
+		}
+		
+		// Draw x-axis
+				g2d.setColor(Color.BLACK);
+				
+				// Draw table
+				for(int i = 1; i < DataSet.getPossibleActivities().length; i++){
+					g2d.drawLine(0, i / n_activities, this.getWidth(), i / n_activities);
+					g2d.drawString(DataSet.getPossibleActivities()[i], 
+								      this.getWidth() / 2 - g2d.getFontMetrics(g2d.getFont()).stringWidth(DataSet.getPossibleActivities()[i]) / 2, 
+								      i / n_activities);
+				}	
 		
 		// Draw bar for timeline
 		g2d.setColor(timelineColorTrack);
@@ -116,7 +149,7 @@ public class TrackVisualization extends JPanel{
 		float i = -offset;
 		float timeBetweenBars = (this.getWidth() / pixelsPerMillisecond) / N_BARS;
 		
-		float xCoord = mapTimeToPixel(i, pixelsPerMillisecond);
+		float xCoord = mapTimeToPixel(i);
 		while(xCoord < this.getWidth()){
 			g2d.setColor(timelineColorTrack);
 			g2d.draw(new Line2D.Float(xCoord, 2, xCoord, this.getHeight() - 2));
@@ -125,14 +158,14 @@ public class TrackVisualization extends JPanel{
 			
 			// Update xCoord
 			i += timeBetweenBars;
-			xCoord = mapTimeToPixel(i, pixelsPerMillisecond);
+			xCoord = mapTimeToPixel(i);
 		}
 
 		
 		// Draw cursor to indicate current position
 		g2d.setColor(Color.BLACK);
 		g2d.setStroke(new BasicStroke(3));
-		g2d.draw(new Line2D.Float(mapTimeToPixel(position, pixelsPerMillisecond), 2, mapTimeToPixel(position, pixelsPerMillisecond), (this.getHeight() - TIMELINE_HEIGHT) - 2));
+		g2d.draw(new Line2D.Float(mapTimeToPixel(position), 2, mapTimeToPixel(position), (this.getHeight() - TIMELINE_HEIGHT) - 2));
 		
 		// Draw information on current mouse position
 		if(coordinatesPopup != null){
@@ -156,12 +189,16 @@ public class TrackVisualization extends JPanel{
 	 * @param pixelsPerMillisecond Scaling factor 
 	 * @return Position on x-axis for time
 	 */
-	private float mapTimeToPixel(float time, float pixelsPerMillisecond){
+	public float mapTimeToPixel(float time){
 		/*
 		 * Position from 0:		 (time 			 * pixelsPerMillisecond
 		 * Add offset:		   	 (time + offset) * pixelsPerMillisecond
 		 */
 		return (time + offset) * pixelsPerMillisecond;
+	}
+	
+	public long mapPixelToTime(float pixel){
+		return (long) ((pixel / pixelsPerMillisecond) - offset);
 	}
 
 	

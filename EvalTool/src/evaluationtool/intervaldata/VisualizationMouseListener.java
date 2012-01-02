@@ -15,13 +15,15 @@ import java.awt.geom.RoundRectangle2D;
 public class VisualizationMouseListener implements MouseWheelListener, MouseListener, MouseMotionListener{
 	
 	IntervalDataVisualization source;
+	TrackVisualization track;
 	
 	boolean dragging = false;
 	int tempMouseX = 0;
 	int tempMouseY = 0;
 	
-	public VisualizationMouseListener(IntervalDataVisualization s) {
+	public VisualizationMouseListener(IntervalDataVisualization s, TrackVisualization tv) {
 		source = s;
+		track = tv;
 	}
 	
 	/**
@@ -37,11 +39,14 @@ public class VisualizationMouseListener implements MouseWheelListener, MouseList
 	}
 
 	/**
-	 * Toggles between compact and expanded view on MMB
+	 * Opens the popup menu on RMB
 	 * @param e
 	 */
 	public void mouseClicked(MouseEvent e) {
-
+		if(e.getButton() == MouseEvent.BUTTON3){
+			source.updatePopupMenuForTimestamp(track.mapPixelToTime(e.getX()));
+        	source.getPopupMenu().show(track, e.getX(), e.getY());
+		}
 	}
 	public void mouseEntered(MouseEvent e) {}
 	public void mouseExited(MouseEvent e) {

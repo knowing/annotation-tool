@@ -8,7 +8,10 @@ import java.awt.event.ComponentListener;
 import java.awt.geom.RoundRectangle2D;
 
 import javax.swing.JButton;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JSeparator;
 
 import evaluationtool.gui.TrackOptionsDialog;
 import evaluationtool.gui.Visualization;
@@ -21,6 +24,10 @@ public class IntervalDataVisualization extends Visualization implements Componen
 	JButton remove = new JButton("Remove");
 	JButton toggleView = new JButton("Compact view");
 	JButton trackParameters = new JButton("");
+	
+	// PopupMenu
+	JPopupMenu popupMenu = new JPopupMenu();
+	JMenuItem[] popupMenuItems;
 	
 	// Track 
 	TrackVisualization trackvis;
@@ -51,6 +58,19 @@ public class IntervalDataVisualization extends Visualization implements Componen
 		toggleView.addActionListener(menulistener);
 		trackParameters.addActionListener(menulistener);
 		trackParameters.setActionCommand("options");
+		
+		popupMenuItems = new JMenuItem[dataSource.getPossibleActivities().length];
+		
+		// Add popupmenu items
+		for(int i = 0; i < dataSource.getPossibleActivities().length; i++){
+			popupMenuItems[i] = new JMenuItem("Start activity: " + dataSource.getPossibleActivities()[i]);
+			popupMenuItems[i].setActionCommand(dataSource.getPossibleActivities()[i]);
+			popupMenu.add(popupMenuItems[i]);
+		}
+		
+		popupMenu.add(new JSeparator());
+		popupMenu.add(new JMenuItem("End activity"));
+		popupMenu.add(new JMenuItem("Delete current activity"));
 		
 		// Add tracks
 		menu.setPreferredSize(new Dimension(200, this.getHeight()));
@@ -98,6 +118,32 @@ public class IntervalDataVisualization extends Visualization implements Componen
 			toggleView.setText("Not editable");
 	}
 	
+	public void updatePopupMenuForTimestamp(long timestamp){
+		
+		// If there is no current activity, enable only "Start"-items
+		if(dataSource.getActivityAt(timestamp) == DataSet.NO_ACTIVITY){
+			for(int i = 0; i < popupMenuItems.length; i++){
+				if(popupMenuItems[i].getText().contains("start")){
+				   popupMenuItems[i].setEnabled(true);
+				}
+				else
+					popupMenuItems[i].setEnabled(false);
+			}
+		}
+		else{
+			for(int i = 0; i < popupMenuItems.length; i++){
+				if(popupMenuItems[i].getText().contains("start")){
+				   popupMenuItems[i].setEnabled(false);
+				}
+				else
+					popupMenuItems[i].setEnabled(true);
+			}
+		}
+	}
+	
+	public JPopupMenu getPopupMenu(){
+		return popupMenu;
+	}
 	
 	protected float getZoomlevel(){
 		return trackvis.getZoomlevel();

@@ -260,9 +260,10 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
 	  
 	  if(model.getLoadedDataTracks().size() == 0 && this.isVisible()){
 		  // No data tracks but video, data frame invisible
-		  this.setJMenuBar(menubar);
 		  dataDialog.setJMenuBar(null);
 		  dataDialog.setVisible(false);
+		  this.setJMenuBar(menubar);
+		  this.validate();
 	  }
 	  else{
 		  // Data tracks exist, so rebuild and show frame
