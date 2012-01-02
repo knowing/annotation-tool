@@ -70,7 +70,7 @@ public class TrackVisualization extends JPanel{
 		// synchronize data
 		dataDimension 	= dataSource.getDataDimension();
 		// Get data length
-		dataLength 		= dataSource.getDataLength();
+		dataLength 		= dataSource.getLength();
 		
 		// Draw background
 		g2d.setColor(backgroundColorTrack);

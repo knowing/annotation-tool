@@ -21,4 +21,6 @@ public interface Data {
 	public void setOffset(long ms);
 	public long getOffset();
 	public void remove();
+
+	public long getLength();
 }

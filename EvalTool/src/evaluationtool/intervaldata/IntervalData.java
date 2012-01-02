@@ -32,17 +32,47 @@ public class IntervalData implements Data {
 		vis = new IntervalDataVisualization(this);
 	}
 	
-	public void addEvent(long timestamp, int activitytype){
+	/**
+	 * Adds an event to the list of events
+	 * @param timestampStart
+	 * @param timestampEnd
+	 * @param activitytype
+	 */
+	public void addEvent(long timestampStart, long timestampEnd, int activitytype){
 		int i = 0;
 		
+		if(events.size() == 0){
+			events.add(i, new DataSet(timestampStart, timestampEnd, activitytype));
+			return;
+		}
+		
+		// Sort by starttime
 		for(; i < events.size(); i++){
-			if(timestamp < events.get(i).timestamp){
-				events.add(i, new DataSet(timestamp, activitytype));
+			if(timestampStart < events.get(i).timestampStart){
+				events.add(i, new DataSet(timestampStart, timestampEnd, activitytype));
 				return;
 			}
 		}
 		
-		events.add(new DataSet(timestamp, activitytype));
+		// Add as last element
+		events.add(i, new DataSet(timestampStart, timestampEnd, activitytype));
+	}
+	
+	/**
+	 *  Ends the activity at timestamp
+	 */
+	public void endActivityAt(long timestamp){
+		int currentActivity = getActivityAt(((IntervalDataVisualization)vis).getCurrentMenuActivity(), timestamp);
+		
+		if(currentActivity != DataSet.NO_ACTIVITY)
+			events.get(currentActivity).timestampEnd = timestamp;
+	}
+	
+	public void deleteActivityAt(long timestamp){
+		int currentActivity = getActivityAt(((IntervalDataVisualization)vis).getCurrentMenuActivity(), timestamp);
+		
+		if(currentActivity != DataSet.NO_ACTIVITY)
+			events.remove(currentActivity);
 	}
 	
 	public Visualization getVisualization() {
@@ -51,6 +81,10 @@ public class IntervalData implements Data {
 
 	public String getSource() {
 		return source;
+	}
+	
+	public DataModel getModel(){
+		return model;
 	}
 
 	public void setOffset(long o){
@@ -88,16 +122,31 @@ public class IntervalData implements Data {
 		return DataSet.getPossibleActivities();
 	}
 
-	public int getActivityAt(long timestamp) {
-		int result = DataSet.NO_ACTIVITY;
+	/**
+	 * Returns the activity number of the active activity at timestamp or NO_ACTIVITY if there is no current activity
+	 * @param timestamp
+	 * @return
+	 */
+	public int getActivityAt(int requestedActivity, long timestamp) {
 		
 		for(int i = 0; i < events.size(); i++){
-			if(events.get(i).timestamp > timestamp)
-				return result;
-			else
-				result = events.get(i).activitytype;
+			// Return activity if it is either of the right kind or if no type is requested
+			if((events.get(i).activitytype == requestedActivity || requestedActivity == DataSet.NO_ACTIVITY)
+				&& events.get(i).timestampStart < timestamp 
+				&& (events.get(i).timestampEnd > timestamp || events.get(i).timestampEnd == 0))
+				
+				return i;
 		}
-		
-		return result;
+
+		return DataSet.NO_ACTIVITY;
+	}
+
+	public long getLength() {
+		if(events.size() < 2){
+			return 0;
+		}
+		else{
+			return events.getLast().timestampEnd - events.getFirst().timestampStart;
+		}
 	}
 }

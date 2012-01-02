@@ -304,6 +304,10 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
 	  vi.loadVideo(src);
   }
   
+  public long getVideoLength(){
+	  return mediaPlayerComponent.getMediaPlayer().getLength();
+  }
+  
   /**
    * Shows the next frame in the video
    */
@@ -343,7 +347,7 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
   /**
    * Switches the video between playing and paused
    */
-  public void playpause (){
+  public void playpause(){
 	  
 	  // If video is playing, pause and change button
 	  if(mediaPlayerComponent.getMediaPlayer().isPlaying()){

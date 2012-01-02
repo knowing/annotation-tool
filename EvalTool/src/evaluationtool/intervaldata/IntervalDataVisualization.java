@@ -28,6 +28,12 @@ public class IntervalDataVisualization extends Visualization implements Componen
 	// PopupMenu
 	JPopupMenu popupMenu = new JPopupMenu();
 	JMenuItem[] popupMenuItems;
+	JMenuItem endActivityItem;
+	JMenuItem deleteActivityItem;
+	
+	// The current position of the popupmenu in milliseconds relative to this track
+	long currentMenuTime = 0;
+	int currentMenuActivity = 0;
 	
 	// Track 
 	TrackVisualization trackvis;
@@ -61,16 +67,29 @@ public class IntervalDataVisualization extends Visualization implements Componen
 		
 		popupMenuItems = new JMenuItem[dataSource.getPossibleActivities().length];
 		
+		PopupMenuListener popuplistener = new PopupMenuListener(popupMenu, this);
+		
 		// Add popupmenu items
 		for(int i = 0; i < dataSource.getPossibleActivities().length; i++){
 			popupMenuItems[i] = new JMenuItem("Start activity: " + dataSource.getPossibleActivities()[i]);
-			popupMenuItems[i].setActionCommand(dataSource.getPossibleActivities()[i]);
+			popupMenuItems[i].setActionCommand("#" + i);
 			popupMenu.add(popupMenuItems[i]);
+			
+			// Add listener
+			popupMenuItems[i].addActionListener(popuplistener);
 		}
 		
 		popupMenu.add(new JSeparator());
-		popupMenu.add(new JMenuItem("End activity"));
-		popupMenu.add(new JMenuItem("Delete current activity"));
+		endActivityItem = new JMenuItem("End activity");
+		deleteActivityItem = new JMenuItem("Delete activity");
+		
+		endActivityItem.setActionCommand("#" + DataSet.NO_ACTIVITY);
+		deleteActivityItem.setActionCommand("#" + DataSet.DELETE_ACTIVITY);
+		
+		popupMenu.add(endActivityItem);
+		endActivityItem.addActionListener(popuplistener);
+		popupMenu.add(deleteActivityItem);
+		deleteActivityItem.addActionListener(popuplistener);
 		
 		// Add tracks
 		menu.setPreferredSize(new Dimension(200, this.getHeight()));
@@ -118,31 +137,25 @@ public class IntervalDataVisualization extends Visualization implements Componen
 			toggleView.setText("Not editable");
 	}
 	
-	public void updatePopupMenuForTimestamp(long timestamp){
-		
-		// If there is no current activity, enable only "Start"-items
-		if(dataSource.getActivityAt(timestamp) == DataSet.NO_ACTIVITY){
-			for(int i = 0; i < popupMenuItems.length; i++){
-				if(popupMenuItems[i].getText().contains("start")){
-				   popupMenuItems[i].setEnabled(true);
-				}
-				else
-					popupMenuItems[i].setEnabled(false);
-			}
-		}
-		else{
-			for(int i = 0; i < popupMenuItems.length; i++){
-				if(popupMenuItems[i].getText().contains("start")){
-				   popupMenuItems[i].setEnabled(false);
-				}
-				else
-					popupMenuItems[i].setEnabled(true);
-			}
-		}
+	public void updatePopupMenuForTimestamp(long timestamp, int activity){
+		currentMenuTime = timestamp;
+		currentMenuActivity = activity;
 	}
 	
 	public JPopupMenu getPopupMenu(){
 		return popupMenu;
+	}
+	
+	public long getCurrentMenuTime(){
+		return currentMenuTime;
+	}
+	
+	public int getCurrentMenuActivity(){
+		return currentMenuActivity;
+	}
+	
+	public IntervalData getDataSource(){
+		return dataSource;
 	}
 	
 	protected float getZoomlevel(){
@@ -199,4 +212,9 @@ public class IntervalDataVisualization extends Visualization implements Componen
 		  updateLayout();
 	  }
 	  public void componentShown(ComponentEvent e) {}
+
+	public TrackVisualization getTrackVisualization() {
+		return trackvis;
+	}
+
 }

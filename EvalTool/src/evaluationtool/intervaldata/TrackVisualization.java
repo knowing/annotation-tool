@@ -95,6 +95,10 @@ public class TrackVisualization extends JPanel{
 		
 		g2d.setStroke(new BasicStroke(1));
 		
+		// If there is no data, set dataLength to length of video
+		if(dataLength == 0)
+			dataLength = dataSource.getModel().getProjectLength();
+		
 		/*
 		 * For zoom level 1f, the whole length points must fit in  	 	 		 this.getWidth()				pixels.
 		 * The distance between two milliseconds is therefore  					(this.getWidth() / dataLength) 	pixels.
@@ -111,21 +115,21 @@ public class TrackVisualization extends JPanel{
 		
 		// Draw data
 		
-		g2d.setColor(new Color(0, 255, 0, 150));
-		
-		int currentActivity = DataSet.NO_ACTIVITY;
-		long beginCurrentActivity = 0;
-		
 		for(int i = 0; i < n_events; i++){
-			if(events[i].activitytype == DataSet.NO_ACTIVITY){
-				g2d.fillRect((int)mapTimeToPixel((float)beginCurrentActivity),  currentActivity 		/ n_activities * this.getHeight(), 
-							 (int)mapTimeToPixel((float)events[i].timestamp),  	(currentActivity + 1)	/ n_activities * this.getHeight());
-			}
-			else{
-				beginCurrentActivity = events[i].timestamp;
-				currentActivity = events[i].activitytype;
-			}	
+				g2d.setColor(new Color((events[i].activitytype * 30) % 255, (events[i].activitytype * 75) % 255, (events[i].activitytype * 120) % 255, 150));
+				if(events[i].timestampEnd != 0)
+					g2d.fill(new Rectangle2D.Float((int)mapTimeToPixel((float)events[i].timestampStart),  												    (float)events[i].activitytype / n_activities * this.getHeight(), 
+												   (int)(mapTimeToPixel((float)events[i].timestampEnd) - mapTimeToPixel((float)events[i].timestampStart)),  (float)this.getHeight() / n_activities));
+				else
+					g2d.fill(new Rectangle2D.Float((int)mapTimeToPixel((float)events[i].timestampStart),  							(float)events[i].activitytype / n_activities * this.getHeight(), 
+							   					    this.getWidth() - mapTimeToPixel((float)events[i].timestampStart),  			(float)this.getHeight() / n_activities));
 		}
+		
+		// Draw table
+		for(int i = 0; i < n_activities; i++){
+			g2d.setColor(Color.BLACK);
+			g2d.drawLine(0, (int)((float)this.getHeight() * i / n_activities), this.getWidth(), (int)((float)this.getHeight() * i / n_activities));
+	}
 		
 		// Draw x-axis
 				g2d.setColor(Color.BLACK);
@@ -140,7 +144,7 @@ public class TrackVisualization extends JPanel{
 		
 		// Draw bar for timeline
 		g2d.setColor(timelineColorTrack);
-		g2d.fillRect(0, this.getHeight() - TIMELINE_HEIGHT , this.getWidth(), TIMELINE_HEIGHT);
+		g2d.fillRect(0, this.getHeight() - TIMELINE_HEIGHT, this.getWidth(), TIMELINE_HEIGHT);
 		
 		// Draw grid
 		g2d.setStroke(new BasicStroke(1));
@@ -199,22 +203,6 @@ public class TrackVisualization extends JPanel{
 	
 	public long mapPixelToTime(float pixel){
 		return (long) ((pixel / pixelsPerMillisecond) - offset);
-	}
-
-	
-	/**
-	 * Generates a Color for different track dimensions
-	 */
-	private Color getColorForDimension(int d){
-		
-		// predefined values for the common three dimensions
-		switch(d){
-		case 0:	return new Color(50, 	50, 	150, 	180);
-		case 1: return new Color(150, 	50, 	50, 	180);
-		case 2: return new Color(50, 	150, 	50, 	180);
-		}
-		
-		return new Color(((d + 1) * 173)%255, ((d + 2) * 37)%255, ((d + 3) * 120)%255, 180);
 	}
 	
 	/**
@@ -286,5 +274,9 @@ public class TrackVisualization extends JPanel{
 	public void showCoordinates(RoundRectangle2D.Float f){
 		coordinatesPopup = f;
 		repaint();
+	}
+
+	public int mapPixelToActivity(int y) {
+		return (int)((float)y / this.getHeight() * n_activities);
 	}
 }

@@ -100,8 +100,8 @@ public class SensorData implements Data{
 	/**
 	 * @return The length of the track in ms
 	 */
-	public float getDataLength(){
-		return getTimeAt(data.length - 1) - getTimeAt(0);
+	public long getLength(){
+		return (long)(getTimeAt(data.length - 1) - getTimeAt(0));
 	}
 	
 	/**

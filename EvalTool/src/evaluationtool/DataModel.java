@@ -62,6 +62,16 @@ public class DataModel {
 		return vlcdir;
 	}
 	
+	public long getProjectLength(){
+		long tempLength = gui.getVideoLength();
+		
+		for(int i = 0; i < loadedDataTracks.size(); i++){
+			tempLength = Math.max(tempLength, loadedDataTracks.get(i).getLength());
+		}
+		
+		return tempLength;
+	}
+	
 	public void removeTrack(Data d){
 		System.out.println("Removing data track");
 		loadedDataTracks.remove(d);
