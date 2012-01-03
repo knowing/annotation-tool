@@ -2,8 +2,10 @@ package evaluationtool.gui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
 
 import evaluationtool.projecthandling.ProjectFileHandler;
 
@@ -20,6 +22,18 @@ public class MenuListener implements ActionListener {
 			  * Show a JFileChooser and load the selected file
 			  */
 				  JFileChooser chooser = new JFileChooser();
+				  chooser.setFileFilter(new FileFilter() {
+					
+					@Override
+					public String getDescription() {
+						return ".sdr - 3d Sensor Data";
+					}
+					
+					@Override
+					public boolean accept(File f) {
+						return f.isDirectory() || f.getName().endsWith(".sdr");
+					}
+				});
 
 				  // If ok has been clicked, load the file
 				  if(chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION){	 
