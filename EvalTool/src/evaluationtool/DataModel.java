@@ -283,6 +283,9 @@ public class DataModel {
 												   (int)ins.get(i).value(3)}));
 			}
 		}
+		else if(fileExtension.equals("arff")){
+			
+		}
 		
 		// Add track to list and to layout
 		
@@ -306,7 +309,30 @@ public class DataModel {
 	 */
 	public void addIntervalTrack(){
 		// Add empty interval track for annotations
-		loadedDataTracks.add(new IntervalData(this, ""));
+		loadedDataTracks.add(new IntervalData(this, "", new String[]{"Running", "Walking", "Biking", "Skating", "Crosstrainer"}));
 		gui.updateDataFrame();
 	}
+
+	/**
+	 * Sets the playback position relatively to the video, which means that 0f is the start of the video, 1f is its end
+	 * @param pos
+	 */
+	public void setPosition(float pos) {
+		for(int i = 0; i < loadedDataTracks.size(); i++){
+			  loadedDataTracks.get(i).getVisualization().setPosition(pos * gui.getVideoLength());
+		  }
+		gui.setVideoPosition(pos);
+	}
+	
+	/**
+	 * Sets the playback position in ms, beginning with the start of the video
+	 */
+	public void setPosition(long time){
+		for(int i = 0; i < loadedDataTracks.size(); i++){
+			  loadedDataTracks.get(i).getVisualization().setPosition(time);
+		  }
+		
+		gui.setVideoPosition(Math.max(0f, Math.min((float)time / (float)gui.getVideoLength(), 1f)));
+	}
+	
 }

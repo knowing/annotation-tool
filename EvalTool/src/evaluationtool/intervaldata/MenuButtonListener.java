@@ -13,8 +13,8 @@ public class MenuButtonListener implements ActionListener{
 	}
 	
 	public void actionPerformed(ActionEvent ae) {
-		if(ae.getActionCommand().equals("Editable") || ae.getActionCommand().equals("Not editable")){
-			source.toggleEditable();
+		if(ae.getActionCommand().equals("togglelocked")){
+			source.toggleLocked();
 		}
 		else if(ae.getActionCommand().equals("Remove")){
 			source.remove();

@@ -132,7 +132,7 @@ public class VideoDataSynchronizer {
 				  // Check if user moved slider
 				  if(tempSliderValue != positionslider.getValue()){
 					  // If slider has been moved, jump to new position
-					  mediaPlayerComponent.getMediaPlayer().setPosition(positionslider.getValue() / 1000f);
+					  gui.getModel().setPosition(positionslider.getValue() / 1000f);
 				  }
 				  else{
 					  // If slider has not been moved, move it to current playing position
@@ -146,9 +146,7 @@ public class VideoDataSynchronizer {
 				  if(pos != tempPos){
 					  // Set values to label and all visualizations
 					  lab.setText(TimestampConverter.getVideoTimestamp((long)(pos * length)) + "/" + TimestampConverter.getVideoTimestamp(length));		  
-					  for(int i = 0; i < visualizations.size(); i++){
-						  visualizations.get(i).getVisualization().setPosition(pos * length);
-					  }
+					  gui.getModel().setPosition(pos);  
 				  } 
 			  }
 		  }

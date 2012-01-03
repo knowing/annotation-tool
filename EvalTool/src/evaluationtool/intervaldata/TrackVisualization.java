@@ -4,10 +4,12 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
+import java.awt.geom.RoundRectangle2D.Float;
 import java.util.LinkedList;
 
 import javax.swing.JPanel;
@@ -16,40 +18,54 @@ import evaluationtool.TimestampConverter;
 
 public class TrackVisualization extends JPanel{
 	
-		private float pixelsPerMillisecond = 0;		// in pixels/millisecond
-		private int n_events = 0;
-		private int n_activities = 1;
-		private DataSet[] events = null;
-		private int N_BARS = 10;
+	// Statics to determine which part of an event is selected
+	public static int STARTPOINT 	= 1;
+	public static int ENDPOINT 		= 2;
+	public static int WHOLE_EVENT 	= 3;
+
+	// Painting variables
+	private float pixelsPerMillisecond = 0;		// in pixels/millisecond
+	private int n_events = 0;
+	private int n_activities = 0;
+	private DataSet[] events = null;
+	private int DISTANCE_BETWEEN_BARS = 100;
+	private int n_bars = 10;
+	
+	// Displaying information
+	private float position = 0f;				// in milliseconds
+	private float zoomlevel = 1f;
+	private float offset = 0f;					// in milliseconds
+	private float dataLength = 0;				// in milliseconds
 		
-		// Data arrays
-		IntervalData dataSource;
 		
-		// Colors		
-		private Color backgroundColorTrack;
-		private Color fontColorTrack;
-		private Color timelineColorTrack;
-		
-		// Displaying information
-		private float position = 0f;				// in milliseconds
-		private float zoomlevel = 1f;
-		private float offset = 0f;					// in milliseconds
-		private float dataLength = 0;				// in milliseconds
-		
-		// Listener for everything
-		VisualizationMouseListener listener;
-		
-		// Determines whether the user can add, change, or remove intervals 
-		boolean editable = false;
-		
-		// Follow position automatically?
-		RoundRectangle2D.Float coordinatesPopup = null;
-		
-		// Minimized view
-		boolean minimize = false;
-		
-		// Design constant
-		final int TIMELINE_HEIGHT = 14;
+	// Data arrays
+	IntervalData dataSource;
+	
+	// For every Interval, there is a Rectangle2D.Float for start and end
+	RoundRectangle2D.Float[] intervals;
+	RoundRectangle2D.Float[] startpoints;
+	RoundRectangle2D.Float[] endpoints;
+	
+	// Colors		
+	private Color backgroundColorTrack;
+	private Color fontColorTrack;
+	private Color timelineColorTrack;
+	
+	
+	// Listener for everything
+	VisualizationMouseListener listener;
+	
+	// Determines whether the user can add, change, or remove intervals 
+	boolean locked = false;
+	
+	// Follow position automatically?
+	RoundRectangle2D.Float coordinatesPopup = null;
+	
+	// Minimized view
+	boolean minimize = false;
+	
+	// Design constant
+	final int TIMELINE_HEIGHT = 14;
 		
 		public TrackVisualization(IntervalData sd, IntervalDataVisualization sdv) {
 			dataSource = sd;
@@ -77,12 +93,15 @@ public class TrackVisualization extends JPanel{
 		// Activate anti-aliasing
 		g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 		
-		N_BARS = this.getWidth() / 100;
+		n_bars = this.getWidth() / DISTANCE_BETWEEN_BARS;
 		
 		// Update data reference
 		events = dataSource.getEvents();
 		n_events = events.length;
-		n_activities = DataSet.ACTIVITIES.length;
+		n_activities = dataSource.getPossibleActivities().length;
+		
+		// Create start, end and interval Rectangles
+		createRectangles();
 		
 		paintTracks(g2d);
 	}
@@ -107,40 +126,45 @@ public class TrackVisualization extends JPanel{
 		pixelsPerMillisecond = zoomlevel * (this.getWidth() / dataLength);
 		
 		
-		// Check if cursor gets out of view
+		// Check if cursor gets out of view and change offset
 		if(mapTimeToPixel(position) > this.getWidth() * 9 / 10 || 
 		   mapTimeToPixel(position) < 0){
 			offset = -(position - 0.1f/pixelsPerMillisecond * this.getWidth());
 		}	
 		
 		// Draw data
-		
 		for(int i = 0; i < n_events; i++){
-				g2d.setColor(new Color((events[i].activitytype * 30) % 255, (events[i].activitytype * 75) % 255, (events[i].activitytype * 120) % 255, 150));
-				if(events[i].timestampEnd != 0)
-					g2d.fill(new Rectangle2D.Float((int)mapTimeToPixel((float)events[i].timestampStart),  												    (float)events[i].activitytype / n_activities * this.getHeight(), 
-												   (int)(mapTimeToPixel((float)events[i].timestampEnd) - mapTimeToPixel((float)events[i].timestampStart)),  (float)this.getHeight() / n_activities));
-				else
-					g2d.fill(new Rectangle2D.Float((int)mapTimeToPixel((float)events[i].timestampStart),  							(float)events[i].activitytype / n_activities * this.getHeight(), 
-							   					    this.getWidth() - mapTimeToPixel((float)events[i].timestampStart),  			(float)this.getHeight() / n_activities));
+				
+					g2d.setColor(new Color((events[i].activitytype * 30) % 255, (events[i].activitytype * 75) % 255, (events[i].activitytype * 120) % 255, 150));
+					g2d.fill(intervals[i]);
+					
+					if(!isLocked()){
+						// Draw start and end
+						g2d.setColor(Color.GREEN);
+						g2d.draw(startpoints[i]);
+						
+						g2d.setColor(Color.RED);
+						if(endpoints[i] != null)
+							g2d.draw(endpoints[i]);
+					}
 		}
 		
 		// Draw table
 		for(int i = 0; i < n_activities; i++){
 			g2d.setColor(Color.BLACK);
 			g2d.drawLine(0, (int)((float)this.getHeight() * i / n_activities), this.getWidth(), (int)((float)this.getHeight() * i / n_activities));
-	}
+		}
 		
 		// Draw x-axis
-				g2d.setColor(Color.BLACK);
-				
-				// Draw table
-				for(int i = 1; i < DataSet.getPossibleActivities().length; i++){
-					g2d.drawLine(0, i / n_activities, this.getWidth(), i / n_activities);
-					g2d.drawString(DataSet.getPossibleActivities()[i], 
-								      this.getWidth() / 2 - g2d.getFontMetrics(g2d.getFont()).stringWidth(DataSet.getPossibleActivities()[i]) / 2, 
-								      i / n_activities);
-				}	
+		g2d.setColor(Color.BLACK);
+		
+		// Draw table
+		for(int i = 0; i < dataSource.getPossibleActivities().length; i++){
+			g2d.drawLine(0, i / n_activities, this.getWidth(), i / n_activities);
+			g2d.drawString(dataSource.getPossibleActivities()[i], 
+						      this.getWidth() / 2 - g2d.getFontMetrics(g2d.getFont()).stringWidth(dataSource.getPossibleActivities()[i]) / 2, 
+						      (i + 0.5f) * this.getHeight() / n_activities);
+		}	
 		
 		// Draw bar for timeline
 		g2d.setColor(timelineColorTrack);
@@ -151,7 +175,7 @@ public class TrackVisualization extends JPanel{
 		
 		// Determine grid resolution
 		float i = -offset;
-		float timeBetweenBars = (this.getWidth() / pixelsPerMillisecond) / N_BARS;
+		float timeBetweenBars = (this.getWidth() / pixelsPerMillisecond) / n_bars;
 		
 		float xCoord = mapTimeToPixel(i);
 		while(xCoord < this.getWidth()){
@@ -185,6 +209,40 @@ public class TrackVisualization extends JPanel{
 			g2d.setColor(Color.BLACK);
 			g2d.draw(coordinatesPopup);
 			}
+	}
+	
+	/**
+	 * Creates all event-related rectangles that need to be drawn
+	 */
+	private void createRectangles(){
+		
+		intervals = new RoundRectangle2D.Float[n_events];
+		startpoints = new RoundRectangle2D.Float[n_events];
+		endpoints = new RoundRectangle2D.Float[n_events];
+		
+		for(int i = 0; i < n_events; i++){
+			
+			// Create startpoint
+			startpoints[i] = 	new RoundRectangle2D.Float(mapTimeToPixel((float)events[i].timestampStart) - 5, (float)events[i].activitytype / n_activities * this.getHeight(), 
+						   							  10,  (float)this.getHeight() / n_activities - 1, 7, 7);
+			
+			if(events[i].timestampEnd != 0){
+				// Create interval
+				intervals[i] = 		new RoundRectangle2D.Float(mapTimeToPixel((float)events[i].timestampStart), (float)events[i].activitytype / n_activities * this.getHeight(), 
+													   	  mapTimeToPixel((float)events[i].timestampEnd) - mapTimeToPixel((float)events[i].timestampStart),  (float)this.getHeight() / n_activities,
+													   	  1, 1);
+				// Create endpoint
+				endpoints[i] = 		new RoundRectangle2D.Float(mapTimeToPixel((float)events[i].timestampEnd) - 5, (float)events[i].activitytype / n_activities * this.getHeight(), 
+					   	  								   10,  (float)this.getHeight() / n_activities - 1, 
+					   	  								   7, 7);
+
+			}
+			else{
+				intervals[i] = new RoundRectangle2D.Float(mapTimeToPixel((float)events[i].timestampStart), (float)events[i].activitytype / n_activities * this.getHeight(), 
+						   					    this.getWidth() - mapTimeToPixel((float)events[i].timestampStart), (float)this.getHeight() / n_activities, 1, 1);
+				endpoints[i] = null;			
+			}		
+		}
 	}
 	
 	/**
@@ -234,7 +292,7 @@ public class TrackVisualization extends JPanel{
 	 * @param o
 	 */
 	protected void setOffset(float o){
-		offset = Math.max(0, o);
+		offset = o;
 	}
 	
 	protected float getOffset(){
@@ -262,13 +320,13 @@ public class TrackVisualization extends JPanel{
 	/**
 	 * Toggles editability
 	 */
-	protected void toggleEditable(){
-		editable = !editable;
+	protected void toggleLocked(){
+		locked = !locked;
 		repaint();
 	}
 	
-	public boolean isEditable(){
-		return editable;
+	public boolean isLocked(){
+		return locked;
 	}
 	
 	public void showCoordinates(RoundRectangle2D.Float f){
@@ -278,5 +336,38 @@ public class TrackVisualization extends JPanel{
 
 	public int mapPixelToActivity(int y) {
 		return (int)((float)y / this.getHeight() * n_activities);
+	}
+
+	/**
+	 * Returns underlying event
+	 * @param p
+	 * @return
+	 */
+	public DataSet getEventAt(Point p) {
+		for(int i = 0; i < n_events; i++){
+			if(startpoints[i].contains(p) || endpoints[i].contains(p) || intervals[i].contains(p))
+				return events[i];
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Returns which part of the event is selected
+	 * @param p
+	 * @return 1 for 
+	 */
+	public int getPartAt(Point p){
+		for(int i = 0; i < n_events; i++){
+			if(startpoints[i].contains(p))
+				return STARTPOINT;
+			if(endpoints[i].contains(p))
+				return ENDPOINT;
+			if(intervals[i].contains(p))
+				return WHOLE_EVENT;
+		}
+		
+		// This should not happen, as getEventAt should be called before
+		return 0;
 	}
 }

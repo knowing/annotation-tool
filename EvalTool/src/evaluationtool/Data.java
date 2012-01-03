@@ -23,4 +23,5 @@ public interface Data {
 	public void remove();
 
 	public long getLength();
+	public DataModel getModel();
 }

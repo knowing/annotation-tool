@@ -7,6 +7,8 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.RoundRectangle2D;
 
+import evaluationtool.pointdata.TrackVisualization;
+
 /**
  * Allows the manipulation of tracks with the mouse
  * @author anfi
@@ -15,12 +17,13 @@ import java.awt.geom.RoundRectangle2D;
 public class VisualizationMouseListener implements MouseWheelListener, MouseListener, MouseMotionListener{
 	
 	SensorDataVisualization source;
+	TrackVisualization track;
 	
-	boolean dragging = false;
+	boolean shiftingTime = false;
 	int tempMouseX = 0;
 	int tempMouseY = 0;
 	
-	public VisualizationMouseListener(SensorDataVisualization s) {
+	public VisualizationMouseListener(SensorDataVisualization s, TrackVisualization tv) {
 		source = s;
 	}
 	
@@ -44,25 +47,38 @@ public class VisualizationMouseListener implements MouseWheelListener, MouseList
 		if(e.getButton() == MouseEvent.BUTTON2){
 				source.toggleCompactView();
 		}
+		// Set playback position to this point
+				else if(e.getButton() == MouseEvent.BUTTON1){
+					source.getDataSource().getModel().setPosition((long)track.mapPixelToTime(e.getX()));
+				}
 	}
 	public void mouseEntered(MouseEvent e) {}
 	public void mouseExited(MouseEvent e) {
 		source.showCoordinates(null);
-		dragging = false;
+		shiftingTime = false;
 	}
 	public void mousePressed(MouseEvent e) {
-		if(e.getButton() == MouseEvent.BUTTON3)
-			dragging = true;
+		if(e.getButton() == MouseEvent.BUTTON3){
+			shiftingTime = true;
 			tempMouseX = e.getX();
-	}
-	public void mouseReleased(MouseEvent e) {
-		if(dragging && e.getButton() == MouseEvent.BUTTON3){
-			source.setOffset((long)(source.getOffset() + (e.getX() - tempMouseX) / source.getPixelsPerMillisecond()));
-			dragging = false;
-			source.repaint();
 		}
 	}
-	public void mouseDragged(MouseEvent e) {}
+	public void mouseReleased(MouseEvent e) {
+		shiftingTime = false;
+	}
+	
+	public void mouseDragged(MouseEvent e) {
+
+			if(shiftingTime){
+				System.out.println("Shifted " + (e.getX() - tempMouseX) + " pixels: " + (e.getX() - tempMouseX) / source.getPixelsPerMillisecond() + " ms");
+				source.setOffset((long)(source.getOffset() + (e.getX() - tempMouseX) / source.getPixelsPerMillisecond()));
+				source.repaint();
+				tempMouseX = e.getX();
+			}
+
+		source.showCoordinates(new RoundRectangle2D.Float((float)e.getX(), (float)e.getY() - 15f, 80f, 15f, 10f, 10f));
+	}
+	
 	public void mouseMoved(MouseEvent e) {
 		source.showCoordinates(new RoundRectangle2D.Float((float)e.getX(), (float)e.getY() - 15f, 80f, 15f, 10f, 10f));
 	}

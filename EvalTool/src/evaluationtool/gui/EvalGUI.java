@@ -309,6 +309,16 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
   }
   
   /**
+   * Sets the video playback position
+   * @param pos
+   */
+  public void setVideoPosition(float pos) {
+		if(mediaPlayerComponent.getMediaPlayer() != null){
+			mediaPlayerComponent.getMediaPlayer().setPosition(pos);
+		}
+	}
+  
+  /**
    * Shows the next frame in the video
    */
   public void skipFrame(){

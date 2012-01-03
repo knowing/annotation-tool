@@ -22,7 +22,7 @@ public class IntervalDataVisualization extends Visualization implements Componen
 	// Menu
 	JPanel menu = new JPanel();
 	JButton remove = new JButton("Remove");
-	JButton toggleView = new JButton("Compact view");
+	JButton toggleLock = new JButton("Lock");
 	JButton trackParameters = new JButton("");
 	
 	// PopupMenu
@@ -61,7 +61,8 @@ public class IntervalDataVisualization extends Visualization implements Componen
 		
 		this.addComponentListener(this);
 		remove.addActionListener(menulistener);
-		toggleView.addActionListener(menulistener);
+		toggleLock.addActionListener(menulistener);
+		toggleLock.setActionCommand("togglelocked");
 		trackParameters.addActionListener(menulistener);
 		trackParameters.setActionCommand("options");
 		
@@ -112,7 +113,7 @@ public class IntervalDataVisualization extends Visualization implements Componen
 			// Create menu
 			menu.setLayout(new GridLayout(Math.max(3, this.getHeight() / 30), 1));
 			menu.add(remove);
-			menu.add(toggleView);
+			menu.add(toggleLock);
 			menu.add(trackParameters);
 		}
 	}
@@ -127,14 +128,18 @@ public class IntervalDataVisualization extends Visualization implements Componen
 	/**
 	 * Toggles the view mode
 	 */
-	protected void toggleEditable(){
-		trackvis.toggleEditable();
+	public void toggleLocked(){
+		trackvis.toggleLocked();
 		
 		// Set correct button text
-		if(trackvis.isEditable())
-			toggleView.setText("Editable");
+		if(trackvis.isLocked())
+			toggleLock.setText("Unlock");
 		else
-			toggleView.setText("Not editable");
+			toggleLock.setText("Lock");
+	}
+	
+	public boolean isLocked(){
+		return trackvis.isLocked();
 	}
 	
 	public void updatePopupMenuForTimestamp(long timestamp, int activity){

@@ -18,15 +18,20 @@ public class IntervalData implements Data {
 	// Source file
 	String source = "";
 	
+	// Possible activities
+	final String[] ACTIVITIES;
+	
 	// LinkedList containing all start- and endpoints
 	LinkedList<DataSet> events = new LinkedList<DataSet>();
 		
 	// Visualization track
 	IntervalDataVisualization vis;
 	
-	public IntervalData(DataModel model, String src){
+	public IntervalData(DataModel model, String src, String[] activities){
 		source = src;
 		this.model = model;
+		
+		ACTIVITIES = activities;
 		
 		// Create visualization
 		vis = new IntervalDataVisualization(this);
@@ -119,7 +124,7 @@ public class IntervalData implements Data {
 	}
 	
 	public String[] getPossibleActivities(){
-		return DataSet.getPossibleActivities();
+		return ACTIVITIES;
 	}
 
 	/**

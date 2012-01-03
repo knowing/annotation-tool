@@ -139,4 +139,9 @@ public class SensorData implements Data{
 		
 		return false;
 	}
+
+	@Override
+	public DataModel getModel() {
+		return model;
+	}
 }

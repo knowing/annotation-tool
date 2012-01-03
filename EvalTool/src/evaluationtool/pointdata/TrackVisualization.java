@@ -53,7 +53,7 @@ public class TrackVisualization extends JPanel{
 			dataSource = sd;
 			
 			// Add listener with reference to visualization main component
-			listener = new VisualizationMouseListener(sdv);
+			listener = new VisualizationMouseListener(sdv, this);
 			
 			addMouseWheelListener(listener);
 			addMouseListener(listener);
@@ -241,6 +241,10 @@ public class TrackVisualization extends JPanel{
 		 * Add offset:		   	 (time + offset) * pixelsPerMillisecond
 		 */
 		return (time + offset) * pixelsPerMillisecond;
+	}
+	
+	public long mapPixelToTime(float pixel){
+		return (long) ((pixel / pixelsPerMillisecond) - offset);
 	}
 	
 	/**

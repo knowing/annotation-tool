@@ -11,6 +11,7 @@ import java.awt.geom.RoundRectangle2D;
 
 import javax.swing.*;
 
+import evaluationtool.Data;
 import evaluationtool.gui.TrackOptionsDialog;
 import evaluationtool.gui.Visualization;
 
@@ -153,4 +154,9 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 		  updateLayout();
 	  }
 	  public void componentShown(ComponentEvent e) {}
+
+	@Override
+	public Data getDataSource() {
+		return dataSource;
+	}
 }
