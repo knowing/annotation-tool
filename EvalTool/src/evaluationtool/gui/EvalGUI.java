@@ -43,10 +43,18 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
   
   JLabel position;
   JSlider positionslider;
-  JButton playpause;
-  JButton stop;
-  JButton skipframe;
-  JButton mute;
+  JButton playPauseButton;
+  JButton stopButton;
+  JButton skipFrameButton;
+  JButton muteButton;
+  
+  // Icons for buttons
+  ImageIcon playIcon;
+  ImageIcon pauseIcon;
+  ImageIcon stopIcon;
+  ImageIcon skipFrameIcon;
+  ImageIcon muteIcon;
+  ImageIcon unmuteIcon;
   
   VideoDataSynchronizer vi;
   
@@ -210,23 +218,34 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
 		    file.add(new JSeparator());
 		    file.add(exit);
 	    
+		    // Load icons
+		    String pathToResources = "Resources\\";
+		    final int ICONSIZE = 16;
+
+		    playIcon 				= getImageIconFromFile(pathToResources + "play.png", 	ICONSIZE);
+		    pauseIcon				= getImageIconFromFile(pathToResources + "pause.png", 	ICONSIZE);
+		    stopIcon				= getImageIconFromFile(pathToResources + "stop.png", 	ICONSIZE);
+		    skipFrameIcon			= getImageIconFromFile(pathToResources + "skip.png", 	ICONSIZE);
+		    muteIcon				= getImageIconFromFile(pathToResources + "mute.png", 	ICONSIZE);
+		    unmuteIcon				= getImageIconFromFile(pathToResources + "unmute.png", 	ICONSIZE);
+		    
 		    // Playback controls
-		    position 		= new JLabel();
-		    positionslider	= new JSlider(JSlider.HORIZONTAL, 0, 1000, 0);
-		    playpause 		= new JButton("Pause");
-		    stop 			= new JButton("Stop");
-		    skipframe 		= new JButton("Skip");
-		    mute 			= new JButton("Mute");
-		    position 		= new JLabel("-");
+		    position 				= new JLabel();
+		    positionslider			= new JSlider(JSlider.HORIZONTAL, 0, 1000, 0);
+		    playPauseButton 		= new JButton(pauseIcon);
+		    stopButton 				= new JButton(stopIcon);
+		    skipFrameButton 		= new JButton(skipFrameIcon);
+		    muteButton 				= new JButton(muteIcon);
+		    position 				= new JLabel("-");
 	    
 	    
 		    menubar.add(file);
 		    menubar.add(positionslider);
 		    menubar.add(position);
-		    menubar.add(playpause);
-		    menubar.add(stop);
-		    menubar.add(skipframe);
-		    menubar.add(mute);
+		    menubar.add(playPauseButton);
+		    menubar.add(stopButton);
+		    menubar.add(skipFrameButton);
+		    menubar.add(muteButton);
 	    
 	    // Set action commands for buttons
 		save.setActionCommand("save");
@@ -234,10 +253,10 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
 	    openfile.setActionCommand("openfile");
 	    createtrack.setActionCommand("createtrack");
 	    exit.setActionCommand("exit");
-	    playpause.setActionCommand("playpause");
-	    stop.setActionCommand("stop");
-	    skipframe.setActionCommand("skipframe");
-	    mute.setActionCommand("mute");
+	    playPauseButton.setActionCommand("playpause");
+	    stopButton.setActionCommand("stop");
+	    skipFrameButton.setActionCommand("skipframe");
+	    muteButton.setActionCommand("mute");
 	    
 	    // Add MenuListener to all buttons
 	    MenuListener menlis = new MenuListener(this);
@@ -246,10 +265,14 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
 	    openfile.addActionListener(menlis);
 	    createtrack.addActionListener(menlis);
 	    exit.addActionListener(menlis);
-	    playpause.addActionListener(menlis);
-	    stop.addActionListener(menlis);
-	    skipframe.addActionListener(menlis);
-	    mute.addActionListener(menlis);
+	    playPauseButton.addActionListener(menlis);
+	    stopButton.addActionListener(menlis);
+	    skipFrameButton.addActionListener(menlis);
+	    muteButton.addActionListener(menlis);
+  }
+  
+  private ImageIcon getImageIconFromFile(String path, int size){
+	 return new ImageIcon((new ImageIcon(path)).getImage().getScaledInstance(size, size,  java.awt.Image.SCALE_SMOOTH));
   }
   
   /**
@@ -323,7 +346,8 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
    */
   public void skipFrame(){
 	  // This will pause the video, so change button text
-	  playpause.setText("Play");
+	 // playPauseButton.setText("Play");
+	  playPauseButton.setIcon(playIcon);
 	  mediaPlayerComponent.getMediaPlayer().nextFrame();
   }
   
@@ -331,7 +355,8 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
    * Stops video playback
    */
   public void stop(){
-	  playpause.setText("Play");
+	 // playPauseButton.setText("Play");
+	  playPauseButton.setIcon(playIcon);
 	  
 	  // Stop playback
 	  if(mediaPlayerComponent.getMediaPlayer().isPlaying())
@@ -347,10 +372,12 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
 	  mediaPlayerComponent.getMediaPlayer().mute();
 	  
 	  if(mediaPlayerComponent.getMediaPlayer().isMute()){
-		  mute.setText("Unmute");
+		 // muteButton.setText("Unmute");
+		  muteButton.setIcon(unmuteIcon);
 	  }
 	  else{
-		  mute.setText("Mute");
+		 // muteButton.setText("Mute");
+		  muteButton.setIcon(muteIcon);
 	  }
   }
   
@@ -362,12 +389,14 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
 	  // If video is playing, pause and change button
 	  if(mediaPlayerComponent.getMediaPlayer().isPlaying()){
 		  mediaPlayerComponent.getMediaPlayer().pause();
-		  playpause.setText("Play");
+		  //playPauseButton.setText("Play");
+		  playPauseButton.setIcon(playIcon);
 	  }
 	  // Otherwise continue playing
 	  else{
 		  mediaPlayerComponent.getMediaPlayer().play();
-		  playpause.setText("Pause");
+		  //playPauseButton.setText("Pause");
+		  playPauseButton.setIcon(pauseIcon);
 	  }
   }
   

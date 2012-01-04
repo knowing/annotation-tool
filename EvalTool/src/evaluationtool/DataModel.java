@@ -11,6 +11,7 @@ import java.util.*;
 import javax.swing.JOptionPane;
 
 import weka.core.Instances;
+import weka.core.converters.ArffLoader;
 
 import de.sendsor.SDRConverter;
 
@@ -62,16 +63,45 @@ public class DataModel {
 		return vlcdir;
 	}
 	
-	public long getProjectLength(){
-		long tempLength = gui.getVideoLength();
-		
-		for(int i = 0; i < loadedDataTracks.size(); i++){
-			tempLength = Math.max(tempLength, loadedDataTracks.get(i).getLength());
-		}
-		
-		return tempLength;
+	public String getProjectPath(){
+		return projectfile;
 	}
 	
+	public void setVideoTrack(String src){
+		videofile = src;
+		gui.loadVideo(src);
+	}
+	
+	public void setVLCPath(String path){
+		vlcdir = path;
+	}
+	
+	public void setProjectPath(String path){
+		projectfile = path;
+		gui.setTitle("EvalTool - " + path );
+	}
+	
+	
+	/**
+	 * Returns the length of the longest track in the current project
+	 * @return
+	 */
+	public long getProjectLength(){	
+		long start = 0;
+		long end = gui.getVideoLength();
+		
+		for(int i = 0; i < loadedDataTracks.size(); i++){
+			start 	= Math.min(start, loadedDataTracks.get(i).getOffset());
+			end 	= Math.max(end, loadedDataTracks.get(i).getLength() + loadedDataTracks.get(i).getOffset());
+		}
+		
+		return end - start;
+	}
+	
+	/**
+	 * Removes a data track from the project
+	 * @param d
+	 */
 	public void removeTrack(Data d){
 		System.out.println("Removing data track");
 		loadedDataTracks.remove(d);
@@ -87,7 +117,7 @@ public class DataModel {
 	}
 	
 	/**
-	 * Handles new files by deciding the type
+	 * Handles new files and eliminating duplicates
 	 * @param src
 	 */
 	public void loadFile(String src){
@@ -116,7 +146,7 @@ public class DataModel {
 		catch(IOException ioe){
 			JOptionPane.showMessageDialog(gui, "Could not read from file.", "Error", JOptionPane.ERROR_MESSAGE);
 		}
-		else if(ProjectFileHandler.canOpenFile(fileExtension)){
+		if(ProjectFileHandler.canOpenFile(fileExtension)){
 			ProjectFileHandler.loadProjectFile(src, this);
 			// Save config and wait for error message
 			String s  = saveConfiguration();
@@ -143,24 +173,144 @@ public class DataModel {
 		return loadedDataTracks;
 	}
 	
-	public void setVideoTrack(String src){
-		videofile = src;
-		gui.loadVideo(src);
+	public void reset(){
+		projectfile = "";
+		setVideoTrack(null);
+		
+		loadedDataTracks.clear();
 	}
 	
-	public void setVLCPath(String path){
-		vlcdir = path;
+	/**
+	 * Determins file types and adds data track
+	 * @param src
+	 * @param fileExtension
+	 * @throws IOException
+	 */
+	public void addDataTrack(String src, String fileExtension) throws IOException{
+	
+		Data newData = null;
+
+		// Load sdr file with SDRConverter
+		if(fileExtension.equals("sdr")){
+			SDRConverter sdrc = new SDRConverter();
+			sdrc.setRelativeTimestamp(true);
+			sdrc.setAggregate(SDRConverter.AGGREGATE_NONE);
+			
+			sdrc.setFile(new File(src));
+			Instances ins = sdrc.getDataSet();
+			
+			long firstTimestamp = (long)ins.get(0).value(0);
+			
+			newData = new SensorData(this, ins.size(), src);	
+
+			for(int i = 0; i < ins.size(); i++){
+					((SensorData)newData).setDataAt(i, new DataSet((long)ins.get(i).value(0) - firstTimestamp, 
+										 new int[]{(int)ins.get(i).value(1), 
+												   (int)ins.get(i).value(2), 
+												   (int)ins.get(i).value(3)}));
+			}
+		}
+		// Load arff file if it has attributes timestamp, x, y, z
+		else if(fileExtension.equals("arff")){
+			weka.core.converters.ArffLoader arffin = new ArffLoader();
+			arffin.setFile(new File(src));
+			
+			if(			arffin.getStructure().attribute(0).name().equals("timestamp") 
+					&& 	arffin.getStructure().attribute(1).name().equals("x") 
+					&&  arffin.getStructure().attribute(2).name().equals("y")
+					&& 	arffin.getStructure().attribute(3).name().equals("z")){
+				
+				Instances ins = arffin.getDataSet();
+				
+				long firstTimestamp = (long)ins.get(0).value(0);
+				
+				newData = new SensorData(this, ins.size(), src);	
+
+				for(int i = 0; i < ins.size(); i++){
+						((SensorData)newData).setDataAt(i, new DataSet((long)ins.get(i).value(0) - firstTimestamp, 
+											 new int[]{(int)ins.get(i).value(1), 
+													   (int)ins.get(i).value(2), 
+													   (int)ins.get(i).value(3)}));
+				}
+			}
+
+		}
+		
+		// Add track to list and to layout
+		
+		if(newData != null){
+			if(loadedDataTracks.size()%2 == 0)
+				newData.getVisualization().setAlternativeColorScheme(true);
+			else
+				newData.getVisualization().setAlternativeColorScheme(false);
+			
+			// Add to list
+			loadedDataTracks.add(newData);
+			gui.updateDataFrame();
+		}
+		else{
+			System.err.println("Error loading file");
+		}
 	}
 	
-	public void setProjectPath(String path){
-		projectfile = path;
-		gui.setTitle("EvalTool - " + path );
+	/**
+	 * Adds an interval track for algorithm results
+	 */
+	public void addIntervalTrack(String src, String fileExtension) throws IOException{
+		
+		if(fileExtension.equals("arff")){
+			weka.core.converters.ArffLoader arffin = new ArffLoader();
+			arffin.setFile(new File(src));
+			
+			if(arffin.getStructure().attribute(0).name().equals("from") && arffin.getStructure().attribute(1).name().equals("to") && arffin.getStructure().attribute(2).name().equals("class")){
+				System.out.println(arffin.getStructure().attribute(2).getMetadata());
+				Data newData = new IntervalData(this, "", new String[]{"Walking", "Running", "Biking", "Skating", "Crosstrainer"});
+			}
+		}
+		
+		gui.updateDataFrame();
 	}
 	
-	public String getProjectPath(){
-		return projectfile;
+	/**
+	 * Adds an empty interval track for annotations
+	 */
+	public void addIntervalTrack(){
+		Data newData = new IntervalData(this, "", new String[]{"Walking", "Running", "Biking", "Skating", "Crosstrainer"});
+		loadedDataTracks.add(newData);
+		
+		if(loadedDataTracks.size()%2 == 0)
+			newData.getVisualization().setAlternativeColorScheme(true);
+		else
+			newData.getVisualization().setAlternativeColorScheme(false);
+		
+		gui.updateDataFrame();
+	}
+
+	/**
+	 * Sets the playback position relatively to the video, which means that 0f is the start of the video, 1f is its end
+	 * @param pos
+	 */
+	public void setPosition(float pos) {
+		for(int i = 0; i < loadedDataTracks.size(); i++){
+			  loadedDataTracks.get(i).getVisualization().setPosition(pos * gui.getVideoLength());
+		  }
+		gui.setVideoPosition(pos);
 	}
 	
+	/**
+	 * Sets the playback position in ms, beginning with the start of the video
+	 */
+	public void setPosition(long time){
+		for(int i = 0; i < loadedDataTracks.size(); i++){
+			  loadedDataTracks.get(i).getVisualization().setPosition(time);
+		  }
+		
+		gui.setVideoPosition(Math.max(0f, Math.min((float)time / (float)gui.getVideoLength(), 1f)));
+	}
+	
+/*
+ * File operations from config.cfg
+ */
 	/**
 	 * Saves the programs configuration and returns possible errors as a string
 	 * @return
@@ -192,13 +342,6 @@ public class DataModel {
 		}
 		
 		return null;
-	}
-	
-	public void reset(){
-		projectfile = "";
-		setVideoTrack(null);
-		
-		loadedDataTracks.clear();
 	}
 	
 	/**
@@ -252,87 +395,4 @@ public class DataModel {
 			System.err.println(ioe.getMessage());
 		}
 	}
-	
-	/**
-	 * Determins file types and adds data track
-	 * @param src
-	 * @param fileExtension
-	 * @throws IOException
-	 */
-	public void addDataTrack(String src, String fileExtension) throws IOException{
-	
-		Data newData = null;
-
-		// Load sdr file with SDRConverter
-		if(fileExtension.equals("sdr")){
-			SDRConverter sdrc = new SDRConverter();
-			sdrc.setRelativeTimestamp(true);
-			sdrc.setAggregate(SDRConverter.AGGREGATE_NONE);
-			
-			sdrc.setFile(new File(src));
-			Instances ins = sdrc.getDataSet();
-			
-			long firstTimestamp = (long)ins.get(0).value(0);
-			
-			newData = new SensorData(this, ins.size(), src);	
-
-			for(int i = 0; i < ins.size(); i++){
-					((SensorData)newData).setDataAt(i, new DataSet((long)ins.get(i).value(0) - firstTimestamp, 
-										 new int[]{(int)ins.get(i).value(1), 
-												   (int)ins.get(i).value(2), 
-												   (int)ins.get(i).value(3)}));
-			}
-		}
-		else if(fileExtension.equals("arff")){
-			
-		}
-		
-		// Add track to list and to layout
-		
-		if(newData != null){
-			if(loadedDataTracks.size()%2 == 0)
-				newData.getVisualization().setAlternativeColorScheme(true);
-			else
-				newData.getVisualization().setAlternativeColorScheme(false);
-			
-			// Add to list
-			loadedDataTracks.add(newData);
-			gui.updateDataFrame();
-		}
-		else{
-			System.err.println("Error loading file");
-		}
-	}
-	
-	/**
-	 * Adds an empty interval track for annotations
-	 */
-	public void addIntervalTrack(){
-		// Add empty interval track for annotations
-		loadedDataTracks.add(new IntervalData(this, "", new String[]{"Running", "Walking", "Biking", "Skating", "Crosstrainer"}));
-		gui.updateDataFrame();
-	}
-
-	/**
-	 * Sets the playback position relatively to the video, which means that 0f is the start of the video, 1f is its end
-	 * @param pos
-	 */
-	public void setPosition(float pos) {
-		for(int i = 0; i < loadedDataTracks.size(); i++){
-			  loadedDataTracks.get(i).getVisualization().setPosition(pos * gui.getVideoLength());
-		  }
-		gui.setVideoPosition(pos);
-	}
-	
-	/**
-	 * Sets the playback position in ms, beginning with the start of the video
-	 */
-	public void setPosition(long time){
-		for(int i = 0; i < loadedDataTracks.size(); i++){
-			  loadedDataTracks.get(i).getVisualization().setPosition(time);
-		  }
-		
-		gui.setVideoPosition(Math.max(0f, Math.min((float)time / (float)gui.getVideoLength(), 1f)));
-	}
-	
 }

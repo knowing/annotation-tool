@@ -133,7 +133,7 @@ public class SensorData implements Data{
 	 */
 	public static boolean canOpenFile(String extension){
 		
-		if(	extension.equals("csv") ||
+		if(	extension.equals("arff") ||
 			extension.equals("sdr"))
 				return true;
 		
