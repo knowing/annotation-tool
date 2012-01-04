@@ -17,6 +17,7 @@ import de.sendsor.SDRConverter;
 
 import evaluationtool.gui.EvalGUI;
 import evaluationtool.intervaldata.IntervalData;
+import evaluationtool.intervaldata.IntervalDataVisualization;
 import evaluationtool.pointdata.SensorData;
 import evaluationtool.pointdata.DataSet;
 import evaluationtool.projecthandling.ProjectFileHandler;
@@ -57,6 +58,10 @@ public class DataModel {
 	
 	public String getVideoPath(){
 		return videofile;
+	}
+	
+	public boolean isVideoPlaying(){
+		return gui.isVideoPlaying();
 	}
 	
 	public String getVLCPath(){
@@ -139,13 +144,17 @@ public class DataModel {
 			fileExtension = st.nextToken();
 		}
 		
-		if(SensorData.canOpenFile(fileExtension))
-			try{
-			addDataTrack(src, fileExtension);
-			}
+		
+		try{
+			if(fileExtension.equals("sdr") || fileExtension.equals("arff") || fileExtension.equals("csv"))
+				addDataTrack(src, fileExtension);
+			if(fileExtension.equals("arff"))
+				addIntervalTrack(src, fileExtension);
+		}
 		catch(IOException ioe){
 			JOptionPane.showMessageDialog(gui, "Could not read from file.", "Error", JOptionPane.ERROR_MESSAGE);
 		}
+		
 		if(ProjectFileHandler.canOpenFile(fileExtension)){
 			ProjectFileHandler.loadProjectFile(src, this);
 			// Save config and wait for error message
@@ -210,28 +219,52 @@ public class DataModel {
 												   (int)ins.get(i).value(3)}));
 			}
 		}
-		// Load arff file if it has attributes timestamp, x, y, z
+		/* 
+		 * Load arff file if it has attributes timestamp and second is numeric.
+		 * All numeric attriubtes will be shown.
+		 */
 		else if(fileExtension.equals("arff")){
 			weka.core.converters.ArffLoader arffin = new ArffLoader();
 			arffin.setFile(new File(src));
 			
 			if(			arffin.getStructure().attribute(0).name().equals("timestamp") 
-					&& 	arffin.getStructure().attribute(1).name().equals("x") 
-					&&  arffin.getStructure().attribute(2).name().equals("y")
-					&& 	arffin.getStructure().attribute(3).name().equals("z")){
+					&& 	arffin.getStructure().attribute(1).isNumeric()){
 				
 				Instances ins = arffin.getDataSet();
 				
 				long firstTimestamp = (long)ins.get(0).value(0);
 				
 				newData = new SensorData(this, ins.size(), src);	
-
-				for(int i = 0; i < ins.size(); i++){
-						((SensorData)newData).setDataAt(i, new DataSet((long)ins.get(i).value(0) - firstTimestamp, 
-											 new int[]{(int)ins.get(i).value(1), 
-													   (int)ins.get(i).value(2), 
-													   (int)ins.get(i).value(3)}));
+				
+				// Count numeric attributes
+				int nNumeric = 0;
+				
+				for(int a = 1; a < ins.numAttributes(); a++){
+					if(ins.attribute(a).isNumeric()){
+						nNumeric++;
+					}
 				}
+				System.out.println("nNumeric: " + nNumeric);
+				int counter;
+	
+				// Add all samples
+				for(int i = 0; i < ins.size(); i++){
+					
+					// Create array for values
+					int[] temp = new int[nNumeric];
+					counter = 0;
+					
+					for(int a = 1; a < ins.numAttributes(); a++){
+						// Add values of they are numeric
+						if(ins.attribute(a).isNumeric())
+							temp[counter++] = (int)ins.get(i).value(a);
+					}
+							
+						((SensorData)newData).setDataAt(i, new DataSet((long)ins.get(i).value(0) - firstTimestamp, temp));
+				}
+			}
+			else{
+				return;
 			}
 
 		}
@@ -258,17 +291,47 @@ public class DataModel {
 	 */
 	public void addIntervalTrack(String src, String fileExtension) throws IOException{
 		
+		IntervalData newData = null;
+
 		if(fileExtension.equals("arff")){
 			weka.core.converters.ArffLoader arffin = new ArffLoader();
 			arffin.setFile(new File(src));
-			
+
 			if(arffin.getStructure().attribute(0).name().equals("from") && arffin.getStructure().attribute(1).name().equals("to") && arffin.getStructure().attribute(2).name().equals("class")){
-				System.out.println(arffin.getStructure().attribute(2).getMetadata());
-				Data newData = new IntervalData(this, "", new String[]{"Walking", "Running", "Biking", "Skating", "Crosstrainer"});
+				String[] activities = new String[arffin.getStructure().attribute(2).numValues()];
+				
+				for(int i = 0; i < activities.length; i++){
+					activities[i] = arffin.getStructure().attribute(2).value(i);
+				}
+				
+				newData = new IntervalData(this, src, activities);
+				
+				Instances ins = arffin.getDataSet();
+
+				long firstTimestamp = (long)ins.get(0).value(0);
+
+				for(int i = 0; i < ins.size(); i++){
+					((IntervalData)newData).addEvent((long)ins.get(i).value(0) - firstTimestamp, (long)ins.get(i).value(1) - firstTimestamp, (int)ins.get(i).value(2));
+				}
 			}
 		}
 		
-		gui.updateDataFrame();
+		// Add track to list and to layout
+		
+				if(newData != null){
+					if(loadedDataTracks.size()%2 == 0)
+						newData.getVisualization().setAlternativeColorScheme(true);
+					else
+						newData.getVisualization().setAlternativeColorScheme(false);
+					
+					// Add to list
+					loadedDataTracks.add(newData);
+					((IntervalDataVisualization)newData.getVisualization()).toggleLocked();
+					gui.updateDataFrame();
+				}
+				else{
+					System.err.println("Error loading file");
+				}
 	}
 	
 	/**
@@ -287,14 +350,16 @@ public class DataModel {
 	}
 
 	/**
-	 * Sets the playback position relatively to the video, which means that 0f is the start of the video, 1f is its end
+	 * Sets the playback position relatively to the video, which means that 0f is the start of the video, 1f is its end.
+	 * setVideoPosition can be false to avoid a loopback from VideoDataSynchronizer
 	 * @param pos
 	 */
-	public void setPosition(float pos) {
+	public void setPosition(float pos, boolean setVideoPosition) {
 		for(int i = 0; i < loadedDataTracks.size(); i++){
 			  loadedDataTracks.get(i).getVisualization().setPosition(pos * gui.getVideoLength());
 		  }
-		gui.setVideoPosition(pos);
+		if(setVideoPosition)
+			gui.setVideoPosition(pos);
 	}
 	
 	/**

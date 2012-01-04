@@ -331,6 +331,10 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
 	  return mediaPlayerComponent.getMediaPlayer().getLength();
   }
   
+  public boolean isVideoPlaying(){
+	  return mediaPlayerComponent.getMediaPlayer().isPlaying();
+  }
+  
   /**
    * Sets the video playback position
    * @param pos
@@ -361,7 +365,8 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
 	  // Stop playback
 	  if(mediaPlayerComponent.getMediaPlayer().isPlaying())
 	  		mediaPlayerComponent.getMediaPlayer().pause();
-	  mediaPlayerComponent.getMediaPlayer().setPosition(0);
+	  
+	  getModel().setPosition(0);
   }
   
   /**

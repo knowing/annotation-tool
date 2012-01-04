@@ -106,11 +106,12 @@ public class TrackVisualization extends JPanel{
 		 */
 		int first = calculateFirstDisplayedValue(pixelsPerMillisecond);
 		
-		// Check if cursor gets out of view
-		if(mapTimeToPixel(position, pixelsPerMillisecond) > this.getWidth() * 9 / 10 || 
-		   mapTimeToPixel(position, pixelsPerMillisecond) < 0){
-			offset = -(position - 0.1f/pixelsPerMillisecond * this.getWidth());
-		}	
+		// Check if cursor gets out of view (only if video is playing)
+		if(dataSource.getModel().isVideoPlaying())
+			if(mapTimeToPixel(position, pixelsPerMillisecond) > this.getWidth() * 9 / 10 || 
+			   mapTimeToPixel(position, pixelsPerMillisecond) < 0){
+				offset = -(position - 0.1f/pixelsPerMillisecond * this.getWidth());
+			}	
 		
 		// Draw x-axis
 		g2d.setColor(Color.BLACK);
@@ -325,7 +326,7 @@ public class TrackVisualization extends JPanel{
 	 * @param o
 	 */
 	protected void setOffset(float o){
-		offset = Math.max(0, o);
+		offset = o;
 	}
 	
 	protected float getOffset(){

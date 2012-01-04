@@ -126,11 +126,12 @@ public class TrackVisualization extends JPanel{
 		pixelsPerMillisecond = zoomlevel * (this.getWidth() / dataLength);
 		
 		
-		// Check if cursor gets out of view and change offset
-		if(mapTimeToPixel(position) > this.getWidth() * 9 / 10 || 
-		   mapTimeToPixel(position) < 0){
-			offset = -(position - 0.1f/pixelsPerMillisecond * this.getWidth());
-		}	
+		// Check if cursor gets out of view and change offset (only when video is playing)
+		if(dataSource.getModel().isVideoPlaying())
+			if(mapTimeToPixel(position) > this.getWidth() * 9 / 10 || 
+			   mapTimeToPixel(position) < 0){
+				offset = -(position - 0.1f/pixelsPerMillisecond * this.getWidth());
+			}	
 		
 		// Draw data
 		for(int i = 0; i < n_events; i++){
@@ -320,7 +321,7 @@ public class TrackVisualization extends JPanel{
 	/**
 	 * Toggles editability
 	 */
-	protected void toggleLocked(){
+	public void toggleLocked(){
 		locked = !locked;
 		repaint();
 	}
