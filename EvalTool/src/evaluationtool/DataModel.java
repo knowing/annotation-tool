@@ -10,9 +10,14 @@ import java.util.*;
 
 import javax.swing.JOptionPane;
 
+import weka.core.Attribute;
+import weka.core.DenseInstance;
+import weka.core.FastVector;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader;
 
+import de.lmu.ifi.dbs.knowing.core.util.ResultsUtil;
 import de.sendsor.SDRConverter;
 
 import evaluationtool.gui.EvalGUI;
@@ -349,7 +354,7 @@ public class DataModel {
 	 * Adds an empty interval track for annotations
 	 */
 	public void addIntervalTrack(){
-		Data newData = new IntervalData(this, "", new String[]{"Walking", "Running", "Biking", "Skating", "Crosstrainer"});
+		Data newData = new IntervalData(this, "", IntervalData.PREDEFINED_ACTIVITIES);
 		loadedDataTracks.add(newData);
 		
 		if(loadedDataTracks.size()%2 == 0)
@@ -384,6 +389,55 @@ public class DataModel {
 		gui.setVideoPosition(Math.max(0f, Math.min((float)time / (float)gui.getVideoLength(), 1f)));
 	}
 	
+	/**
+	 * Saves an interval track to the specified path
+	 * @param i
+	 * @param string
+	 */
+	public boolean saveTrack(int track, String filename) {
+		// Only interval data can be saved
+		if(this.getLoadedDataTracks().get(track) instanceof IntervalData){
+			this.getLoadedDataTracks().get(track).setSource(filename);
+			
+			weka.core.converters.ArffSaver arffout = new weka.core.converters.ArffSaver();
+			try {
+				arffout.setFile(new File(filename));
+				LinkedList<String> atts = new LinkedList<String>();
+				// Create attributes list
+				for(int i = 0; i < IntervalData.PREDEFINED_ACTIVITIES.length; i++){
+					atts.add(IntervalData.PREDEFINED_ACTIVITIES[i]);
+				}
+				
+				// Create structure for arff file
+				arffout.setStructure(ResultsUtil.timeIntervalResult(atts));
+				
+				Instances ins = arffout.getInstances();
+				evaluationtool.intervaldata.DataSet[] events = ((IntervalData)this.getLoadedDataTracks().get(track)).getEvents();
+				
+				for(int i = 0; i < events.length; i++){
+					
+					DenseInstance instance = new DenseInstance(3);
+					instance.setValue(ins.attribute(0), events[i].timestampStart);
+					instance.setValue(ins.attribute(1), events[i].timestampEnd);
+					instance.setValue(ins.attribute(2), events[i].activitytype);
+					
+					ins.add(instance);
+				}
+				
+				arffout.writeBatch();
+				
+			} catch (IOException e) {
+				System.err.println("Error saving user generated track: " + e + "\nSkipping track.");
+				return false;
+			}
+
+			return true;
+		}
+		else{
+			System.err.println("Error saving user generated track: Wrong type. \nSkipping track.");
+			return false;
+		}
+	}
 /*
  * File operations from config.cfg
  */

@@ -24,4 +24,6 @@ public interface Data {
 
 	public long getLength();
 	public DataModel getModel();
+
+	public void setSource(String filename);
 }

@@ -144,4 +144,9 @@ public class SensorData implements Data{
 	public DataModel getModel() {
 		return model;
 	}
+
+	@Override
+	public void setSource(String filename) {
+		this.source = filename;
+	}
 }

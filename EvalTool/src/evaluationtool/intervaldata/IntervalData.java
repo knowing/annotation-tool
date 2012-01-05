@@ -20,6 +20,7 @@ public class IntervalData implements Data {
 	
 	// Possible activities
 	final String[] ACTIVITIES;
+	public static final String[] PREDEFINED_ACTIVITIES = new String[]{"Walking", "Running", "Biking", "Skating", "Crosstrainer"};
 	
 	// LinkedList containing all start- and endpoints
 	LinkedList<DataSet> events = new LinkedList<DataSet>();
@@ -153,5 +154,9 @@ public class IntervalData implements Data {
 		else{
 			return events.getLast().timestampEnd - events.getFirst().timestampStart;
 		}
+	}
+
+	public void setSource(String filename) {
+		this.source = filename;
 	}
 }

@@ -26,6 +26,8 @@ import evaluationtool.gui.EvalGUI;
 
 public class ProjectFileHandler {
 	
+	static final String USER_GENERATED_TRACK_PREFIX = "track_";
+	
 	public static String loadProjectFile(String path, DataModel model){
 		
 		// Extract archive into a temporary folder
@@ -168,8 +170,13 @@ public class ProjectFileHandler {
 			fw.write("# Data tracks");
 			for(int i = 0; i < model.getLoadedDataTracks().size(); i++){
 
-				
-				if(getFilenameFromPath(model.getLoadedDataTracks().get(i).getSource()) != null){
+				if(model.getLoadedDataTracks().get(i).getSource().equals("")){
+					// File will be created later
+					fw.write("\n" + model.DATAPATH_LINE + USER_GENERATED_TRACK_PREFIX + i + ".arff");
+					fw.write("\n" + model.OFFSET_LINE + (long)model.getLoadedDataTracks().get(i).getOffset());
+					fw.write("\n" + model.SPEED_LINE + model.getLoadedDataTracks().get(i).getPlaybackSpeed() + "\n");
+				}	
+				else if(getFilenameFromPath(model.getLoadedDataTracks().get(i).getSource()) != null){
 					fw.write("\n" + model.DATAPATH_LINE + getFilenameFromPath(model.getLoadedDataTracks().get(i).getSource()));
 					fw.write("\n" + model.OFFSET_LINE + (long)model.getLoadedDataTracks().get(i).getOffset());
 					fw.write("\n" + model.SPEED_LINE + model.getLoadedDataTracks().get(i).getPlaybackSpeed() + "\n");
@@ -181,7 +188,7 @@ public class ProjectFileHandler {
 			
 		}
 		catch(IOException ioe){
-			return ioe.getMessage();
+			return "Error writing config.cfg: " + ioe.getMessage();
 		}
 		
 		f = new File(path);
@@ -211,6 +218,28 @@ public class ProjectFileHandler {
 			
 		// Add data tracks
 		for(int i = 0; i < model.getLoadedDataTracks().size(); i++){
+			
+			// Check if a track has to be saved first
+			if(model.getLoadedDataTracks().get(i).getSource().equals("")){
+				System.out.print("Trying to save user generated track...");
+				
+				File tempDir = new File("\\temp");
+				tempDir.deleteOnExit();
+				
+				// Create temp directory if it does not exist
+				tempDir.mkdir();
+				
+				File trackFile = new File("\\temp\\" + USER_GENERATED_TRACK_PREFIX + i + ".arff");
+				trackFile.createNewFile();
+				
+				// If the track cannot be saved, continue with next track
+				if(!model.saveTrack(i, trackFile.getAbsolutePath())){
+					System.out.println("Fail");
+					continue;
+				}
+				System.out.println("Success");
+			}
+			
 			fi = new FileInputStream(model.getLoadedDataTracks().get(i).getSource());
 			entry = new ZipEntry(getFilenameFromPath(model.getLoadedDataTracks().get(i).getSource()));
 			
