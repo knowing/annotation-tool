@@ -49,7 +49,7 @@ public class VisualizationMouseListener implements MouseWheelListener, MouseList
 		}
 		// Set playback position to this point
 				else if(e.getButton() == MouseEvent.BUTTON1){
-					source.getDataSource().getModel().setPosition((long)track.mapPixelToTime(e.getX()));
+					source.getDataSource().getModel().setPlaybackPosition((long)track.mapPixelToTime(e.getX()));
 				}
 	}
 	public void mouseEntered(MouseEvent e) {}

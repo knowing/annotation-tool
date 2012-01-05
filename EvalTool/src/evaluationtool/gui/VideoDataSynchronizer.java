@@ -8,7 +8,7 @@ import javax.swing.JSlider;
 import uk.co.caprica.vlcj.component.EmbeddedMediaPlayerComponent;
 
 import evaluationtool.Data;
-import evaluationtool.TimestampConverter;
+import evaluationtool.util.TimestampConverter;
 
 public class VideoDataSynchronizer {
 
@@ -30,6 +30,12 @@ public class VideoDataSynchronizer {
 		 return vi;
 	 }
 	 
+	 public void setRunning(boolean b){
+		  vi.setRunning(b);
+		  
+		  // Wait for thread to stop
+		  try {Thread.sleep(20);} catch (InterruptedException e) {}
+	  }
 	
 	/*
 	   * Video playback methods
@@ -103,19 +109,7 @@ public class VideoDataSynchronizer {
 			  while(running){
 				  try{sleep(10);}
 				  catch(Exception e){System.err.println("Could not sleep");}
-				  
-				  /*
-				   * DEBUG OUTPUT
-				   */
-				  
-				  //System.out.println("GUI Videofile length: " + mediaPlayerComponent.getMediaPlayer().getLength());
-				  //System.out.println("Model videofile path: " + model.getVideoPath());
-					 
-				  
-				  /*
-				   * END DEBUG OUTPUT
-				   */
-				  
+
 				  // Save old position
 				  tempPos = pos;
 				  
@@ -132,7 +126,7 @@ public class VideoDataSynchronizer {
 				  // Check if user moved slider
 				  if(tempSliderValue != positionslider.getValue()){
 					  // If slider has been moved, jump to new position
-					  gui.getModel().setPosition(positionslider.getValue() / 1000f, true);
+					  gui.getModel().setPlaybackPosition(positionslider.getValue() / 1000f, true);
 				  }
 				  else{
 					  // If slider has not been moved, move it to current playing position
@@ -146,7 +140,7 @@ public class VideoDataSynchronizer {
 				  if(pos != tempPos){
 					  // Set values to label and all visualizations
 					  lab.setText(TimestampConverter.getVideoTimestamp((long)(pos * length)) + "/" + TimestampConverter.getVideoTimestamp(length));		  
-					  gui.getModel().setPosition(pos, false);  
+					  gui.getModel().setPlaybackPosition(pos, false);  
 				  } 
 			  }
 		  }

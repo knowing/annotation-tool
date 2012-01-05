@@ -1,4 +1,4 @@
-package evaluationtool;
+package evaluationtool.util;
 
 /**
  * The class offers methods to create String representations of tiemstamps

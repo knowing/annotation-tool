@@ -12,7 +12,7 @@ import java.awt.geom.RoundRectangle2D;
 import javax.swing.JPanel;
 
 import evaluationtool.DataModel;
-import evaluationtool.TimestampConverter;
+import evaluationtool.util.TimestampConverter;
 
 /**
  * Abstract class that provides basic features for displaying values on a timeline, including zoom scrolling
@@ -178,6 +178,12 @@ abstract public class TrackVisualization extends JPanel{
 	 */
 	public void setPosition(float p){
 		position = p;
+		
+		// Makes sure the current position in viewable
+		if(mapTimeToPixel(position) > this.getWidth() * 9 / 10 || 
+				   mapTimeToPixel(position) < 0){
+					offset = -(position - 0.1f/pixelsPerMillisecond * this.getWidth());
+				}
 		repaint();
 	}
 	

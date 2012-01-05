@@ -5,7 +5,8 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JFileChooser;
 
-import evaluationtool.projecthandling.ProjectFileHandler;
+import evaluationtool.FileImporter;
+import evaluationtool.util.ProjectFileHandler;
 
 public class MenuListener implements ActionListener {
 
@@ -24,7 +25,7 @@ public class MenuListener implements ActionListener {
 				  // If ok has been clicked, load the file
 				  if(chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION){	 
 					  String path = chooser.getSelectedFile().getAbsolutePath();
-					  gui.getModel().loadFile(path);
+					  FileImporter.loadFile(gui.getModel(), path);
 				  }
 			  }
 		else if(ae.getActionCommand().equals("createtrack")){

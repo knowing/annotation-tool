@@ -1,4 +1,4 @@
-package evaluationtool.projecthandling;
+package evaluationtool.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -22,6 +22,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import com.sun.media.sound.Toolkit;
 
 import evaluationtool.DataModel;
+import evaluationtool.FileImporter;
 import evaluationtool.gui.EvalGUI;
 
 public class ProjectFileHandler {
@@ -98,7 +99,7 @@ public class ProjectFileHandler {
 							videoPath = "\\temp\\" + line.substring(model.VIDEOPATH_LINE.length());
 					}
 					else if (line.startsWith(model.DATAPATH_LINE)){
-						model.loadFile("\\temp\\" + line.substring(model.DATAPATH_LINE.length()));
+						FileImporter.loadFile(model, "\\temp\\" + line.substring(model.DATAPATH_LINE.length()));
 					}
 					else if (line.startsWith(model.OFFSET_LINE)){
 						model.getLoadedDataTracks().getLast().setOffset(Long.parseLong(line.substring(model.OFFSET_LINE.length())));
@@ -112,7 +113,7 @@ public class ProjectFileHandler {
 				
 				// Convert path to system standard
 				File videoFile = new File(videoPath);
-				model.setVideoTrack(videoFile.getAbsolutePath());
+				model.setVideoPath(videoFile.getAbsolutePath());
 			}
 			catch(IOException ioe){
 				System.err.println("Project file error: " + ioe.getMessage());
@@ -133,7 +134,7 @@ public class ProjectFileHandler {
 		
 		// Delete file and recreate
 					if(f.exists()){
-						int overwriteAnswer = JOptionPane.showOptionDialog(model.getGUI(), "Overwrite " + path + "?", "File already exists", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+						int overwriteAnswer = JOptionPane.showOptionDialog(model.getGUI().getActiveFrame(), "Overwrite " + path + "?", "File already exists", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 						if(overwriteAnswer == JOptionPane.OK_OPTION){
 							f.delete();
 						}
@@ -301,24 +302,24 @@ public class ProjectFileHandler {
 	}
 	
 	public static void saveCurrentProject(EvalGUI gui){
-		 int videoAnswer = JOptionPane.showOptionDialog(gui, "Do you want to include the video file in the archive?", "Video file", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+		 int videoAnswer = JOptionPane.showOptionDialog(gui.getActiveFrame(), "Do you want to include the video file in the archive?", "Video file", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 		 
 		 if(videoAnswer == JOptionPane.YES_OPTION){
 			  String result = saveProjectFile(gui.getModel(), gui.getModel().getProjectPath(), true);
 			  if(result != null){
-				  JOptionPane.showMessageDialog(gui, "Error saving file: " + result, "Error" , JOptionPane.ERROR_MESSAGE);
+				  JOptionPane.showMessageDialog(gui.getActiveFrame(), "Error saving file: " + result, "Error" , JOptionPane.ERROR_MESSAGE);
 			  }
 			  else{
-				  JOptionPane.showMessageDialog(gui, "File has been saved succesfully", "File saved" , JOptionPane.INFORMATION_MESSAGE);
+				  JOptionPane.showMessageDialog(gui.getActiveFrame(), "File has been saved succesfully", "File saved" , JOptionPane.INFORMATION_MESSAGE);
 			  }
 		  }
 		  else if (videoAnswer == JOptionPane.NO_OPTION){
 			  String result = saveProjectFile(gui.getModel(), gui.getModel().getProjectPath(), false);
 			  if(result != null){
-				  JOptionPane.showMessageDialog(gui, "Error saving file: " + result, "Error" , JOptionPane.ERROR_MESSAGE);
+				  JOptionPane.showMessageDialog(gui.getActiveFrame(), "Error saving file: " + result, "Error" , JOptionPane.ERROR_MESSAGE);
 			  }
 			  else{
-				  JOptionPane.showMessageDialog(gui, "File has been saved succesfully", "File saved" , JOptionPane.INFORMATION_MESSAGE);
+				  JOptionPane.showMessageDialog(gui.getActiveFrame(), "File has been saved succesfully", "File saved" , JOptionPane.INFORMATION_MESSAGE);
 			  }
 		  }
 	}
@@ -332,31 +333,31 @@ public class ProjectFileHandler {
 		 String path = "";
 		
 		 // If ok has been clicked, save project
-		  if(chooser.showOpenDialog(gui) == JFileChooser.APPROVE_OPTION){	 
+		  if(chooser.showOpenDialog(gui.getActiveFrame()) == JFileChooser.APPROVE_OPTION){	 
 			  path = chooser.getSelectedFile().getAbsolutePath();
 
 			  if(!path.substring(path.length() - 4, path.length()).equals(".zip")){
 				  path = path + ".zip";
 			  }
 			 
-			  int videoAnswer = JOptionPane.showOptionDialog(gui, "Do you want to include the video file in the archive?", "Video file", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+			  int videoAnswer = JOptionPane.showOptionDialog(gui.getActiveFrame(), "Do you want to include the video file in the archive?", "Video file", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 				
 			  if(videoAnswer == JOptionPane.YES_OPTION){
 				  String result = saveProjectFile(gui.getModel(), path, true);
 				  if(result != null){
-					  JOptionPane.showMessageDialog(gui, "Error saving file: " + result, "Error" , JOptionPane.ERROR_MESSAGE);
+					  JOptionPane.showMessageDialog(gui.getActiveFrame(), "Error saving file: " + result, "Error" , JOptionPane.ERROR_MESSAGE);
 				  }
 				  else{
-					  JOptionPane.showMessageDialog(gui, "File has been saved succesfully", "File saved" , JOptionPane.INFORMATION_MESSAGE);
+					  JOptionPane.showMessageDialog(gui.getActiveFrame(), "File has been saved succesfully", "File saved" , JOptionPane.INFORMATION_MESSAGE);
 				  }
 			  }
 			  else if (videoAnswer == JOptionPane.NO_OPTION){
 				  String result = saveProjectFile(gui.getModel(), path, false);
 				  if(result != null){
-					  JOptionPane.showMessageDialog(gui, "Error saving file: " + result, "Error" , JOptionPane.ERROR_MESSAGE);
+					  JOptionPane.showMessageDialog(gui.getActiveFrame(), "Error saving file: " + result, "Error" , JOptionPane.ERROR_MESSAGE);
 				  }
 				  else{
-					  JOptionPane.showMessageDialog(gui, "File has been saved succesfully", "File saved" , JOptionPane.INFORMATION_MESSAGE);
+					  JOptionPane.showMessageDialog(gui.getActiveFrame(), "File has been saved succesfully", "File saved" , JOptionPane.INFORMATION_MESSAGE);
 				  }
 			  }
 		  }
@@ -369,7 +370,7 @@ public class ProjectFileHandler {
 		chooser.setDialogType(JFileChooser.OPEN_DIALOG);
 		chooser.setFileFilter(new FileNameExtensionFilter("ZIP file", "zip"));
 		
-		if(chooser.showOpenDialog(model.getGUI()) == JFileChooser.APPROVE_OPTION){	 
+		if(chooser.showOpenDialog(model.getGUI().getActiveFrame()) == JFileChooser.APPROVE_OPTION){	 
 			  String path = chooser.getSelectedFile().getAbsolutePath();
 			  String result = loadProjectFile(path, model);
 		}

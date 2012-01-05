@@ -1,45 +1,41 @@
 package evaluationtool.gui;
 
 import java.awt.*;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import java.util.LinkedList;
-
 import javax.swing.*;
 
 import com.sun.jna.NativeLibrary;
 
-import evaluationtool.Data;
 import evaluationtool.DataModel;
-import evaluationtool.TimestampConverter;
+import evaluationtool.util.VLCPlayerHandler;
 
 import uk.co.caprica.vlcj.component.*;
-import uk.co.caprica.vlcj.player.MediaPlayerEventListener;
 
-public class EvalGUI extends JFrame implements ComponentListener, WindowListener{
+public class EvalGUI extends WindowAdapter{
 
   String windowTitle = "EvalTool";
   
   // Model
   DataModel model;
-	
-  String mrl;
-  private EmbeddedMediaPlayerComponent mediaPlayerComponent;
-  JPanel panelVideo;
-  JPanel panelDataTracks;
-  JFrame dataDialog;
+  
+  // Media player component
+  EmbeddedMediaPlayerComponent mediaPlayerComponent = null;
+  
+  JFrame dataFrame;
+  JPanel dataContent;
+  JFrame videoFrame;
   
   // Menu bar
   JMenuBar menubar;
   
+  // Menubar
   JMenu file;
-  JMenuItem createtrack;
-  JMenuItem openfile;
-  JMenuItem save;
-  JMenuItem saveNewProject;
-  JMenuItem exit;
+	  JMenuItem createtrack;
+	  JMenuItem openfile;
+	  JMenuItem save;
+	  JMenuItem saveNewProject;
+	  JMenuItem exit;
   
   JLabel position;
   JSlider positionslider;
@@ -59,46 +55,6 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
   VideoDataSynchronizer vi;
   
   /**
-	  * Sets VLC path. 
-	  * Needed files are (Windows):
-	  * - libvlc.dll
-	  * - libvlccore.dll
-	  * - /plugins
-   */
-  void initLibVlc(){
-	  
-	  JFileChooser chooser = new JFileChooser();
-	  chooser.setDialogTitle("Please select a directory with VLC 1.2 or higher");
-	  // We need a directory
-	  chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-	  
-	  // If ok has been clicked, load the file
-	  if(chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION){	 
-		  String path = chooser.getSelectedFile().getAbsolutePath();
-		  NativeLibrary.addSearchPath("libvlc",  path);
-		  model.setVLCPath(path);
-		  
-		// Save config and wait for error message
-			String s  = model.saveConfiguration();
-			
-			// If there is an error, create a message dialog
-			if(s != null){
-				JOptionPane.showMessageDialog(this, "Error saving configuration: " + s, "File error", JOptionPane.ERROR_MESSAGE);			 
-				}
-			else
-				System.out.println("Wrote config");
-	  }  
-	  else{
-		   JOptionPane.showMessageDialog(this, "This program does not work without VLC. Quitting.", "Error", JOptionPane.ERROR_MESSAGE);	
-		   System.exit(0);
-	  }
- }
-
-  public DataModel getModel(){
-	  return model;
-  }
-  
-  /**
    * Initializes the GUI with a DataModel
    * @param m
    */
@@ -111,88 +67,61 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
 	// Load VLC path
 	model.loadVLCPath();
 	
-		if(model.getVLCPath().trim().equals("")){
-			initLibVlc();
-		}
-		else{
-			// Add path if it is not ""
-			NativeLibrary.addSearchPath("libvlc",  model.getVLCPath());
-		}
-	 
-	// Create this frame
-	buildVideoFrame();
-    
-	// Create menu
-	buildMenu(); 
-    
-	// Show window
-    this.setVisible(true);
-    
-    // Create second Frame for data tracks
+	if(model.getVLCPath().trim().equals(""))
+		VLCPlayerHandler.initLibVlc(model, null);
+	
+	buildMenu();
+	buildVideoFrame(); 
     buildDataFrame(); 
     
-    // Create synchonizer
+    // Create synchronizer
     vi = new VideoDataSynchronizer(this, mediaPlayerComponent);
 
-    // Show panelSouth only of there are tracks to show
-    updateDataFrame();
+    updateFrames();
   }
   
   /**
-   * Builds this frame and its components
+   * Builds the frame for video
    */
   private void buildVideoFrame(){
-	// Set window properties
-		this.setTitle(windowTitle);
-	    this.setLocation(100, 100);
-	    this.setSize(800, 600);
-	    
-	    // Exit immediately when user clicks the X
-	    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	    this.addWindowListener(this);
-	    
-	    // Add ComponentListener
-	    this.addComponentListener(this);
-	    
-	    // North panel
-	    while(mediaPlayerComponent == null){
-		    try{
-		    // While VLC path is not valid, ask user again
-		    mediaPlayerComponent = new VideoComponent();
-		    }
-		    catch(Exception e){
-		    	initLibVlc();
-		    }
-	    }
-	    
+	  
+	videoFrame = new JFrame();
+	  
+	// Set window properties and add listeners
+	videoFrame.setTitle(windowTitle);
+	videoFrame.setLocation(100, 100);
+	videoFrame.setSize(800, 600);
+	videoFrame.addWindowListener(this);
+    
+    // Create media player and ask for VLC path if necessary
+    while(mediaPlayerComponent == null){
+	    try{
+	    NativeLibrary.addSearchPath("libvlc",  model.getVLCPath());
+	    mediaPlayerComponent = new EmbeddedMediaPlayerComponent();
 	    mediaPlayerComponent.addKeyListener(new VideoFrameListener(this));
-	    panelVideo = new JPanel();
-	    panelVideo.setLayout(new BorderLayout());
-	    panelVideo.add(mediaPlayerComponent, BorderLayout.CENTER);
-	    
-	    // Create layout
-	    panelDataTracks = new JPanel();
-	    
-		// Minimum sizes
-		Dimension minimumSize = new Dimension(100, 100);
-		mediaPlayerComponent.setMinimumSize(minimumSize);
-		panelDataTracks.setMinimumSize(minimumSize);
-		
-		this.setContentPane(panelVideo);
+	    }
+	    catch(Exception e){
+	    	VLCPlayerHandler.initLibVlc(model, videoFrame);
+	    }
+    }
+	
+	// Add media player
+	videoFrame.setContentPane(mediaPlayerComponent);
+	videoFrame.setVisible(true);
   }
   
   /**
-   * Creates the second frame for data tracks
+   * Creates the frame for data tracks
    */
   private void buildDataFrame(){
-	  dataDialog = new JFrame();
-	  dataDialog.setSize(800, 600);
-	  dataDialog.setTitle("EvalTool - Data tracks");
-	    
-	  dataDialog.setJMenuBar(menubar);
-	    
-	  dataDialog.setContentPane(panelDataTracks);
-	  dataDialog.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	  dataFrame = new JFrame();
+	  dataContent = new JPanel();
+	  
+	  dataFrame.setSize(800, 600);
+	  dataFrame.setMinimumSize(new Dimension(100, 100));  
+	  dataFrame.setTitle("EvalTool - Data tracks");
+	  dataFrame.addWindowListener(this);
+	  dataFrame.setContentPane(dataContent);
   }
   
   /**
@@ -258,7 +187,7 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
 	    skipFrameButton.setActionCommand("skipframe");
 	    muteButton.setActionCommand("mute");
 	    
-	    // Add MenuListener to all buttons
+	    // Add a MenuListener to all buttons
 	    MenuListener menlis = new MenuListener(this);
 	    save.addActionListener(menlis);
 	    saveNewProject.addActionListener(menlis);
@@ -271,48 +200,53 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
 	    muteButton.addActionListener(menlis);
   }
   
-  private ImageIcon getImageIconFromFile(String path, int size){
-	 return new ImageIcon((new ImageIcon(path)).getImage().getScaledInstance(size, size,  java.awt.Image.SCALE_SMOOTH));
-  }
-  
   /**
    * Recreates the layout of panelSouth
    */
-  public void updateDataFrame(){
-	  panelDataTracks.removeAll();
+  public void updateFrames(){
+	  dataContent.removeAll();
 	  
-	  if(model.getLoadedDataTracks().size() == 0 && this.isVisible()){
-		  // No data tracks but video, data frame invisible
-		  dataDialog.setJMenuBar(null);
-		  dataDialog.setVisible(false);
-		  this.setJMenuBar(menubar);
-		  this.validate();
+	  if(model.getLoadedDataTracks().size() == 0){
+		  // No data tracks, so let the data frame disappear
+		  dataFrame.setJMenuBar(null);
+		  dataFrame.setVisible(false);
+		  
+		  videoFrame.setJMenuBar(menubar);
+		  videoFrame.validate();
 	  }
 	  else{
-		  // Data tracks exist, so rebuild and show frame
-		  this.setJMenuBar(null);
-		  this.revalidate();
-		  dataDialog.setJMenuBar(menubar);
+		  // Data tracks exist, so build and show data frame
+		  videoFrame.setJMenuBar(null);
+		  videoFrame.revalidate();
+		  
+		  dataFrame.setJMenuBar(menubar);
 		  // Create GridLayout with a row for every track
-		  panelDataTracks.setLayout(new GridLayout(model.getLoadedDataTracks().size(), 1)); 
+		  dataContent.setLayout(new GridLayout(model.getLoadedDataTracks().size(), 1)); 
 		  
 		  // Add all tracks
 		  for(int i = 0; i < model.getLoadedDataTracks().size(); i++){
-			  if(model.getLoadedDataTracks().get(i).getVisualization() == null){
-				  System.err.println("No visualization");
-			  }
-			  else{		
-				  panelDataTracks.add(model.getLoadedDataTracks().get(i).getVisualization());
-			  }
+				  dataContent.add(model.getLoadedDataTracks().get(i).getVisualization());
 		  }
 		  
-		  dataDialog.setVisible(true);
-		  panelDataTracks.validate();
+		  dataFrame.setVisible(true);
+		  dataFrame.validate();
 		  
 		  // For some reason, the layouts are only updated on a resize. Workaround.
-		  dataDialog.setSize(dataDialog.getWidth() + 1, dataDialog.getHeight());
-		  dataDialog.setSize(dataDialog.getWidth() - 1, dataDialog.getHeight());
+		  dataFrame.setSize(dataFrame.getWidth() + 1, dataFrame.getHeight());
+		  dataFrame.setSize(dataFrame.getWidth() - 1, dataFrame.getHeight());
 	  }
+  }
+  
+  public JFrame getActiveFrame() {
+		if(dataFrame != null && dataFrame.isVisible())
+			return dataFrame;
+		else if (videoFrame != null)
+			return videoFrame;
+		else return null;
+	}
+  
+  public DataModel getModel(){
+	  return model;
   }
   
   public JLabel getPositionLabel(){
@@ -350,7 +284,6 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
    */
   public void skipFrame(){
 	  // This will pause the video, so change button text
-	 // playPauseButton.setText("Play");
 	  playPauseButton.setIcon(playIcon);
 	  mediaPlayerComponent.getMediaPlayer().nextFrame();
   }
@@ -359,14 +292,13 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
    * Stops video playback
    */
   public void stop(){
-	 // playPauseButton.setText("Play");
 	  playPauseButton.setIcon(playIcon);
 	  
 	  // Stop playback
 	  if(mediaPlayerComponent.getMediaPlayer().isPlaying())
 	  		mediaPlayerComponent.getMediaPlayer().pause();
 	  
-	  getModel().setPosition(0);
+	  getModel().setPlaybackPosition(0);
   }
   
   /**
@@ -377,11 +309,9 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
 	  mediaPlayerComponent.getMediaPlayer().mute();
 	  
 	  if(mediaPlayerComponent.getMediaPlayer().isMute()){
-		 // muteButton.setText("Unmute");
 		  muteButton.setIcon(unmuteIcon);
 	  }
 	  else{
-		 // muteButton.setText("Mute");
 		  muteButton.setIcon(muteIcon);
 	  }
   }
@@ -394,39 +324,38 @@ public class EvalGUI extends JFrame implements ComponentListener, WindowListener
 	  // If video is playing, pause and change button
 	  if(mediaPlayerComponent.getMediaPlayer().isPlaying()){
 		  mediaPlayerComponent.getMediaPlayer().pause();
-		  //playPauseButton.setText("Play");
 		  playPauseButton.setIcon(playIcon);
 	  }
 	  // Otherwise continue playing
 	  else{
 		  mediaPlayerComponent.getMediaPlayer().play();
-		  //playPauseButton.setText("Pause");
 		  playPauseButton.setIcon(pauseIcon);
 	  }
   }
   
-  public void componentHidden(ComponentEvent e) {}
-  public void componentMoved(ComponentEvent e) {}
-  public void componentResized(ComponentEvent e) {}
-  public void componentShown(ComponentEvent e) {}
+  /**
+   * Loads and resizes ImageIcons
+   * @param path
+   * @param size
+   * @return
+   */
+  private ImageIcon getImageIconFromFile(String path, int size){
+		 return new ImageIcon((new ImageIcon(path)).getImage().getScaledInstance(size, size,  java.awt.Image.SCALE_SMOOTH));
+	  }
 
-
-	public void windowActivated(WindowEvent arg0) {}
-	public void windowClosed(WindowEvent arg0) {}
 	public void windowClosing(WindowEvent arg0) {
-	
-		vi.getVideoInfo().setRunning(false);
-	
-		// Stop media player properly
-			mediaPlayerComponent.getMediaPlayer().stop();
-			mediaPlayerComponent.getMediaPlayer().release();
-			mediaPlayerComponent.release();
-			
-			mediaPlayerComponent = null;
+
+		// Stop thread
+		vi.setRunning(false);
 		
+		// Stop media player properly
+		mediaPlayerComponent.getMediaPlayer().stop();
+		mediaPlayerComponent.getMediaPlayer().release();
+		mediaPlayerComponent.getMediaPlayerFactory().release();
+		mediaPlayerComponent.release();
+
+		// Exit
+		System.exit(0);
 }
-public void windowDeactivated(WindowEvent arg0) {}
-public void windowDeiconified(WindowEvent arg0) {}
-public void windowIconified(WindowEvent arg0) {}
-public void windowOpened(WindowEvent arg0) {}
+
 }
