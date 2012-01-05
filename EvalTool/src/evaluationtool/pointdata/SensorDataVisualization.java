@@ -24,7 +24,7 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 	JButton trackParameters = new JButton("");
 	
 	// Track 
-	TrackVisualization trackvis;
+	SensorTrackVisualization trackvis;
 	
 	// Data arrays
 	SensorData dataSource;
@@ -37,7 +37,7 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 	
 	SensorDataVisualization(SensorData sd){
 		dataSource = sd;
-		trackvis = new TrackVisualization(sd, this);
+		trackvis = new SensorTrackVisualization(sd, this);
 		
 		// Will be overwritten anyway, just set this in case repaint is called earlier
 		trackvis.setAlternativeColorScheme(false);

@@ -7,7 +7,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.RoundRectangle2D;
 
-import evaluationtool.pointdata.TrackVisualization;
+import evaluationtool.pointdata.SensorTrackVisualization;
 
 /**
  * Allows the manipulation of tracks with the mouse
@@ -17,13 +17,13 @@ import evaluationtool.pointdata.TrackVisualization;
 public class VisualizationMouseListener implements MouseWheelListener, MouseListener, MouseMotionListener{
 	
 	SensorDataVisualization source;
-	TrackVisualization track;
+	SensorTrackVisualization track;
 	
 	boolean shiftingTime = false;
 	int tempMouseX = 0;
 	int tempMouseY = 0;
 	
-	public VisualizationMouseListener(SensorDataVisualization s, TrackVisualization tv) {
+	public VisualizationMouseListener(SensorDataVisualization s, SensorTrackVisualization tv) {
 		source = s;
 	}
 	

@@ -15,7 +15,7 @@ import java.awt.geom.RoundRectangle2D;
 public class VisualizationMouseListener implements MouseWheelListener, MouseListener, MouseMotionListener{
 	
 	IntervalDataVisualization source;
-	TrackVisualization track;
+	IntervalTrackVisualization track;
 	
 	boolean shiftingTime = false;
 	
@@ -27,7 +27,7 @@ public class VisualizationMouseListener implements MouseWheelListener, MouseList
 	int tempMouseX = 0;
 	int tempMouseY = 0;
 	
-	public VisualizationMouseListener(IntervalDataVisualization s, TrackVisualization tv) {
+	public VisualizationMouseListener(IntervalDataVisualization s, IntervalTrackVisualization tv) {
 		source = s;
 		track = tv;
 	}
@@ -78,10 +78,10 @@ public class VisualizationMouseListener implements MouseWheelListener, MouseList
 				draggedPart = track.getPartAt(e.getPoint());
 				
 				// Set point to the cursor position
-				if(draggedPart == TrackVisualization.STARTPOINT){
+				if(draggedPart == IntervalTrackVisualization.STARTPOINT){
 					draggedEvent.timestampStart = track.mapPixelToTime(e.getX());
 				}
-				else if(draggedPart == TrackVisualization.ENDPOINT){
+				else if(draggedPart == IntervalTrackVisualization.ENDPOINT){
 					draggedEvent.timestampEnd = track.mapPixelToTime(e.getX());				
 				}
 			}
@@ -100,13 +100,13 @@ public class VisualizationMouseListener implements MouseWheelListener, MouseList
 				tempMouseX = e.getX();
 			}
 			if(draggedEvent != null){
-				if(draggedPart == TrackVisualization.STARTPOINT){
+				if(draggedPart == IntervalTrackVisualization.STARTPOINT){
 					draggedEvent.timestampStart += (e.getX() - tempMouseX) / source.getPixelsPerMillisecond();
 				}
-				else if(draggedPart == TrackVisualization.ENDPOINT){
+				else if(draggedPart == IntervalTrackVisualization.ENDPOINT){
 					draggedEvent.timestampEnd += (e.getX() - tempMouseX) / source.getPixelsPerMillisecond();				
 				}
-				else if(draggedPart == TrackVisualization.WHOLE_EVENT){
+				else if(draggedPart == IntervalTrackVisualization.WHOLE_EVENT){
 					draggedEvent.timestampStart += (e.getX() - tempMouseX) / source.getPixelsPerMillisecond();
 					draggedEvent.timestampEnd += (e.getX() - tempMouseX) / source.getPixelsPerMillisecond();
 				}

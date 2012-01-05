@@ -36,7 +36,7 @@ public class IntervalDataVisualization extends Visualization implements Componen
 	int currentMenuActivity = 0;
 	
 	// Track 
-	TrackVisualization trackvis;
+	IntervalTrackVisualization trackvis;
 	
 	// Data arrays
 	IntervalData dataSource;
@@ -49,7 +49,7 @@ public class IntervalDataVisualization extends Visualization implements Componen
 	
 	IntervalDataVisualization(IntervalData sd){
 		dataSource = sd;
-		trackvis = new TrackVisualization(sd, this);
+		trackvis = new IntervalTrackVisualization(sd, this);
 		
 		// Will be overwritten anyway, just set this in case repaint is called earlier
 		trackvis.setAlternativeColorScheme(false);
@@ -218,7 +218,7 @@ public class IntervalDataVisualization extends Visualization implements Componen
 	  }
 	  public void componentShown(ComponentEvent e) {}
 
-	public TrackVisualization getTrackVisualization() {
+	public IntervalTrackVisualization getTrackVisualization() {
 		return trackvis;
 	}
 
