@@ -43,10 +43,6 @@ public class ProjectFileHandler {
 		}
 		
 		BufferedOutputStream dest = null;
-        		
-		/*
-		 * Extract code from http://java.sun.com/developer/technicalArticles/Programming/compression/
-		 */
 		
 		      try(FileInputStream fis = new FileInputStream(path); ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fis));){         
 			         
@@ -100,14 +96,7 @@ public class ProjectFileHandler {
 							videoPath = "\\temp\\" + line.substring(model.VIDEOPATH_LINE.length());
 					}
 					else if (line.startsWith(model.DATAPATH_LINE)){
-						StringTokenizer st = new StringTokenizer(line, ".");
-						String fileExtension = "";
-						
-						while(st.hasMoreElements()){
-							fileExtension = st.nextToken();
-						}
-						
-						model.addDataTrack("\\temp\\" + line.substring(model.DATAPATH_LINE.length()), fileExtension);
+						model.loadFile("\\temp\\" + line.substring(model.DATAPATH_LINE.length()));
 					}
 					else if (line.startsWith(model.OFFSET_LINE)){
 						model.getLoadedDataTracks().getLast().setOffset(Long.parseLong(line.substring(model.OFFSET_LINE.length())));

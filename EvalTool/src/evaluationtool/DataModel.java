@@ -126,6 +126,7 @@ public class DataModel {
 	 * @param src
 	 */
 	public void loadFile(String src){
+		
 		StringTokenizer st = new StringTokenizer(src, ".");
 		String fileExtension = "";
 		
@@ -144,19 +145,29 @@ public class DataModel {
 			fileExtension = st.nextToken();
 		}
 		
+		boolean fileLoaded = false;
 		
 		try{
-			if(fileExtension.equals("sdr") || fileExtension.equals("arff") || fileExtension.equals("csv"))
-				addDataTrack(src, fileExtension);
-			if(fileExtension.equals("arff"))
-				addIntervalTrack(src, fileExtension);
+			if(!fileLoaded && (fileExtension.equals("sdr") || fileExtension.equals("arff") || fileExtension.equals("csv"))){
+				System.out.println("Loading " + src + " as sensor data");
+				fileLoaded = addDataTrack(src, fileExtension);
+			}
+				
+			if(!fileLoaded && (fileExtension.equals("arff"))){
+				System.out.println("Loading " + src + " as interval data");
+				fileLoaded = addIntervalTrack(src, fileExtension);
+			}
+				
 		}
 		catch(IOException ioe){
 			JOptionPane.showMessageDialog(gui, "Could not read from file.", "Error", JOptionPane.ERROR_MESSAGE);
 		}
 		
-		if(ProjectFileHandler.canOpenFile(fileExtension)){
-			ProjectFileHandler.loadProjectFile(src, this);
+		if(!fileLoaded && (fileExtension.equals("zip"))){
+			String ret = ProjectFileHandler.loadProjectFile(src, this);
+			if(ret == null){
+				fileLoaded = true;
+			}
 			// Save config and wait for error message
 			String s  = saveConfiguration();
 						
@@ -164,11 +175,10 @@ public class DataModel {
 				if(s != null){
 					JOptionPane.showMessageDialog(this.getGUI(), "Error saving configuration: " + s, "File error", JOptionPane.ERROR_MESSAGE);
 				}
-				else
-						System.out.println("Wrote config");
 		}
 		// If it is not a readable data track, try to open as video
-		else{
+		if(!fileLoaded){
+			System.out.println("Setting " + src + " as video.");
 			setVideoTrack(src);
 		}
 			
@@ -193,9 +203,10 @@ public class DataModel {
 	 * Determins file types and adds data track
 	 * @param src
 	 * @param fileExtension
+	 * @return 
 	 * @throws IOException
 	 */
-	public void addDataTrack(String src, String fileExtension) throws IOException{
+	public boolean addDataTrack(String src, String fileExtension) throws IOException{
 	
 		Data newData = null;
 
@@ -263,10 +274,6 @@ public class DataModel {
 						((SensorData)newData).setDataAt(i, new DataSet((long)ins.get(i).value(0) - firstTimestamp, temp));
 				}
 			}
-			else{
-				return;
-			}
-
 		}
 		
 		// Add track to list and to layout
@@ -280,16 +287,18 @@ public class DataModel {
 			// Add to list
 			loadedDataTracks.add(newData);
 			gui.updateDataFrame();
+			return true;
 		}
 		else{
-			System.err.println("Error loading file");
+			return false;
 		}
 	}
 	
 	/**
 	 * Adds an interval track for algorithm results
+	 * @return 
 	 */
-	public void addIntervalTrack(String src, String fileExtension) throws IOException{
+	public boolean addIntervalTrack(String src, String fileExtension) throws IOException{
 		
 		IntervalData newData = null;
 
@@ -298,6 +307,7 @@ public class DataModel {
 			arffin.setFile(new File(src));
 
 			if(arffin.getStructure().attribute(0).name().equals("from") && arffin.getStructure().attribute(1).name().equals("to") && arffin.getStructure().attribute(2).name().equals("class")){
+				
 				String[] activities = new String[arffin.getStructure().attribute(2).numValues()];
 				
 				for(int i = 0; i < activities.length; i++){
@@ -318,20 +328,21 @@ public class DataModel {
 		
 		// Add track to list and to layout
 		
-				if(newData != null){
-					if(loadedDataTracks.size()%2 == 0)
-						newData.getVisualization().setAlternativeColorScheme(true);
-					else
-						newData.getVisualization().setAlternativeColorScheme(false);
-					
-					// Add to list
-					loadedDataTracks.add(newData);
-					((IntervalDataVisualization)newData.getVisualization()).toggleLocked();
-					gui.updateDataFrame();
-				}
-				else{
-					System.err.println("Error loading file");
-				}
+		if(newData != null){
+			if(loadedDataTracks.size()%2 == 0)
+				newData.getVisualization().setAlternativeColorScheme(true);
+			else
+				newData.getVisualization().setAlternativeColorScheme(false);
+			
+			// Add to list
+			loadedDataTracks.add(newData);
+			((IntervalDataVisualization)newData.getVisualization()).toggleLocked();
+			gui.updateDataFrame();
+			return true;
+		}
+		else{
+			return false;
+		}
 	}
 	
 	/**
