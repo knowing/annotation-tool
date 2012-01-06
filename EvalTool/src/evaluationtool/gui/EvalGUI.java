@@ -35,6 +35,7 @@ public class EvalGUI extends WindowAdapter{
 	  JMenuItem openfile;
 	  JMenuItem save;
 	  JMenuItem saveNewProject;
+	  JMenuItem closeProject;
 	  JMenuItem exit;
   
   JLabel position;
@@ -91,6 +92,7 @@ public class EvalGUI extends WindowAdapter{
 	videoFrame.setTitle(windowTitle);
 	videoFrame.setLocation(100, 100);
 	videoFrame.setSize(800, 600);
+	videoFrame.setAlwaysOnTop(true);
 	videoFrame.addWindowListener(this);
     
     // Create media player and ask for VLC path if necessary
@@ -131,54 +133,57 @@ public class EvalGUI extends WindowAdapter{
 	  // Create menu structure
 	    menubar = new JMenuBar();
 	    
-	    	// File menu
-		    file 			= new JMenu("File");
-		    openfile 		= new JMenuItem("Import file");
-		    createtrack		= new JMenuItem("Create annotation track");
-		    save 			= new JMenuItem("Save project");
-		    saveNewProject 	= new JMenuItem("Save project as");
-		    exit 			= new JMenuItem("Exit");
-		    
-		    file.add(openfile);
-		    file.add(createtrack);
-		    file.add(new JSeparator());
-		    file.add(save);
-		    file.add(saveNewProject);
-		    file.add(new JSeparator());
-		    file.add(exit);
+    	// File menu
+	    file 			= new JMenu("File");
+	    openfile 		= new JMenuItem("Import file", 'I');
+	    createtrack		= new JMenuItem("Create annotation track", 'C');
+	    save 			= new JMenuItem("Save project", 'S');
+	    saveNewProject 	= new JMenuItem("Save project as");
+	    closeProject 	= new JMenuItem("Close project", 'Q');
+	    exit 			= new JMenuItem("Exit");
 	    
-		    // Load icons
-		    String pathToResources = "Resources\\";
-		    final int ICONSIZE = 16;
+	    file.add(openfile);
+	    file.add(createtrack);
+	    file.add(new JSeparator());
+	    file.add(save);
+	    file.add(saveNewProject);
+	    file.add(closeProject);
+	    file.add(new JSeparator());
+	    file.add(exit);
+    
+	    // Load icons
+	    String pathToResources = "Resources\\";
+	    final int ICONSIZE = 16;
 
-		    playIcon 				= getImageIconFromFile(pathToResources + "play.png", 	ICONSIZE);
-		    pauseIcon				= getImageIconFromFile(pathToResources + "pause.png", 	ICONSIZE);
-		    stopIcon				= getImageIconFromFile(pathToResources + "stop.png", 	ICONSIZE);
-		    skipFrameIcon			= getImageIconFromFile(pathToResources + "skip.png", 	ICONSIZE);
-		    muteIcon				= getImageIconFromFile(pathToResources + "mute.png", 	ICONSIZE);
-		    unmuteIcon				= getImageIconFromFile(pathToResources + "unmute.png", 	ICONSIZE);
-		    
-		    // Playback controls
-		    position 				= new JLabel();
-		    positionslider			= new JSlider(JSlider.HORIZONTAL, 0, 1000, 0);
-		    playPauseButton 		= new JButton(pauseIcon);
-		    stopButton 				= new JButton(stopIcon);
-		    skipFrameButton 		= new JButton(skipFrameIcon);
-		    muteButton 				= new JButton(muteIcon);
-		    position 				= new JLabel("-");
+	    playIcon 				= getImageIconFromFile(pathToResources + "play.png", 	ICONSIZE);
+	    pauseIcon				= getImageIconFromFile(pathToResources + "pause.png", 	ICONSIZE);
+	    stopIcon				= getImageIconFromFile(pathToResources + "stop.png", 	ICONSIZE);
+	    skipFrameIcon			= getImageIconFromFile(pathToResources + "skip.png", 	ICONSIZE);
+	    muteIcon				= getImageIconFromFile(pathToResources + "mute.png", 	ICONSIZE);
+	    unmuteIcon				= getImageIconFromFile(pathToResources + "unmute.png", 	ICONSIZE);
 	    
-	    
-		    menubar.add(file);
-		    menubar.add(positionslider);
-		    menubar.add(position);
-		    menubar.add(playPauseButton);
-		    menubar.add(stopButton);
-		    menubar.add(skipFrameButton);
-		    menubar.add(muteButton);
+	    // Playback controls
+	    position 				= new JLabel();
+	    positionslider			= new JSlider(JSlider.HORIZONTAL, 0, 1000, 0);
+	    playPauseButton 		= new JButton(pauseIcon);
+	    stopButton 				= new JButton(stopIcon);
+	    skipFrameButton 		= new JButton(skipFrameIcon);
+	    muteButton 				= new JButton(muteIcon);
+	    position 				= new JLabel("-");
+    
+    
+	    menubar.add(file);
+	    menubar.add(positionslider);
+	    menubar.add(position);
+	    menubar.add(playPauseButton);
+	    menubar.add(stopButton);
+	    menubar.add(skipFrameButton);
+	    menubar.add(muteButton);
 	    
 	    // Set action commands for buttons
 		save.setActionCommand("save");
 		saveNewProject.setActionCommand("saveas");
+		closeProject.setActionCommand("closeproject");
 	    openfile.setActionCommand("openfile");
 	    createtrack.setActionCommand("createtrack");
 	    exit.setActionCommand("exit");
@@ -191,6 +196,7 @@ public class EvalGUI extends WindowAdapter{
 	    MenuListener menlis = new MenuListener(this);
 	    save.addActionListener(menlis);
 	    saveNewProject.addActionListener(menlis);
+	    closeProject.addActionListener(menlis);
 	    openfile.addActionListener(menlis);
 	    createtrack.addActionListener(menlis);
 	    exit.addActionListener(menlis);
@@ -228,6 +234,7 @@ public class EvalGUI extends WindowAdapter{
 				  dataContent.add(model.getLoadedDataTracks().get(i).getVisualization());
 		  }
 		  
+		  dataFrame.setTitle(windowTitle + model.getProjectPath());
 		  dataFrame.setVisible(true);
 		  dataFrame.validate();
 		  
@@ -259,6 +266,7 @@ public class EvalGUI extends WindowAdapter{
   
   public void loadVideo(String src){
 	  vi.loadVideo(src);
+	  videoFrame.setTitle(windowTitle + " - " + model.getVideoPath());
   }
   
   public long getVideoLength(){
@@ -356,6 +364,5 @@ public class EvalGUI extends WindowAdapter{
 
 		// Exit
 		System.exit(0);
-}
-
+	}
 }

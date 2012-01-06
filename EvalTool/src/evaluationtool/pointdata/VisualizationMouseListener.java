@@ -25,6 +25,7 @@ public class VisualizationMouseListener implements MouseWheelListener, MouseList
 	
 	public VisualizationMouseListener(SensorDataVisualization s, SensorTrackVisualization tv) {
 		source = s;
+		track = tv;
 	}
 	
 	/**
@@ -48,9 +49,9 @@ public class VisualizationMouseListener implements MouseWheelListener, MouseList
 				source.toggleCompactView();
 		}
 		// Set playback position to this point
-				else if(e.getButton() == MouseEvent.BUTTON1){
-					source.getDataSource().getModel().setPlaybackPosition((long)track.mapPixelToTime(e.getX()));
-				}
+		else if(e.getButton() == MouseEvent.BUTTON1){
+			source.getDataSource().getModel().setPlaybackPosition((long)track.mapPixelToTime(e.getX()));
+		}
 	}
 	public void mouseEntered(MouseEvent e) {}
 	public void mouseExited(MouseEvent e) {
@@ -70,7 +71,6 @@ public class VisualizationMouseListener implements MouseWheelListener, MouseList
 	public void mouseDragged(MouseEvent e) {
 
 			if(shiftingTime){
-				System.out.println("Shifted " + (e.getX() - tempMouseX) + " pixels: " + (e.getX() - tempMouseX) / source.getPixelsPerMillisecond() + " ms");
 				source.setOffset((long)(source.getOffset() + (e.getX() - tempMouseX) / source.getPixelsPerMillisecond()));
 				source.repaint();
 				tempMouseX = e.getX();

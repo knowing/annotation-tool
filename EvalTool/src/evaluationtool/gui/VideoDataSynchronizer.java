@@ -34,7 +34,7 @@ public class VideoDataSynchronizer {
 		  vi.setRunning(b);
 		  
 		  // Wait for thread to stop
-		  try {Thread.sleep(20);} catch (InterruptedException e) {}
+		  try {Thread.sleep(10);} catch (InterruptedException e) {}
 	  }
 	
 	/*
@@ -58,6 +58,9 @@ public class VideoDataSynchronizer {
 
 			// Loop the video
 			mediaPlayerComponent.getMediaPlayer().setRepeat(true);
+			
+			// Play to get video length
+			gui.playpause();
 		 }
 	
 	/**
@@ -107,9 +110,6 @@ public class VideoDataSynchronizer {
 			  float tempPos= 0;
 			  
 			  while(running){
-				  try{sleep(10);}
-				  catch(Exception e){System.err.println("Could not sleep");}
-
 				  // Save old position
 				  tempPos = pos;
 				  
@@ -142,6 +142,9 @@ public class VideoDataSynchronizer {
 					  lab.setText(TimestampConverter.getVideoTimestamp((long)(pos * length)) + "/" + TimestampConverter.getVideoTimestamp(length));		  
 					  gui.getModel().setPlaybackPosition(pos, false);  
 				  } 
+				  
+				  try{sleep(10);}
+				  catch(Exception e){System.err.println("Could not sleep");}
 			  }
 		  }
 	  }

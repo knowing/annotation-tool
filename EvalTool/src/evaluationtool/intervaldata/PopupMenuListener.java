@@ -27,7 +27,7 @@ public class PopupMenuListener implements ActionListener{
 		}
 		else{	
 			// Add event at menu position and parse action command to activity
-			vis.getDataSource().addEvent(vis.getCurrentMenuTime(), 0, activitytype);
+			vis.getDataSource().createAndAddEvent(vis.getCurrentMenuTime(), 0, activitytype);
 		}
 	}
 

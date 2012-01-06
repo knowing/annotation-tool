@@ -19,6 +19,7 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 	
 	// Menu
 	JPanel menu = new JPanel();
+	JLabel file = new JLabel();
 	JButton remove = new JButton("Remove");
 	JButton toggleView = new JButton("Compact view");
 	JButton trackParameters = new JButton("");
@@ -70,9 +71,12 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 		if(menu != null){
 			menu.setPreferredSize(new Dimension(200, this.getHeight()));
 			
+			file.setText(getDataSource().getSource());
+			
 			menu.removeAll();
 			// Create menu
-			menu.setLayout(new GridLayout(Math.max(3, this.getHeight() / 30), 1));
+			menu.setLayout(new GridLayout(Math.max(4, this.getHeight() / 30), 1));
+			menu.add(file);
 			menu.add(remove);
 			menu.add(toggleView);
 			menu.add(trackParameters);

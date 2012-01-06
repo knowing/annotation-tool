@@ -116,9 +116,12 @@ public class DataModel {
 	
 	public void reset(){
 		projectfile = "";
-		setVideoPath(null);
+		setVideoPath("");
 		
 		loadedDataTracks.clear();
+		
+		this.getGUI().loadVideo("");
+		this.getGUI().updateFrames();
 	}
 	
 	/**
@@ -141,10 +144,11 @@ public class DataModel {
 	 * @param i
 	 * @param string
 	 */
-	public boolean saveTrack(int track, String filename) {
+	public boolean saveTrack(int n_track, String filename) {
 		// Only interval data can be saved
-		if(this.getLoadedDataTracks().get(track) instanceof IntervalData){
-			this.getLoadedDataTracks().get(track).setSource(filename);
+		if(this.getLoadedDataTracks().get(n_track) instanceof IntervalData){
+			IntervalData track = (IntervalData) this.getLoadedDataTracks().get(n_track);
+			track.setSource(filename);
 			
 			weka.core.converters.ArffSaver arffout = new weka.core.converters.ArffSaver();
 			try {
@@ -159,10 +163,11 @@ public class DataModel {
 				arffout.setStructure(ResultsUtil.timeIntervalResult(atts));
 				
 				Instances ins = arffout.getInstances();
-				evaluationtool.intervaldata.DataSet[] events = ((IntervalData)this.getLoadedDataTracks().get(track)).getEvents();
+				
+				track.orderEvents();
+				evaluationtool.intervaldata.DataSet[] events = track.getEvents();
 				
 				for(int i = 0; i < events.length; i++){
-					
 					DenseInstance instance = new DenseInstance(3);
 					instance.setValue(ins.attribute(0), events[i].timestampStart);
 					instance.setValue(ins.attribute(1), events[i].timestampEnd);

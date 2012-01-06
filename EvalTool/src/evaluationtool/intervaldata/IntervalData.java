@@ -9,7 +9,7 @@ import evaluationtool.gui.Visualization;
 public class IntervalData implements Data {
 
 	// Reference to model
-		DataModel model;
+	DataModel model;
 		
 	// Timing corrections
 	private float playbackSpeed = 1f;	// Factor of original
@@ -39,29 +39,34 @@ public class IntervalData implements Data {
 	}
 	
 	/**
+	 * Creates an event from two timestamps and an activity number and adds in to the list
+	 * @param timestampStart
+	 * @param timestampEnd
+	 * @param activitytype
+	 */
+	public void createAndAddEvent(long timestampStart, long timestampEnd, int activitytype){	
+		DataSet set = new DataSet(timestampStart, timestampEnd, activitytype);
+		addEvent(set);
+	}
+	
+	/**
 	 * Adds an event to the list of events
 	 * @param timestampStart
 	 * @param timestampEnd
 	 * @param activitytype
 	 */
-	public void addEvent(long timestampStart, long timestampEnd, int activitytype){
-		int i = 0;
-		
-		if(events.size() == 0){
-			events.add(i, new DataSet(timestampStart, timestampEnd, activitytype));
-			return;
-		}
+	public void addEvent(DataSet set){
 		
 		// Sort by starttime
-		for(; i < events.size(); i++){
-			if(timestampStart < events.get(i).timestampStart){
-				events.add(i, new DataSet(timestampStart, timestampEnd, activitytype));
+		for(int i = 0; i < events.size(); i++){
+			if(set.timestampStart < events.get(i).timestampStart){
+				events.add(i, set);
 				return;
 			}
 		}
 		
 		// Add as last element
-		events.add(i, new DataSet(timestampStart, timestampEnd, activitytype));
+		events.add(set);
 	}
 	
 	/**
@@ -158,5 +163,18 @@ public class IntervalData implements Data {
 
 	public void setSource(String filename) {
 		this.source = filename;
+	}
+	
+	/**
+	 * This will bring the events in proper order
+	 */
+	public void orderEvents() {
+
+		LinkedList<DataSet> eventsOld = events;
+		events = new LinkedList<DataSet>();
+		
+		while(!eventsOld.isEmpty()){
+			addEvent(eventsOld.pop());
+		}
 	}
 }

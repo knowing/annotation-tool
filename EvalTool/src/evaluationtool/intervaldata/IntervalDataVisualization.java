@@ -8,6 +8,7 @@ import java.awt.event.ComponentListener;
 import java.awt.geom.RoundRectangle2D;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -21,6 +22,7 @@ public class IntervalDataVisualization extends Visualization implements Componen
 	
 	// Menu
 	JPanel menu = new JPanel();
+	JLabel file = new JLabel();
 	JButton remove = new JButton("Remove");
 	JButton toggleLock = new JButton("Lock");
 	JButton trackParameters = new JButton("");
@@ -110,8 +112,12 @@ public class IntervalDataVisualization extends Visualization implements Componen
 			menu.setPreferredSize(new Dimension(200, this.getHeight()));
 			
 			menu.removeAll();
+			
+			file.setText(getDataSource().getSource());
+			
 			// Create menu
-			menu.setLayout(new GridLayout(Math.max(3, this.getHeight() / 30), 1));
+			menu.setLayout(new GridLayout(Math.max(4, this.getHeight() / 30), 1));
+			menu.add(file);
 			menu.add(remove);
 			menu.add(toggleLock);
 			menu.add(trackParameters);
@@ -132,10 +138,14 @@ public class IntervalDataVisualization extends Visualization implements Componen
 		trackvis.toggleLocked();
 		
 		// Set correct button text
-		if(trackvis.isLocked())
+		if(trackvis.isLocked()){
 			toggleLock.setText("Unlock");
-		else
+		}
+		else{
 			toggleLock.setText("Lock");
+			// Set source to empty string so the track will be saved
+			dataSource.setSource("");
+		}
 	}
 	
 	public boolean isLocked(){

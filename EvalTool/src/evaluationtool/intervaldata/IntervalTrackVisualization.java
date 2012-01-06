@@ -89,7 +89,7 @@ public class IntervalTrackVisualization extends TrackVisualization{
 		// Draw table
 		for(int i = 0; i < n_activities; i++){
 			g2d.setColor(Color.BLACK);
-			g2d.drawLine(0, (int)((float)this.getHeight() * i / n_activities), this.getWidth(), (int)((float)this.getHeight() * i / n_activities));
+			g2d.drawLine(0, (int)((float)(this.getHeight() - TIMELINE_HEIGHT) * i / n_activities), this.getWidth(), (int)((float)(this.getHeight() - TIMELINE_HEIGHT) * i / n_activities));
 		}
 		
 		// Draw x-axis
@@ -100,7 +100,7 @@ public class IntervalTrackVisualization extends TrackVisualization{
 			g2d.drawLine(0, i / n_activities, this.getWidth(), i / n_activities);
 			g2d.drawString(dataSource.getPossibleActivities()[i], 
 						      this.getWidth() / 2 - g2d.getFontMetrics(g2d.getFont()).stringWidth(dataSource.getPossibleActivities()[i]) / 2, 
-						      (i + 0.5f) * this.getHeight() / n_activities);
+						      (i + 0.5f) * (this.getHeight() - TIMELINE_HEIGHT) / n_activities);
 		}	
 	}
 	
@@ -116,23 +116,23 @@ public class IntervalTrackVisualization extends TrackVisualization{
 		for(int i = 0; i < n_events; i++){
 			
 			// Create startpoint
-			startpoints[i] = 	new RoundRectangle2D.Float(mapTimeToPixel((float)events[i].timestampStart) - 5, (float)events[i].activitytype / n_activities * this.getHeight(), 
-						   							  10,  (float)this.getHeight() / n_activities - 1, 7, 7);
+			startpoints[i] = 	new RoundRectangle2D.Float(mapTimeToPixel((float)events[i].timestampStart) - 5, (float)events[i].activitytype / n_activities * (this.getHeight() - TIMELINE_HEIGHT), 
+						   							  10,  (float)(this.getHeight() - TIMELINE_HEIGHT) / n_activities - 1, 7, 7);
 			
 			if(events[i].timestampEnd != 0){
 				// Create interval
-				intervals[i] = 		new RoundRectangle2D.Float(mapTimeToPixel((float)events[i].timestampStart), (float)events[i].activitytype / n_activities * this.getHeight(), 
-													   	  mapTimeToPixel((float)events[i].timestampEnd) - mapTimeToPixel((float)events[i].timestampStart),  (float)this.getHeight() / n_activities,
+				intervals[i] = 		new RoundRectangle2D.Float(mapTimeToPixel((float)events[i].timestampStart), (float)events[i].activitytype / n_activities * (this.getHeight() - TIMELINE_HEIGHT), 
+													   	  mapTimeToPixel((float)events[i].timestampEnd) - mapTimeToPixel((float)events[i].timestampStart),  (float)(this.getHeight() - TIMELINE_HEIGHT) / n_activities,
 													   	  1, 1);
 				// Create endpoint
-				endpoints[i] = 		new RoundRectangle2D.Float(mapTimeToPixel((float)events[i].timestampEnd) - 5, (float)events[i].activitytype / n_activities * this.getHeight(), 
-					   	  								   10,  (float)this.getHeight() / n_activities - 1, 
+				endpoints[i] = 		new RoundRectangle2D.Float(mapTimeToPixel((float)events[i].timestampEnd) - 5, (float)events[i].activitytype / n_activities * (this.getHeight() - TIMELINE_HEIGHT), 
+					   	  								   10,  (float)(this.getHeight() - TIMELINE_HEIGHT) / n_activities - 1, 
 					   	  								   7, 7);
 
 			}
 			else{
-				intervals[i] = new RoundRectangle2D.Float(mapTimeToPixel((float)events[i].timestampStart), (float)events[i].activitytype / n_activities * this.getHeight(), 
-						   					    this.getWidth() - mapTimeToPixel((float)events[i].timestampStart), (float)this.getHeight() / n_activities, 1, 1);
+				intervals[i] = new RoundRectangle2D.Float(mapTimeToPixel((float)events[i].timestampStart), (float)events[i].activitytype / n_activities * (this.getHeight() - TIMELINE_HEIGHT), 
+						   					    this.getWidth() - mapTimeToPixel((float)events[i].timestampStart), (float)(this.getHeight() - TIMELINE_HEIGHT) / n_activities, 1, 1);
 				endpoints[i] = null;			
 			}		
 		}

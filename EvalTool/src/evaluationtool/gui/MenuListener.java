@@ -5,7 +5,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JFileChooser;
 
-import evaluationtool.FileImporter;
+import evaluationtool.util.FileImporter;
 import evaluationtool.util.ProjectFileHandler;
 
 public class MenuListener implements ActionListener {
@@ -59,6 +59,9 @@ public class MenuListener implements ActionListener {
 		else if(ae.getActionCommand().equals("saveas")){
 			String projectpath = ProjectFileHandler.showSaveDialog(gui);	
 			gui.getModel().setProjectPath(projectpath);
+		}
+		else if(ae.getActionCommand().equals("closeproject")){	
+			gui.getModel().reset();
 		}
 	}
 	

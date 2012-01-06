@@ -1,4 +1,4 @@
-package evaluationtool;
+package evaluationtool.util;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,11 +9,12 @@ import javax.swing.JOptionPane;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader;
 import de.sendsor.SDRConverter;
+import evaluationtool.Data;
+import evaluationtool.DataModel;
 import evaluationtool.intervaldata.IntervalData;
 import evaluationtool.intervaldata.IntervalDataVisualization;
 import evaluationtool.pointdata.DataSet;
 import evaluationtool.pointdata.SensorData;
-import evaluationtool.util.ProjectFileHandler;
 
 /**
  * Imports sensor data or interval data into a given DataModel
@@ -203,7 +204,7 @@ public class FileImporter {
 				long firstTimestamp = (long)ins.get(0).value(0);
 
 				for(int i = 0; i < ins.size(); i++){
-					((IntervalData)newData).addEvent((long)ins.get(i).value(0) - firstTimestamp, (long)ins.get(i).value(1) - firstTimestamp, (int)ins.get(i).value(2));
+					((IntervalData)newData).createAndAddEvent((long)ins.get(i).value(0) - firstTimestamp, (long)ins.get(i).value(1) - firstTimestamp, (int)ins.get(i).value(2));
 				}
 			}
 		}

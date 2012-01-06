@@ -22,7 +22,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import com.sun.media.sound.Toolkit;
 
 import evaluationtool.DataModel;
-import evaluationtool.FileImporter;
 import evaluationtool.gui.EvalGUI;
 
 public class ProjectFileHandler {
