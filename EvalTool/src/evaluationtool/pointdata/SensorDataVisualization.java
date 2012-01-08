@@ -163,4 +163,9 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 	public Data getDataSource() {
 		return dataSource;
 	}
+
+	@Override
+	public JPanel getTrackVisualization() {
+		return trackvis;
+	}
 }

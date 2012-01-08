@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.geom.RoundRectangle2D;
 
+import evaluationtool.Data;
 import evaluationtool.gui.TrackVisualization;
 
 public class IntervalTrackVisualization extends TrackVisualization{
@@ -37,8 +38,9 @@ public class IntervalTrackVisualization extends TrackVisualization{
 	// Minimized view
 	boolean minimize = false;
 	
-	public IntervalTrackVisualization(IntervalData sd, IntervalDataVisualization sdv) {
-		dataSource = sd;
+	public IntervalTrackVisualization(Data sd, IntervalDataVisualization sdv) {
+		super(sd);
+		dataSource = (IntervalData)sd;
 		model = dataSource.getModel();
 		
 		// Add listener with reference to visualization main component

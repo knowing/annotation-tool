@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 
+import evaluationtool.Data;
 import evaluationtool.gui.TrackVisualization;
 
 public class SensorTrackVisualization extends TrackVisualization{
@@ -23,8 +24,9 @@ public class SensorTrackVisualization extends TrackVisualization{
 	boolean compactView = false;
 
 		
-	public SensorTrackVisualization(SensorData sd, SensorDataVisualization sdv) {
-		dataSource = sd;
+	public SensorTrackVisualization(Data sd, SensorDataVisualization sdv) {
+		super(sd);
+		dataSource = (SensorData)sd;
 		model = dataSource.getModel();
 		
 		// Add listener with reference to visualization main component

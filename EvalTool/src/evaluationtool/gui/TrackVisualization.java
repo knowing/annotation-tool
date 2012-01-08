@@ -11,6 +11,7 @@ import java.awt.geom.RoundRectangle2D;
 
 import javax.swing.JPanel;
 
+import evaluationtool.Data;
 import evaluationtool.DataModel;
 import evaluationtool.util.TimestampConverter;
 
@@ -44,6 +45,11 @@ abstract public class TrackVisualization extends JPanel{
 	
 	// Reference to the model
 	protected DataModel model;
+	
+	public TrackVisualization(Data d) {
+		this.setFocusable(true);
+		this.addKeyListener(d.getModel().getGUI().getShortcutKeyListener());
+	}
 	
 	public void paint(Graphics g){
 		// Graphics2D object

@@ -49,6 +49,7 @@ public class VisualizationMouseListener implements MouseWheelListener, MouseList
 	 * @param e
 	 */
 	public void mouseClicked(MouseEvent e) {
+		
 		if(e.getButton() == MouseEvent.BUTTON3){
 			source.updatePopupMenuForTimestamp(track.mapPixelToTime(e.getX()), track.mapPixelToActivity(e.getY()));
         	source.getPopupMenu().show(track, e.getX(), e.getY());
@@ -58,7 +59,9 @@ public class VisualizationMouseListener implements MouseWheelListener, MouseList
 			source.getDataSource().getModel().setPlaybackPosition((long)track.mapPixelToTime(e.getX()));
 		}
 	}
-	public void mouseEntered(MouseEvent e) {}
+	public void mouseEntered(MouseEvent e) {
+		track.requestFocusInWindow();
+	}
 	public void mouseExited(MouseEvent e) {
 		source.showCoordinates(null);
 		shiftingTime = false;

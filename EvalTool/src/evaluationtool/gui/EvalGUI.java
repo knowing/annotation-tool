@@ -1,6 +1,7 @@
 package evaluationtool.gui;
 
 import java.awt.*;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.*;
@@ -55,6 +56,9 @@ public class EvalGUI extends WindowAdapter{
   
   VideoDataSynchronizer vi;
   
+  // KeyListener for shortcuts
+  ShortcutKeyListener keylis;
+  
   /**
    * Initializes the GUI with a DataModel
    * @param m
@@ -64,6 +68,7 @@ public class EvalGUI extends WindowAdapter{
 	// Reference the model
 	model = m;
 	model.setGUI(this);
+	keylis = new ShortcutKeyListener(this);
 	
 	// Load VLC path
 	model.loadVLCPath();
@@ -92,15 +97,15 @@ public class EvalGUI extends WindowAdapter{
 	videoFrame.setTitle(windowTitle);
 	videoFrame.setLocation(100, 100);
 	videoFrame.setSize(800, 600);
-	videoFrame.setAlwaysOnTop(true);
+	//videoFrame.setAlwaysOnTop(true);
 	videoFrame.addWindowListener(this);
+	videoFrame.addKeyListener(this.getShortcutKeyListener());
     
     // Create media player and ask for VLC path if necessary
     while(mediaPlayerComponent == null){
 	    try{
 	    NativeLibrary.addSearchPath("libvlc",  model.getVLCPath());
 	    mediaPlayerComponent = new EmbeddedMediaPlayerComponent();
-	    mediaPlayerComponent.addKeyListener(new VideoFrameListener(this));
 	    }
 	    catch(Exception e){
 	    	VLCPlayerHandler.initLibVlc(model, videoFrame);
@@ -123,6 +128,8 @@ public class EvalGUI extends WindowAdapter{
 	  dataFrame.setMinimumSize(new Dimension(100, 100));  
 	  dataFrame.setTitle("EvalTool - Data tracks");
 	  dataFrame.addWindowListener(this);
+	  dataContent.addKeyListener(this.getShortcutKeyListener());
+	  dataFrame.addKeyListener(this.getShortcutKeyListener());
 	  dataFrame.setContentPane(dataContent);
   }
   
@@ -232,6 +239,7 @@ public class EvalGUI extends WindowAdapter{
 		  // Add all tracks
 		  for(int i = 0; i < model.getLoadedDataTracks().size(); i++){
 				  dataContent.add(model.getLoadedDataTracks().get(i).getVisualization());
+				  model.getLoadedDataTracks().get(i).getVisualization().getTrackVisualization().requestFocusInWindow();
 		  }
 		  
 		  dataFrame.setTitle(windowTitle + model.getProjectPath());
@@ -251,6 +259,10 @@ public class EvalGUI extends WindowAdapter{
 			return videoFrame;
 		else return null;
 	}
+  
+  public KeyListener getShortcutKeyListener(){
+	  return keylis;
+  }
   
   public DataModel getModel(){
 	  return model;
