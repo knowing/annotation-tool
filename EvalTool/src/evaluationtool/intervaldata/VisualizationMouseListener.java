@@ -42,6 +42,10 @@ public class VisualizationMouseListener implements MouseWheelListener, MouseList
 			source.setZoomlevel(source.getZoomlevel() * 1.3f);
 		else if(e.getWheelRotation() > 0)
 			source.setZoomlevel(source.getZoomlevel() / 1.3f);
+		
+		if(source.getDataSource().getModel().getGUI().getGlobalZoom()){
+			source.getDataSource().getModel().getGUI().setGlobalPixelsPerMillisecond(track.calculatePixelsPerMillisecond());
+		}
 	}
 
 	/**
@@ -75,7 +79,7 @@ public class VisualizationMouseListener implements MouseWheelListener, MouseList
 			shiftingTime = true;
 		}
 		// Drag startpoint, endpoint or a whole interval
-		else if(e.getButton() == MouseEvent.BUTTON1 && !track.isLocked()){
+		else if(e.getButton() == MouseEvent.BUTTON1 && !source.isLocked()){
 			draggedEvent = track.getEventAt(e.getPoint());
 			if(draggedEvent != null){
 				draggedPart = track.getPartAt(e.getPoint());
@@ -98,21 +102,34 @@ public class VisualizationMouseListener implements MouseWheelListener, MouseList
 	public void mouseDragged(MouseEvent e) {
 
 			if(shiftingTime){
-				source.setOffset((long)(source.getOffset() + (e.getX() - tempMouseX) / source.getPixelsPerMillisecond()));
-				source.repaint();
+				
+				long newOffset = (long)(source.getOffset() + (e.getX() - tempMouseX) / source.getPixelsPerMillisecond());
+				
+				if(source.getDataSource().getModel().getGUI().getGlobalZoom()){
+					source.getDataSource().getModel().getGUI().setGlobalOffset(newOffset);
+				}
+				else{
+					source.setOffset(newOffset);
+				}
 				tempMouseX = e.getX();
 			}
 			if(draggedEvent != null){
 				if(draggedPart == IntervalTrackVisualization.STARTPOINT){
 					draggedEvent.timestampStart += (e.getX() - tempMouseX) / source.getPixelsPerMillisecond();
+					
+					if(draggedEvent.timestampEnd != 0)
+						draggedEvent.timestampEnd = Math.max(draggedEvent.timestampStart, draggedEvent.timestampEnd);
 				}
 				else if(draggedPart == IntervalTrackVisualization.ENDPOINT){
-					draggedEvent.timestampEnd += (e.getX() - tempMouseX) / source.getPixelsPerMillisecond();				
+					draggedEvent.timestampEnd += (e.getX() - tempMouseX) / source.getPixelsPerMillisecond();
+					draggedEvent.timestampStart = Math.min(draggedEvent.timestampStart, draggedEvent.timestampEnd);
 				}
 				else if(draggedPart == IntervalTrackVisualization.WHOLE_EVENT){
 					draggedEvent.timestampStart += (e.getX() - tempMouseX) / source.getPixelsPerMillisecond();
 					draggedEvent.timestampEnd += (e.getX() - tempMouseX) / source.getPixelsPerMillisecond();
 				}
+				
+				source.getDataSource().mergeOverlappingActivities(draggedEvent);
 				source.repaint();
 				tempMouseX = e.getX();
 			}

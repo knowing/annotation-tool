@@ -71,7 +71,7 @@ public class DataModel {
 	 */
 	public void setPlaybackPosition(float pos, boolean setVideoPosition) {
 		for(int i = 0; i < loadedDataTracks.size(); i++){
-			  loadedDataTracks.get(i).getVisualization().setPosition(pos * gui.getVideoLength());
+			  loadedDataTracks.get(i).getVisualization().setPosition((long)(pos * gui.getVideoLength()));
 		  }
 		if(setVideoPosition)
 			gui.setVideoPosition(pos);

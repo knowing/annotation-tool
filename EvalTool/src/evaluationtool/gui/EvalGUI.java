@@ -15,49 +15,54 @@ import uk.co.caprica.vlcj.component.*;
 
 public class EvalGUI extends WindowAdapter{
 
-  String windowTitle = "EvalTool";
+  private String windowTitle = "EvalTool";
   
   // Model
-  DataModel model;
+  private DataModel model;
   
   // Media player component
-  EmbeddedMediaPlayerComponent mediaPlayerComponent = null;
+  private EmbeddedMediaPlayerComponent mediaPlayerComponent = null;
   
-  JFrame dataFrame;
-  JPanel dataContent;
-  JFrame videoFrame;
+  private JFrame dataFrame;
+  private JPanel dataContent;
+  private JFrame videoFrame;
   
   // Menu bar
-  JMenuBar menubar;
+  private JMenuBar menubar;
   
   // Menubar
-  JMenu file;
-	  JMenuItem createtrack;
-	  JMenuItem openfile;
-	  JMenuItem save;
-	  JMenuItem saveNewProject;
-	  JMenuItem closeProject;
-	  JMenuItem exit;
+  private JMenu file;
+  	  private JCheckBox globalzoomCheckbox;
+	  private JMenuItem createtrack;
+	  private JMenuItem openfile;
+	  private JMenuItem save;
+	  private JMenuItem saveNewProject;
+	  private JMenuItem closeProject;
+	  private JMenuItem exit;
   
-  JLabel position;
-  JSlider positionslider;
-  JButton playPauseButton;
-  JButton stopButton;
-  JButton skipFrameButton;
-  JButton muteButton;
+  private JLabel position;
+  private JSlider positionslider;
+  private JButton playPauseButton;
+  private JButton stopButton;
+  private JButton skipFrameButton;
+  private JButton muteButton;
   
   // Icons for buttons
-  ImageIcon playIcon;
-  ImageIcon pauseIcon;
-  ImageIcon stopIcon;
-  ImageIcon skipFrameIcon;
-  ImageIcon muteIcon;
-  ImageIcon unmuteIcon;
+  private ImageIcon playIcon;
+  private ImageIcon pauseIcon;
+  private ImageIcon stopIcon;
+  private ImageIcon skipFrameIcon;
+  private ImageIcon muteIcon;
+  private ImageIcon unmuteIcon;
   
-  VideoDataSynchronizer vi;
+  private VideoDataSynchronizer vi;
   
   // KeyListener for shortcuts
-  ShortcutKeyListener keylis;
+  private ShortcutKeyListener keylis;
+  
+  // Global zoom settings
+  private long globalOffset = 0;
+  private float globalPixelsPerMillisecond = 1;
   
   /**
    * Initializes the GUI with a DataModel
@@ -130,7 +135,6 @@ public class EvalGUI extends WindowAdapter{
 	  dataFrame.addWindowListener(this);
 	  dataContent.addKeyListener(this.getShortcutKeyListener());
 	  dataFrame.addKeyListener(this.getShortcutKeyListener());
-	  dataFrame.setContentPane(dataContent);
   }
   
   /**
@@ -147,7 +151,7 @@ public class EvalGUI extends WindowAdapter{
 	    save 			= new JMenuItem("Save project", 'S');
 	    saveNewProject 	= new JMenuItem("Save project as");
 	    closeProject 	= new JMenuItem("Close project", 'Q');
-	    exit 			= new JMenuItem("Exit");
+	    exit 			= new JMenuItem("Exit"); 
 	    
 	    file.add(openfile);
 	    file.add(createtrack);
@@ -170,6 +174,8 @@ public class EvalGUI extends WindowAdapter{
 	    unmuteIcon				= getImageIconFromFile(pathToResources + "unmute.png", 	ICONSIZE);
 	    
 	    // Playback controls
+	    globalzoomCheckbox 		= new JCheckBox("Global zoom");
+	    globalzoomCheckbox.setSelected(true);
 	    position 				= new JLabel();
 	    positionslider			= new JSlider(JSlider.HORIZONTAL, 0, 1000, 0);
 	    playPauseButton 		= new JButton(pauseIcon);
@@ -180,6 +186,7 @@ public class EvalGUI extends WindowAdapter{
     
     
 	    menubar.add(file);
+	    menubar.add(globalzoomCheckbox);
 	    menubar.add(positionslider);
 	    menubar.add(position);
 	    menubar.add(playPauseButton);
@@ -241,6 +248,13 @@ public class EvalGUI extends WindowAdapter{
 				  dataContent.add(model.getLoadedDataTracks().get(i).getVisualization());
 				  model.getLoadedDataTracks().get(i).getVisualization().getTrackVisualization().requestFocusInWindow();
 		  }
+		  
+		  dataContent.setMinimumSize(new Dimension(100, model.getLoadedDataTracks().size() * 100));
+		  dataContent.setPreferredSize(new Dimension(dataContent.getWidth(), model.getLoadedDataTracks().size() * 200));
+		  
+		  JScrollPane scroll = new JScrollPane(dataContent);
+		  scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		  dataFrame.setContentPane(scroll);
 		  
 		  dataFrame.setTitle(windowTitle + model.getProjectPath());
 		  dataFrame.setVisible(true);
@@ -376,5 +390,39 @@ public class EvalGUI extends WindowAdapter{
 
 		// Exit
 		System.exit(0);
+	}
+
+	public boolean getGlobalZoom() {
+		return globalzoomCheckbox.isSelected();
+	}
+
+	public void setGlobalZoom(boolean globalZoom) {
+		globalzoomCheckbox.setSelected(globalZoom);
+	}
+
+	public long getGlobalOffset() {
+		return globalOffset;
+	}
+
+	public void setGlobalOffset(long globalOffset) {
+		this.globalOffset = globalOffset;
+		
+		// Update visualizations
+		  for(int i = 0; i < model.getLoadedDataTracks().size(); i++){
+				  model.getLoadedDataTracks().get(i).getVisualization().getTrackVisualization().repaint();
+		  }
+	}
+
+	public float getGlobalPixelsPerMillisecond() {
+		return globalPixelsPerMillisecond;
+	}
+
+	public void setGlobalPixelsPerMillisecond(float globalPixelsPerMillisecond) {
+		this.globalPixelsPerMillisecond = globalPixelsPerMillisecond;
+		
+		// Update visualizations
+		  for(int i = 0; i < model.getLoadedDataTracks().size(); i++){
+				  model.getLoadedDataTracks().get(i).getVisualization().getTrackVisualization().repaint();
+		  }
 	}
 }

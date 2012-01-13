@@ -86,7 +86,7 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 	/**
 	 * Sets the position for the cursor
 	 */
-	public void setPosition(float p){
+	public void setPosition(long p){
 		trackvis.setPosition(p);
 	}
 	
@@ -133,7 +133,7 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 		trackvis.setZoomlevel(z);
 	}
 	
-	protected void setOffset(float o){
+	protected void setOffset(long o){
 		trackvis.setOffset(o);
 	}
 	

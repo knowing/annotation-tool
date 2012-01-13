@@ -25,9 +25,9 @@ public class PopupMenuListener implements ActionListener{
 		else if(activitytype == DataSet.DELETE_ACTIVITY){
 			vis.getDataSource().deleteActivityAt(vis.getCurrentMenuTime());
 		}
-		else{	
+		else if(activitytype == DataSet.CURRENT_ACTIVITY){	
 			// Add event at menu position and parse action command to activity
-			vis.getDataSource().createAndAddEvent(vis.getCurrentMenuTime(), 0, activitytype);
+			vis.getDataSource().createAndAddEvent(vis.getCurrentMenuTime(), 0, vis.getCurrentMenuActivity());
 		}
 	}
 

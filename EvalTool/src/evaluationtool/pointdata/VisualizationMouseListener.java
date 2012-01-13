@@ -38,6 +38,10 @@ public class VisualizationMouseListener implements MouseWheelListener, MouseList
 			source.setZoomlevel(source.getZoomlevel() * 1.3f);
 		else if(e.getWheelRotation() > 0)
 			source.setZoomlevel(source.getZoomlevel() / 1.3f);
+		
+		if(source.getDataSource().getModel().getGUI().getGlobalZoom()){
+			source.getDataSource().getModel().getGUI().setGlobalPixelsPerMillisecond(track.calculatePixelsPerMillisecond());
+		}
 	}
 
 	/**
@@ -73,11 +77,18 @@ public class VisualizationMouseListener implements MouseWheelListener, MouseList
 	
 	public void mouseDragged(MouseEvent e) {
 
-			if(shiftingTime){
-				source.setOffset((long)(source.getOffset() + (e.getX() - tempMouseX) / source.getPixelsPerMillisecond()));
-				source.repaint();
-				tempMouseX = e.getX();
+		if(shiftingTime){
+			
+			long newOffset = (long)(source.getOffset() + (e.getX() - tempMouseX) / source.getPixelsPerMillisecond());
+			
+			if(source.getDataSource().getModel().getGUI().getGlobalZoom()){
+				source.getDataSource().getModel().getGUI().setGlobalOffset(newOffset);
 			}
+			else{
+				source.setOffset(newOffset);
+			}
+			tempMouseX = e.getX();
+		}
 
 		source.showCoordinates(new RoundRectangle2D.Float((float)e.getX(), (float)e.getY() - 15f, 80f, 15f, 10f, 10f));
 	}

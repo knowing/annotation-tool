@@ -29,7 +29,7 @@ public class IntervalDataVisualization extends Visualization implements Componen
 	
 	// PopupMenu
 	JPopupMenu popupMenu = new JPopupMenu();
-	JMenuItem[] popupMenuItems;
+	JMenuItem startActivityItem;
 	JMenuItem endActivityItem;
 	JMenuItem deleteActivityItem;
 	
@@ -68,27 +68,20 @@ public class IntervalDataVisualization extends Visualization implements Componen
 		trackParameters.addActionListener(menulistener);
 		trackParameters.setActionCommand("options");
 		
-		popupMenuItems = new JMenuItem[dataSource.getPossibleActivities().length];
-		
 		PopupMenuListener popuplistener = new PopupMenuListener(popupMenu, this);
 		
 		// Add popupmenu items
-		for(int i = 0; i < dataSource.getPossibleActivities().length; i++){
-			popupMenuItems[i] = new JMenuItem("Start activity: " + dataSource.getPossibleActivities()[i]);
-			popupMenuItems[i].setActionCommand("#" + i);
-			popupMenu.add(popupMenuItems[i]);
-			
-			// Add listener
-			popupMenuItems[i].addActionListener(popuplistener);
-		}
 		
-		popupMenu.add(new JSeparator());
+		startActivityItem = new JMenuItem("Start activity");
 		endActivityItem = new JMenuItem("End activity");
 		deleteActivityItem = new JMenuItem("Delete activity");
 		
+		startActivityItem.setActionCommand("#" + DataSet.CURRENT_ACTIVITY);
 		endActivityItem.setActionCommand("#" + DataSet.NO_ACTIVITY);
 		deleteActivityItem.setActionCommand("#" + DataSet.DELETE_ACTIVITY);
 		
+		popupMenu.add(startActivityItem);
+		startActivityItem.addActionListener(popuplistener);
 		popupMenu.add(endActivityItem);
 		endActivityItem.addActionListener(popuplistener);
 		popupMenu.add(deleteActivityItem);
@@ -127,7 +120,7 @@ public class IntervalDataVisualization extends Visualization implements Componen
 	/**
 	 * Sets the position for the cursor
 	 */
-	public void setPosition(float p){
+	public void setPosition(long p){
 		trackvis.setPosition(p);
 	}
 	
@@ -135,10 +128,10 @@ public class IntervalDataVisualization extends Visualization implements Componen
 	 * Toggles the view mode
 	 */
 	public void toggleLocked(){
-		trackvis.toggleLocked();
+		dataSource.setLocked(!dataSource.isLocked());
 		
 		// Set correct button text
-		if(trackvis.isLocked()){
+		if(dataSource.isLocked()){
 			toggleLock.setText("Unlock");
 		}
 		else{
@@ -149,7 +142,7 @@ public class IntervalDataVisualization extends Visualization implements Componen
 	}
 	
 	public boolean isLocked(){
-		return trackvis.isLocked();
+		return dataSource.isLocked();
 	}
 	
 	public void updatePopupMenuForTimestamp(long timestamp, int activity){
@@ -202,7 +195,7 @@ public class IntervalDataVisualization extends Visualization implements Componen
 		trackvis.setZoomlevel(z);
 	}
 	
-	protected void setOffset(float o){
+	protected void setOffset(long o){
 		trackvis.setOffset(o);
 	}
 	

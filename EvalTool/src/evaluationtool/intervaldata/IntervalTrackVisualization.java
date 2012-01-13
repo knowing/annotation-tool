@@ -32,9 +32,6 @@ public class IntervalTrackVisualization extends TrackVisualization{
 	// Listener for everything
 	VisualizationMouseListener listener;
 	
-	// Determines whether the user can add, change, or remove intervals 
-	boolean locked = false;
-	
 	// Minimized view
 	boolean minimize = false;
 	
@@ -77,7 +74,7 @@ public class IntervalTrackVisualization extends TrackVisualization{
 					g2d.setColor(new Color((events[i].activitytype * 30) % 255, (events[i].activitytype * 75) % 255, (events[i].activitytype * 120) % 255, 150));
 					g2d.fill(intervals[i]);
 					
-					if(!isLocked()){
+					if(!dataSource.isLocked()){
 						// Draw start and end
 						g2d.setColor(Color.GREEN);
 						g2d.draw(startpoints[i]);
@@ -139,18 +136,6 @@ public class IntervalTrackVisualization extends TrackVisualization{
 			}		
 		}
 	}
-	
-	/**
-	 * Toggles editability
-	 */
-	public void toggleLocked(){
-		locked = !locked;
-		repaint();
-	}
-	
-	public boolean isLocked(){
-		return locked;
-	}
 
 	public int mapPixelToActivity(int y) {
 		return (int)((float)y / this.getHeight() * n_activities);
@@ -163,7 +148,8 @@ public class IntervalTrackVisualization extends TrackVisualization{
 	 */
 	public DataSet getEventAt(Point p) {
 		for(int i = 0; i < n_events; i++){
-			if(startpoints[i].contains(p) || endpoints[i].contains(p) || intervals[i].contains(p))
+			// Endpoints have to be checked for null pointer
+			if(startpoints[i].contains(p) || (endpoints[i] != null && endpoints[i].contains(p)) || intervals[i].contains(p))
 				return events[i];
 		}
 		
@@ -179,7 +165,7 @@ public class IntervalTrackVisualization extends TrackVisualization{
 		for(int i = 0; i < n_events; i++){
 			if(startpoints[i].contains(p))
 				return STARTPOINT;
-			if(endpoints[i].contains(p))
+			if(endpoints[i] != null && endpoints[i].contains(p))
 				return ENDPOINT;
 			if(intervals[i].contains(p))
 				return WHOLE_EVENT;

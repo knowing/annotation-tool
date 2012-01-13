@@ -28,6 +28,9 @@ public class IntervalData implements Data {
 	// Visualization track
 	IntervalDataVisualization vis;
 	
+	// Determines whether the user can add, change, or remove intervals 
+	boolean locked = false;
+	
 	public IntervalData(DataModel model, String src, String[] activities){
 		source = src;
 		this.model = model;
@@ -36,6 +39,12 @@ public class IntervalData implements Data {
 		
 		// Create visualization
 		vis = new IntervalDataVisualization(this);
+	}
+	
+	public void addEventAtCurrentPosition(int activity) {
+		if(activity >= 0 && activity < ACTIVITIES.length){
+			createAndAddEvent(vis.getTrackVisualization().getPosition(), 0, activity);
+		}
 	}
 	
 	/**
@@ -56,6 +65,8 @@ public class IntervalData implements Data {
 	 * @param activitytype
 	 */
 	public void addEvent(DataSet set){
+
+		mergeOverlappingActivities(set);
 		
 		// Sort by starttime
 		for(int i = 0; i < events.size(); i++){
@@ -69,6 +80,20 @@ public class IntervalData implements Data {
 		events.add(set);
 	}
 	
+	public void mergeOverlappingActivities(DataSet set) {
+		// First check for overlaps
+				for(int i = 0; i < events.size(); i++){
+					if(DataSet.doOverlap(events.get(i), set)){
+						// Merge events
+						set.timestampStart = Math.min(set.timestampStart, events.get(i).timestampStart);
+						set.timestampEnd = Math.max(set.timestampEnd, events.get(i).timestampEnd);
+						
+						// Delete existing event
+						events.remove(i);
+					}
+				}
+	}
+
 	/**
 	 *  Ends the activity at timestamp
 	 */
@@ -77,6 +102,10 @@ public class IntervalData implements Data {
 		
 		if(currentActivity != DataSet.NO_ACTIVITY)
 			events.get(currentActivity).timestampEnd = timestamp;
+	}
+	
+	public void deleteActivityAtCurrentPosition() {
+		deleteActivityAt(vis.getTrackVisualization().getPosition());
 	}
 	
 	public void deleteActivityAt(long timestamp){
@@ -176,5 +205,13 @@ public class IntervalData implements Data {
 		while(!eventsOld.isEmpty()){
 			addEvent(eventsOld.pop());
 		}
+	}
+
+	public boolean isLocked() {
+		return locked;
+	}
+	
+	public void setLocked(boolean b) {
+		locked = b;
 	}
 }

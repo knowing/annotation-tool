@@ -2,6 +2,7 @@ package evaluationtool.gui;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -27,9 +28,9 @@ abstract public class TrackVisualization extends JPanel{
 	protected int n_bars = 10;
 	
 	// Displaying information
-	protected float position = 0f;				// in milliseconds
+	protected long position = 0;				// in milliseconds
 	protected float zoomlevel = 1f;	
-	protected float offset = 0f;				// in milliseconds
+	protected long offset = 0;				// in milliseconds
 	protected float dataLength = 0;				// in milliseconds
 	
 	// Colors		
@@ -81,22 +82,38 @@ abstract public class TrackVisualization extends JPanel{
 		if(dataLength == 0)
 			dataLength = model.getProjectLength();
 		
-		/*
-		 * For zoom level 1f, the whole length points must fit in  	 	 		 this.getWidth()				pixels.
-		 * The distance between two milliseconds is therefore  					(this.getWidth() / dataLength) 	pixels.
-		 * Adding zoom, the distance will be 						zoomlevel * (this.getWidth() / dataLength) pixels.
-		 */
-		pixelsPerMillisecond = zoomlevel * (this.getWidth() / dataLength);
+		if(model.getGUI().getGlobalZoom()){
+			pixelsPerMillisecond = model.getGUI().getGlobalPixelsPerMillisecond();
+			zoomlevel = pixelsPerMillisecond / (this.getWidth() / dataLength);
+			offset = model.getGUI().getGlobalOffset();
+		}
+		else{
+			pixelsPerMillisecond = calculatePixelsPerMillisecond();
+		}
 		
 		
 		// Check if cursor gets out of view and change offset (only when video is playing)
 		if(model.isVideoPlaying())
 			if(mapTimeToPixel(position) > this.getWidth() * 9 / 10 || 
 			   mapTimeToPixel(position) < 0){
-				offset = -(position - 0.1f/pixelsPerMillisecond * this.getWidth());
+				offset = (long) -(position - 0.1f/pixelsPerMillisecond * this.getWidth());
+				
+				// Also update global offset
+				if(model.getGUI().getGlobalZoom()){
+					model.getGUI().setGlobalOffset(offset);
+				}
 			}
 	}
 	
+	public float calculatePixelsPerMillisecond() {
+		/*
+		 * For zoom level 1f, the whole length points must fit in  	 	 		 this.getWidth()				pixels.
+		 * The distance between two milliseconds is therefore  					(this.getWidth() / dataLength) 	pixels.
+		 * Adding zoom, the distance will be 						zoomlevel * (this.getWidth() / dataLength) pixels.
+		 */
+		return zoomlevel * (this.getWidth() / dataLength);
+	}
+
 	protected void paintBasics(Graphics2D g2d){
 		g2d.setStroke(new BasicStroke(1));
 		
@@ -182,13 +199,13 @@ abstract public class TrackVisualization extends JPanel{
 	/**
 	 * Sets the position for the cursor
 	 */
-	public void setPosition(float p){
+	public void setPosition(long p){
 		position = p;
 		
 		// Makes sure the current position in viewable
 		if(mapTimeToPixel(position) > this.getWidth() * 9 / 10 || 
 				   mapTimeToPixel(position) < 0){
-					offset = -(position - 0.1f/pixelsPerMillisecond * this.getWidth());
+					offset = (long) -(position - 0.1f/pixelsPerMillisecond * this.getWidth());
 				}
 		repaint();
 	}
@@ -197,8 +214,9 @@ abstract public class TrackVisualization extends JPanel{
 	 * Changes the viewable area of the track
 	 * @param o
 	 */
-	public void setOffset(float o){
+	public void setOffset(long o){
 		offset = o;
+		repaint();
 	}
 	
 	public float getOffset(){
@@ -211,6 +229,10 @@ abstract public class TrackVisualization extends JPanel{
 	
 	public float getPixelsPerMillisecond(){
 		return pixelsPerMillisecond;
+	}
+	
+	public long getPosition(){
+		return position;
 	}
 	
 	/**
