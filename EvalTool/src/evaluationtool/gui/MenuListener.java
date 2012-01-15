@@ -32,7 +32,7 @@ public class MenuListener implements ActionListener {
 			gui.getModel().addIntervalTrack();
 		}
 		else if(ae.getActionCommand().equals("exit")){
-			System.exit(0);
+			gui.stopProperly();
 		}
 		else if(ae.getActionCommand().equals("playpause")){
 			gui.playpause();

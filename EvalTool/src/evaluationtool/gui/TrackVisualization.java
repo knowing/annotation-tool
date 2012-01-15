@@ -24,7 +24,7 @@ import evaluationtool.util.TimestampConverter;
 abstract public class TrackVisualization extends JPanel{
 	
 	protected float pixelsPerMillisecond = 0;		// in pixels/millisecond
-	protected int DISTANCE_BETWEEN_BARS = 100;
+	protected int DISTANCE_BETWEEN_BARS = 150;
 	protected int n_bars = 10;
 	
 	// Displaying information
@@ -103,27 +103,14 @@ abstract public class TrackVisualization extends JPanel{
 					model.getGUI().setGlobalOffset(offset);
 				}
 			}
-	}
-	
-	public float calculatePixelsPerMillisecond() {
-		/*
-		 * For zoom level 1f, the whole length points must fit in  	 	 		 this.getWidth()				pixels.
-		 * The distance between two milliseconds is therefore  					(this.getWidth() / dataLength) 	pixels.
-		 * Adding zoom, the distance will be 						zoomlevel * (this.getWidth() / dataLength) pixels.
-		 */
-		return zoomlevel * (this.getWidth() / dataLength);
-	}
-
-	protected void paintBasics(Graphics2D g2d){
+		
+		// Draw grid
 		g2d.setStroke(new BasicStroke(1));
 		
 		// Draw bar for timeline
 		g2d.setColor(timelineColorTrack);
 		g2d.fillRect(0, this.getHeight() - TIMELINE_HEIGHT, this.getWidth(), TIMELINE_HEIGHT);
-		
-		// Draw grid
-		g2d.setStroke(new BasicStroke(1));
-		
+				
 		// Determine grid resolution
 		float i = -offset;
 		float timeBetweenBars = (this.getWidth() / pixelsPerMillisecond) / n_bars;
@@ -139,7 +126,19 @@ abstract public class TrackVisualization extends JPanel{
 			i += timeBetweenBars;
 			xCoord = mapTimeToPixel(i);
 		}
+	}
+	
+	public float calculatePixelsPerMillisecond() {
+		/*
+		 * For zoom level 1f, the whole length points must fit in  	 	 		 this.getWidth()				pixels.
+		 * The distance between two milliseconds is therefore  					(this.getWidth() / dataLength) 	pixels.
+		 * Adding zoom, the distance will be 						zoomlevel * (this.getWidth() / dataLength) pixels.
+		 */
+		return zoomlevel * (this.getWidth() / dataLength);
+	}
 
+	protected void paintBasics(Graphics2D g2d){
+		g2d.setStroke(new BasicStroke(1));
 		
 		// Draw cursor to indicate current position
 		g2d.setColor(Color.BLACK);
@@ -219,7 +218,7 @@ abstract public class TrackVisualization extends JPanel{
 		repaint();
 	}
 	
-	public float getOffset(){
+	public long getOffset(){
 		return offset;
 	}
 
@@ -248,5 +247,15 @@ abstract public class TrackVisualization extends JPanel{
 	public void showCoordinates(RoundRectangle2D.Float f){
 		coordinatesPopup = f;
 		repaint();
+	}
+
+	/**
+	 * Sets the offset to bring a certain timestamp to a specified pixel
+	 * @param mouseTime
+	 * @param x
+	 */
+	public void adjustOffset(long mouseTime, int x) {
+		pixelsPerMillisecond = calculatePixelsPerMillisecond();
+		offset = (long)((x / pixelsPerMillisecond) - mouseTime);
 	}
 }

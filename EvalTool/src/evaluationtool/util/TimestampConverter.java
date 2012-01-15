@@ -35,15 +35,15 @@ public class TimestampConverter {
 		// Build String
 		String sH = "";
 		if(h > 0)
-			sH = h + ":";
+			sH = h + "h ";
 		
 		String sMin;
 		if(h == 0 && min == 0)
 			sMin = "";
 		else if(min < 10)
-			sMin = "0" + min + ":";
+			sMin = "0" + min + " min ";
 		else
-			sMin = ""  + min + ":";
+			sMin = ""  + min + " min ";
 		
 		String sSec;
 		if(s < 10)
@@ -53,11 +53,11 @@ public class TimestampConverter {
 		
 		String sMinsec;
 		if(ms < 10)
-			sMinsec = "00" + ms;
+			sMinsec = "00" + ms + "s";
 		else if(ms < 100)
-			sMinsec = "0"  + ms;
+			sMinsec = "0"  + ms + "s";
 		else
-			sMinsec = ""  + ms;
+			sMinsec = ""  + ms + "s";
 		
 		if(pos)
 			return (sH + sMin + sSec + sMinsec);

@@ -166,7 +166,7 @@ public class IntervalDataVisualization extends Visualization implements Componen
 		return dataSource;
 	}
 	
-	protected float getZoomlevel(){
+	public float getZoomlevel(){
 		return trackvis.getZoomlevel();
 	}
 	
@@ -191,7 +191,7 @@ public class IntervalDataVisualization extends Visualization implements Componen
 	 * Sets the zoom level
 	 * @param z
 	 */
-	protected void setZoomlevel(float z){
+	public void setZoomlevel(float z){
 		trackvis.setZoomlevel(z);
 	}
 	

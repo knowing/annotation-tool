@@ -9,5 +9,6 @@ public abstract class Visualization extends JPanel{
 	abstract public void setAlternativeColorScheme(boolean b);
 	abstract public void updateLayout();
 	abstract public Data getDataSource();
+	
 	abstract public JPanel getTrackVisualization();
 }

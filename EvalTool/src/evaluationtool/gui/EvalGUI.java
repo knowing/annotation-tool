@@ -378,7 +378,10 @@ public class EvalGUI extends WindowAdapter{
 	  }
 
 	public void windowClosing(WindowEvent arg0) {
+		stopProperly();
+	}
 
+	public void stopProperly() {
 		// Stop thread
 		vi.setRunning(false);
 		
@@ -389,7 +392,7 @@ public class EvalGUI extends WindowAdapter{
 		mediaPlayerComponent.release();
 
 		// Exit
-		System.exit(0);
+		System.exit(0);	
 	}
 
 	public boolean getGlobalZoom() {

@@ -7,6 +7,9 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.RoundRectangle2D;
 
+import evaluationtool.gui.TrackMouseListener;
+import evaluationtool.gui.TrackVisualization;
+import evaluationtool.gui.Visualization;
 import evaluationtool.pointdata.SensorTrackVisualization;
 
 /**
@@ -14,86 +17,25 @@ import evaluationtool.pointdata.SensorTrackVisualization;
  * @author anfi
  *
  */
-public class VisualizationMouseListener implements MouseWheelListener, MouseListener, MouseMotionListener{
+public class VisualizationMouseListener extends TrackMouseListener implements MouseWheelListener, MouseListener, MouseMotionListener{
 	
-	SensorDataVisualization source;
-	SensorTrackVisualization track;
-	
+	public VisualizationMouseListener(Visualization s, TrackVisualization tv) {
+		super(s, tv);
+	}
+
 	boolean shiftingTime = false;
 	int tempMouseX = 0;
 	int tempMouseY = 0;
-	
-	public VisualizationMouseListener(SensorDataVisualization s, SensorTrackVisualization tv) {
-		source = s;
-		track = tv;
-	}
-	
-	/**
-	 * Changes the zoomlevel on mouse wheel rotation
-	 * @param e
-	 */
-	public void mouseWheelMoved(MouseWheelEvent e) {
-		// Do not allow zoomlevel to get < 1 or > 3e8f
-		if(e.getWheelRotation() < 0)
-			source.setZoomlevel(source.getZoomlevel() * 1.3f);
-		else if(e.getWheelRotation() > 0)
-			source.setZoomlevel(source.getZoomlevel() / 1.3f);
-		
-		if(source.getDataSource().getModel().getGUI().getGlobalZoom()){
-			source.getDataSource().getModel().getGUI().setGlobalPixelsPerMillisecond(track.calculatePixelsPerMillisecond());
-		}
-	}
 
 	/**
 	 * Toggles between compact and expanded view on MMB
 	 * @param e
 	 */
 	public void mouseClicked(MouseEvent e) {
+		super.mouseClicked(e);
 		
 		if(e.getButton() == MouseEvent.BUTTON2){
-				source.toggleCompactView();
+				((SensorTrackVisualization)track).toggleCompactView();
 		}
-		// Set playback position to this point
-		else if(e.getButton() == MouseEvent.BUTTON1){
-			source.getDataSource().getModel().setPlaybackPosition((long)track.mapPixelToTime(e.getX()));
-		}
-	}
-	public void mouseEntered(MouseEvent e) {
-		track.requestFocusInWindow();
-	}
-	public void mouseExited(MouseEvent e) {
-		source.showCoordinates(null);
-		shiftingTime = false;
-	}
-	public void mousePressed(MouseEvent e) {
-		if(e.getButton() == MouseEvent.BUTTON3){
-			shiftingTime = true;
-			tempMouseX = e.getX();
-		}
-	}
-	public void mouseReleased(MouseEvent e) {
-		shiftingTime = false;
-	}
-	
-	public void mouseDragged(MouseEvent e) {
-
-		if(shiftingTime){
-			
-			long newOffset = (long)(source.getOffset() + (e.getX() - tempMouseX) / source.getPixelsPerMillisecond());
-			
-			if(source.getDataSource().getModel().getGUI().getGlobalZoom()){
-				source.getDataSource().getModel().getGUI().setGlobalOffset(newOffset);
-			}
-			else{
-				source.setOffset(newOffset);
-			}
-			tempMouseX = e.getX();
-		}
-
-		source.showCoordinates(new RoundRectangle2D.Float((float)e.getX(), (float)e.getY() - 15f, 80f, 15f, 10f, 10f));
-	}
-	
-	public void mouseMoved(MouseEvent e) {
-		source.showCoordinates(new RoundRectangle2D.Float((float)e.getX(), (float)e.getY() - 15f, 80f, 15f, 10f, 10f));
 	}
 }

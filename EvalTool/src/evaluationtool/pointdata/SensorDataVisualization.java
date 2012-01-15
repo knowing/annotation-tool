@@ -104,7 +104,7 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 	}
 	
 	
-	protected float getZoomlevel(){
+	public float getZoomlevel(){
 		return trackvis.getZoomlevel();
 	}
 	
@@ -129,7 +129,7 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 	 * Sets the zoom level
 	 * @param z
 	 */
-	protected void setZoomlevel(float z){
+	public void setZoomlevel(float z){
 		trackvis.setZoomlevel(z);
 	}
 	

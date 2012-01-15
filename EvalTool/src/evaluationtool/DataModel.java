@@ -35,6 +35,8 @@ public class DataModel {
 	String vlcdir = "";
 	String videofile = "";
 	
+	String PREDEFINED_ACTIVITIES[];
+	
 	public final String CONFIG_PATH = "config.cfg";
 	public final String VLCPATH_LINE = "$VLCDIR=";
 	public final String PROJECTPATH_LINE = "$PROJECTFILE=";
@@ -43,6 +45,8 @@ public class DataModel {
 	public final String DATAPATH_LINE = "$DATAFILE=";
 	public final String OFFSET_LINE = "$DATAOFFSET=";
 	public final String SPEED_LINE = "$DATAZOOM=";
+	
+	public final String ACTIVITY_TYPE_LINE = "$ACTIVITYTYPE=";
 	
 	LinkedList<Data> loadedDataTracks = new LinkedList<Data>();
 	
@@ -128,7 +132,7 @@ public class DataModel {
 	 * Adds an empty interval track for annotations
 	 */
 	public void addIntervalTrack(){
-		Data newData = new IntervalData(this, "", IntervalData.PREDEFINED_ACTIVITIES);
+		Data newData = new IntervalData(this, "", PREDEFINED_ACTIVITIES);
 		loadedDataTracks.add(newData);
 		
 		if(loadedDataTracks.size()%2 == 0)
@@ -155,8 +159,8 @@ public class DataModel {
 				arffout.setFile(new File(filename));
 				LinkedList<String> atts = new LinkedList<String>();
 				// Create attributes list
-				for(int i = 0; i < IntervalData.PREDEFINED_ACTIVITIES.length; i++){
-					atts.add(IntervalData.PREDEFINED_ACTIVITIES[i]);
+				for(int i = 0; i < track.getPossibleActivities().length; i++){
+					atts.add(track.getPossibleActivities()[i]);
 				}
 				
 				// Create structure for arff file
@@ -216,6 +220,11 @@ public class DataModel {
 			
 			fw.write("# Path to current project file\n");
 			fw.write("\n" + PROJECTPATH_LINE + projectfile + "\n\n");
+			
+			fw.write("# Standard activities\n");
+			for(int i = 0; i < PREDEFINED_ACTIVITIES.length; i++){
+				fw.write("\n" + ACTIVITY_TYPE_LINE + PREDEFINED_ACTIVITIES[i] + "\n");
+			}
 		}
 		catch(IOException ioe){
 			return ioe.getMessage();
@@ -229,6 +238,8 @@ public class DataModel {
 	 */
 	public void loadConfiguration(){
 		File f = new File(CONFIG_PATH);
+		
+		LinkedList<String> temp = new LinkedList<String>();
 		
 		try(BufferedReader br = new BufferedReader(new FileReader(f))){
 			String line = br.readLine();
@@ -245,6 +256,10 @@ public class DataModel {
 							}
 						}
 				}
+				// Add all activity lines to linked list
+				if (line.startsWith(ACTIVITY_TYPE_LINE)){
+						temp.add(line.substring(ACTIVITY_TYPE_LINE.length()));			
+				}
 				
 				line = br.readLine();
 			}
@@ -252,6 +267,8 @@ public class DataModel {
 		catch(IOException ioe){
 			System.err.println(ioe.getMessage());
 		}
+			
+		PREDEFINED_ACTIVITIES = temp.toArray(new String[temp.size()]);
 	}
 	
 	/**

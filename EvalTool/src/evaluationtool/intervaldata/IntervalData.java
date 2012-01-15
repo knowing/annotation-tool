@@ -19,8 +19,7 @@ public class IntervalData implements Data {
 	String source = "";
 	
 	// Possible activities
-	final String[] ACTIVITIES;
-	public static final String[] PREDEFINED_ACTIVITIES = new String[]{"Walking", "Running", "Biking", "Skating", "Crosstrainer"};
+	private String[] ACTIVITIES;
 	
 	// LinkedList containing all start- and endpoints
 	LinkedList<DataSet> events = new LinkedList<DataSet>();
