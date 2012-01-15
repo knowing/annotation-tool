@@ -21,7 +21,7 @@ public class IntervalTrackVisualization extends TrackVisualization{
 	// Painting variables
 	private int n_events 			= 0;
 	private int n_activities 		= 0;
-	private DataSet[] events 		= null;
+	private Activity[] events 		= null;
 
 	// Data source
 	IntervalData dataSource;
@@ -73,10 +73,10 @@ public class IntervalTrackVisualization extends TrackVisualization{
 		// Draw data
 		for(int i = 0; i < n_events; i++){
 				
-					
-					if(this.getMousePosition() != null && (intervals[i].contains(this.getMousePosition())
-													    && !startpoints[i].contains(this.getMousePosition())
-													    && !(endpoints[i] != null && endpoints[i].contains(this.getMousePosition())))){
+					Point p = this.getMousePosition();
+					if(p != null && (intervals[i].contains(p)
+													    && !startpoints[i].contains(p)
+													    && !(endpoints[i] != null && endpoints[i].contains(p)))){
 						g2d.setColor(new Color((events[i].activitytype * 30) % 255, (events[i].activitytype * 75) % 255, (events[i].activitytype * 120) % 255, 210));
 						g2d.fill(intervals[i]);
 						
@@ -90,14 +90,14 @@ public class IntervalTrackVisualization extends TrackVisualization{
 					if(!dataSource.isLocked()){
 						// Draw start and end
 						g2d.setColor(Color.GREEN);
-						if(this.getMousePosition() != null && startpoints[i].contains(this.getMousePosition()))
+						if(p != null && startpoints[i].contains(p))
 							g2d.fill(startpoints[i]);
 						else
 							g2d.draw(startpoints[i]);
 						
 						g2d.setColor(Color.RED);
 						if(endpoints[i] != null){
-							if(this.getMousePosition() != null && endpoints[i].contains(this.getMousePosition()))
+							if(p != null && endpoints[i].contains(p))
 								g2d.fill(endpoints[i]);
 							else
 								g2d.draw(endpoints[i]);
@@ -230,7 +230,7 @@ public class IntervalTrackVisualization extends TrackVisualization{
 	 * @param p
 	 * @return
 	 */
-	public DataSet getEventAt(Point p) {
+	public Activity getEventAt(Point p) {
 		for(int i = 0; i < n_events; i++){
 			// Endpoints have to be checked for null pointer
 			if(startpoints[i].contains(p) || (endpoints[i] != null && endpoints[i].contains(p)) || intervals[i].contains(p))

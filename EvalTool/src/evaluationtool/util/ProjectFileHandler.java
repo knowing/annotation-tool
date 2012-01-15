@@ -171,12 +171,15 @@ public class ProjectFileHandler {
 			for(int i = 0; i < model.getLoadedDataTracks().size(); i++){
 
 				if(model.getLoadedDataTracks().get(i).getSource().equals("")){
-					// File will be created later
-					fw.write("\n" + model.DATAPATH_LINE + USER_GENERATED_TRACK_PREFIX + i + ".arff");
-					fw.write("\n" + model.OFFSET_LINE + (long)model.getLoadedDataTracks().get(i).getOffset());
-					fw.write("\n" + model.SPEED_LINE + model.getLoadedDataTracks().get(i).getPlaybackSpeed() + "\n");
+					int tempNumber = 1;
+					// Find a name
+					while(nameExists(model, USER_GENERATED_TRACK_PREFIX + tempNumber + ".arff")){
+						tempNumber++;
+					}
+					model.getLoadedDataTracks().get(i).setSource(USER_GENERATED_TRACK_PREFIX + tempNumber + ".arff");
 				}	
-				else if(getFilenameFromPath(model.getLoadedDataTracks().get(i).getSource()) != null){
+				
+				if(getFilenameFromPath(model.getLoadedDataTracks().get(i).getSource()) != null){
 					fw.write("\n" + model.DATAPATH_LINE + getFilenameFromPath(model.getLoadedDataTracks().get(i).getSource()));
 					fw.write("\n" + model.OFFSET_LINE + (long)model.getLoadedDataTracks().get(i).getOffset());
 					fw.write("\n" + model.SPEED_LINE + model.getLoadedDataTracks().get(i).getPlaybackSpeed() + "\n");
@@ -215,29 +218,26 @@ public class ProjectFileHandler {
 				   zipout.write(data, 0, count);
 		         }
 			}
-			
+		
+		File tempDir = new File("\\temp");
+		tempDir.deleteOnExit();
+		// Create temp directory if it does not exist
+		tempDir.mkdir();
+		
 		// Add data tracks
 		for(int i = 0; i < model.getLoadedDataTracks().size(); i++){
 			
 			// Check if a track has to be saved first
-			if(model.getLoadedDataTracks().get(i).getSource().equals("")){
+			if(model.getLoadedDataTracks().get(i).getSource().contains(USER_GENERATED_TRACK_PREFIX)){
 				System.out.print("Trying to save user generated track...");
-				
-				File tempDir = new File("\\temp");
-				tempDir.deleteOnExit();
-				
-				// Create temp directory if it does not exist
-				tempDir.mkdir();
-				
-				File trackFile = new File("\\temp\\" + USER_GENERATED_TRACK_PREFIX + i + ".arff");
+
+				File trackFile = new File("\\temp\\" + model.getLoadedDataTracks().get(i).getSource());
 				trackFile.createNewFile();
 				
-				// If the track cannot be saved, continue with next track
+				// Save track. If the track cannot be saved, continue with next track
 				if(!model.saveTrack(i, trackFile.getAbsolutePath())){
-					System.out.println("Fail");
 					continue;
 				}
-				System.out.println("Success");
 			}
 			
 			fi = new FileInputStream(model.getLoadedDataTracks().get(i).getSource());
@@ -273,6 +273,21 @@ public class ProjectFileHandler {
 		}
 		
 		return null;
+	}
+	
+	/**
+	 * Checks whether a filename already exists within a project
+	 * @param model
+	 * @param name
+	 * @return
+	 */
+	private static boolean nameExists(DataModel model, String name){
+		for(int i = 0; i < model.getLoadedDataTracks().size(); i++){
+			if(model.getLoadedDataTracks().get(i).getSource().equals(name))
+				return true;
+		}
+		
+		return false;
 	}
 	
 	/**

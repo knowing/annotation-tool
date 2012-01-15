@@ -28,8 +28,11 @@ public class MenuListener implements ActionListener {
 					  FileImporter.loadFile(gui.getModel(), path);
 				  }
 			  }
-		else if(ae.getActionCommand().equals("createtrack")){
+		else if(ae.getActionCommand().equals("createintervaltrack")){
 			gui.getModel().addIntervalTrack();
+		}
+		else if(ae.getActionCommand().equals("createpointstrack")){
+			gui.getModel().addPointsTrack();
 		}
 		else if(ae.getActionCommand().equals("exit")){
 			gui.stopProperly();

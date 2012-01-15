@@ -33,7 +33,8 @@ public class EvalGUI extends WindowAdapter{
   // Menubar
   private JMenu file;
   	  private JCheckBox globalzoomCheckbox;
-	  private JMenuItem createtrack;
+  	  private JMenuItem createIntervalTrack;
+  	  private JMenuItem createPointsTrack;
 	  private JMenuItem openfile;
 	  private JMenuItem save;
 	  private JMenuItem saveNewProject;
@@ -147,14 +148,16 @@ public class EvalGUI extends WindowAdapter{
     	// File menu
 	    file 			= new JMenu("File");
 	    openfile 		= new JMenuItem("Import file", 'I');
-	    createtrack		= new JMenuItem("Create annotation track", 'C');
+	    createIntervalTrack		= new JMenuItem("Create interval annotation track", 'C');
+	    createPointsTrack		= new JMenuItem("Create point annotation track", 'P');
 	    save 			= new JMenuItem("Save project", 'S');
 	    saveNewProject 	= new JMenuItem("Save project as");
 	    closeProject 	= new JMenuItem("Close project", 'Q');
 	    exit 			= new JMenuItem("Exit"); 
 	    
 	    file.add(openfile);
-	    file.add(createtrack);
+	    file.add(createIntervalTrack);
+	    file.add(createPointsTrack);
 	    file.add(new JSeparator());
 	    file.add(save);
 	    file.add(saveNewProject);
@@ -199,7 +202,8 @@ public class EvalGUI extends WindowAdapter{
 		saveNewProject.setActionCommand("saveas");
 		closeProject.setActionCommand("closeproject");
 	    openfile.setActionCommand("openfile");
-	    createtrack.setActionCommand("createtrack");
+	    createIntervalTrack.setActionCommand("createintervaltrack");
+	    createPointsTrack.setActionCommand("createpointstrack");
 	    exit.setActionCommand("exit");
 	    playPauseButton.setActionCommand("playpause");
 	    stopButton.setActionCommand("stop");
@@ -212,7 +216,8 @@ public class EvalGUI extends WindowAdapter{
 	    saveNewProject.addActionListener(menlis);
 	    closeProject.addActionListener(menlis);
 	    openfile.addActionListener(menlis);
-	    createtrack.addActionListener(menlis);
+	    createIntervalTrack.addActionListener(menlis);
+	    createPointsTrack.addActionListener(menlis);
 	    exit.addActionListener(menlis);
 	    playPauseButton.addActionListener(menlis);
 	    stopButton.addActionListener(menlis);

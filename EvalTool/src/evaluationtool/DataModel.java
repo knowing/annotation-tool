@@ -21,8 +21,9 @@ import de.sendsor.SDRConverter;
 import evaluationtool.gui.EvalGUI;
 import evaluationtool.intervaldata.IntervalData;
 import evaluationtool.intervaldata.IntervalDataVisualization;
-import evaluationtool.pointdata.SensorData;
-import evaluationtool.pointdata.DataSet;
+import evaluationtool.pointdata.PointData;
+import evaluationtool.sensordata.DataSet;
+import evaluationtool.sensordata.SensorData;
 import evaluationtool.util.ProjectFileHandler;
 
 /**
@@ -143,6 +144,18 @@ public class DataModel {
 		gui.updateFrames();
 	}
 	
+	public void addPointsTrack() {
+		Data newData = new PointData(this, "");
+		loadedDataTracks.add(newData);
+		
+		if(loadedDataTracks.size()%2 == 0)
+			newData.getVisualization().setAlternativeColorScheme(true);
+		else
+			newData.getVisualization().setAlternativeColorScheme(false);
+		
+		gui.updateFrames();
+	}
+	
 	/**
 	 * Saves an interval track to the specified path
 	 * @param i
@@ -169,13 +182,46 @@ public class DataModel {
 				Instances ins = arffout.getInstances();
 				
 				track.orderEvents();
-				evaluationtool.intervaldata.DataSet[] events = track.getEvents();
+				evaluationtool.intervaldata.Activity[] events = track.getEvents();
 				
 				for(int i = 0; i < events.length; i++){
 					DenseInstance instance = new DenseInstance(3);
 					instance.setValue(ins.attribute(0), events[i].timestampStart);
 					instance.setValue(ins.attribute(1), events[i].timestampEnd);
 					instance.setValue(ins.attribute(2), events[i].activitytype);
+					
+					ins.add(instance);
+				}
+				
+				arffout.writeBatch();
+				
+			} catch (IOException e) {
+				System.err.println("Error saving user generated track: " + e + "\nSkipping track.");
+				return false;
+			}
+
+			return true;
+		}
+		else if(this.getLoadedDataTracks().get(n_track) instanceof PointData){
+			PointData track = (PointData) this.getLoadedDataTracks().get(n_track);
+			track.setSource(filename);
+			
+			weka.core.converters.ArffSaver arffout = new weka.core.converters.ArffSaver();
+			try {
+				arffout.setFile(new File(filename));
+				LinkedList<String> atts = new LinkedList<String>();
+				
+				// Create structure for arff file
+				arffout.setStructure(ResultsUtil.timeSeriesResult(atts));
+				
+				Instances ins = arffout.getInstances();
+				
+				track.orderPoints();
+				long[] points = track.getPoints();
+				
+				for(int i = 0; i < points.length; i++){
+					DenseInstance instance = new DenseInstance(3);
+					instance.setValue(ins.attribute(0), points[i]);
 					
 					ins.add(instance);
 				}

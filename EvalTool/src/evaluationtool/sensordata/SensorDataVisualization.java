@@ -1,4 +1,4 @@
-package evaluationtool.pointdata;
+package evaluationtool.sensordata;
 
 
 import java.awt.BorderLayout;

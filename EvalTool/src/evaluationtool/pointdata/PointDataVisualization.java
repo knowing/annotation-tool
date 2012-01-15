@@ -1,4 +1,4 @@
-package evaluationtool.intervaldata;
+package evaluationtool.pointdata;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -18,7 +18,7 @@ import evaluationtool.gui.TrackOptionsDialog;
 import evaluationtool.gui.Visualization;
 
 
-public class IntervalDataVisualization extends Visualization implements ComponentListener {
+public class PointDataVisualization extends Visualization implements ComponentListener {
 	
 	// Menu
 	JPanel menu = new JPanel();
@@ -27,21 +27,11 @@ public class IntervalDataVisualization extends Visualization implements Componen
 	JButton toggleLock = new JButton("Lock");
 	JButton trackParameters = new JButton("");
 	
-	// PopupMenu
-	JPopupMenu popupMenu = new JPopupMenu();
-	JMenuItem startActivityItem;
-	JMenuItem endActivityItem;
-	JMenuItem deleteActivityItem;
-	
-	// The current position of the popupmenu in milliseconds relative to this track
-	long currentMenuTime = 0;
-	int currentMenuActivity = 0;
-	
 	// Track 
-	IntervalTrackVisualization trackvis;
+	PointTrackVisualization trackvis;
 	
 	// Data arrays
-	IntervalData dataSource;
+	PointData dataSource;
 	
 	// Listener for menu
 	MenuButtonListener menulistener = new MenuButtonListener(this);
@@ -49,9 +39,9 @@ public class IntervalDataVisualization extends Visualization implements Componen
 	// options dialog
 	TrackOptionsDialog to;
 	
-	IntervalDataVisualization(IntervalData sd){
+	PointDataVisualization(PointData sd){
 		dataSource = sd;
-		trackvis = new IntervalTrackVisualization(sd, this);
+		trackvis = new PointTrackVisualization(sd, this);
 		
 		// Will be overwritten anyway, just set this in case repaint is called earlier
 		trackvis.setAlternativeColorScheme(false);
@@ -68,27 +58,8 @@ public class IntervalDataVisualization extends Visualization implements Componen
 		trackParameters.addActionListener(menulistener);
 		trackParameters.setActionCommand("options");
 		
-		PopupMenuListener popuplistener = new PopupMenuListener(popupMenu, this);
-		
-		// Add popupmenu items
-		
-		startActivityItem = new JMenuItem("Start activity");
-		endActivityItem = new JMenuItem("End activity");
-		deleteActivityItem = new JMenuItem("Delete activity");
-		
-		startActivityItem.setActionCommand("#" + Activity.CURRENT_ACTIVITY);
-		endActivityItem.setActionCommand("#" + Activity.NO_ACTIVITY);
-		deleteActivityItem.setActionCommand("#" + Activity.DELETE_ACTIVITY);
-		
-		popupMenu.add(startActivityItem);
-		startActivityItem.addActionListener(popuplistener);
-		popupMenu.add(endActivityItem);
-		endActivityItem.addActionListener(popuplistener);
-		popupMenu.add(deleteActivityItem);
-		deleteActivityItem.addActionListener(popuplistener);
-		
 		// Add tracks
-		menu.setPreferredSize(new Dimension(200, this.getHeight()));
+		menu.setPreferredSize(new Dimension(200, 100));
 		this.add(menu, BorderLayout.WEST);
 		this.add(trackvis, BorderLayout.CENTER);
 		
@@ -145,24 +116,7 @@ public class IntervalDataVisualization extends Visualization implements Componen
 		return dataSource.isLocked();
 	}
 	
-	public void updatePopupMenuForTimestamp(long timestamp, int activity){
-		currentMenuTime = timestamp;
-		currentMenuActivity = activity;
-	}
-	
-	public JPopupMenu getPopupMenu(){
-		return popupMenu;
-	}
-	
-	public long getCurrentMenuTime(){
-		return currentMenuTime;
-	}
-	
-	public int getCurrentMenuActivity(){
-		return currentMenuActivity;
-	}
-	
-	public IntervalData getDataSource(){
+	public PointData getDataSource(){
 		return dataSource;
 	}
 	
@@ -221,7 +175,7 @@ public class IntervalDataVisualization extends Visualization implements Componen
 	  }
 	  public void componentShown(ComponentEvent e) {}
 
-	public IntervalTrackVisualization getTrackVisualization() {
+	public PointTrackVisualization getTrackVisualization() {
 		return trackvis;
 	}
 

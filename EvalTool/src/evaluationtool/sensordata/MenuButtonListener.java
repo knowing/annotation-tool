@@ -1,4 +1,4 @@
-package evaluationtool.pointdata;
+package evaluationtool.sensordata;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -6,15 +6,15 @@ import java.awt.event.ActionListener;
 
 public class MenuButtonListener implements ActionListener{
 
-	PointDataVisualization source;
+	SensorDataVisualization source;
 	
-	MenuButtonListener(PointDataVisualization s){
+	MenuButtonListener(SensorDataVisualization s){
 		source = s;
 	}
 	
 	public void actionPerformed(ActionEvent ae) {
-		if(ae.getActionCommand().equals("togglelocked")){
-			source.toggleLocked();
+		if(ae.getActionCommand().equals("Expanded view") || ae.getActionCommand().equals("Compact view")){
+			source.toggleCompactView();
 		}
 		else if(ae.getActionCommand().equals("Remove")){
 			source.remove();

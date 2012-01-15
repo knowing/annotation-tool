@@ -13,8 +13,10 @@ import evaluationtool.Data;
 import evaluationtool.DataModel;
 import evaluationtool.intervaldata.IntervalData;
 import evaluationtool.intervaldata.IntervalDataVisualization;
-import evaluationtool.pointdata.DataSet;
-import evaluationtool.pointdata.SensorData;
+import evaluationtool.pointdata.PointData;
+import evaluationtool.pointdata.PointDataVisualization;
+import evaluationtool.sensordata.DataSet;
+import evaluationtool.sensordata.SensorData;
 
 /**
  * Imports sensor data or interval data into a given DataModel
@@ -56,6 +58,10 @@ public class FileImporter {
 				
 			if(!fileLoaded && (fileExtension.equals("arff"))){
 				fileLoaded = FileImporter.addIntervalTrack(model, src, fileExtension);
+			}
+			
+			if(!fileLoaded && (fileExtension.equals("arff"))){
+				fileLoaded = FileImporter.addPointTrack(model, src, fileExtension);
 			}
 				
 		}
@@ -122,8 +128,9 @@ public class FileImporter {
 			weka.core.converters.ArffLoader arffin = new ArffLoader();
 			arffin.setFile(new File(src));
 			
-			if(			arffin.getStructure().attribute(0).name().equals("timestamp") 
-					&& 	arffin.getStructure().attribute(1).isNumeric()){
+			if(		arffin.getStructure().numAttributes() > 1 &&
+					arffin.getStructure().attribute(0).name().equals("timestamp") 
+				&& 	arffin.getStructure().attribute(1).isNumeric()){
 				
 				Instances ins = arffin.getDataSet();
 				
@@ -189,7 +196,10 @@ public class FileImporter {
 			weka.core.converters.ArffLoader arffin = new ArffLoader();
 			arffin.setFile(new File(src));
 
-			if(arffin.getStructure().attribute(0).name().equals("from") && arffin.getStructure().attribute(1).name().equals("to") && arffin.getStructure().attribute(2).name().equals("class")){
+			if(		arffin.getStructure().numAttributes() > 2 &&
+					arffin.getStructure().attribute(0).name().equals("from") &&
+					arffin.getStructure().attribute(1).name().equals("to") && 
+					arffin.getStructure().attribute(2).name().equals("class")){
 				
 				String[] activities = new String[arffin.getStructure().attribute(2).numValues()];
 				
@@ -220,6 +230,52 @@ public class FileImporter {
 			// Add to list
 			model.getLoadedDataTracks().add(newData);
 			((IntervalDataVisualization)newData.getVisualization()).toggleLocked();
+			model.getGUI().updateFrames();
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	
+	/**
+	 * Adds a point track for algorithm results
+	 * @return 
+	 */
+	public static boolean addPointTrack(DataModel model, String src, String fileExtension) throws IOException{
+		
+		PointData newData = null;
+
+		if(fileExtension.equals("arff")){
+			weka.core.converters.ArffLoader arffin = new ArffLoader();
+			arffin.setFile(new File(src));
+
+			if(		arffin.getStructure().numAttributes() > 0 &&
+					arffin.getStructure().attribute(0).name().equals("timestamp")){
+	
+				newData = new PointData(model, src);
+				
+				Instances ins = arffin.getDataSet();
+
+				long firstTimestamp = (long)ins.get(0).value(0);
+
+				for(int i = 0; i < ins.size(); i++){
+					((PointData)newData).addPoint((long)ins.get(i).value(0) - firstTimestamp);
+				}
+			}
+		}
+		
+		// Add track to list and to layout
+		
+		if(newData != null){
+			if(model.getLoadedDataTracks().size()%2 == 0)
+				newData.getVisualization().setAlternativeColorScheme(true);
+			else
+				newData.getVisualization().setAlternativeColorScheme(false);
+			
+			// Add to list
+			model.getLoadedDataTracks().add(newData);
+			((PointDataVisualization)newData.getVisualization()).toggleLocked();
 			model.getGUI().updateFrames();
 			return true;
 		}

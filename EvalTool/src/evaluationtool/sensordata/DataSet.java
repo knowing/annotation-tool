@@ -1,4 +1,4 @@
-package evaluationtool.pointdata;
+package evaluationtool.sensordata;
 
 /**
  * Represents one three dimensional sensor value - timestamp pair

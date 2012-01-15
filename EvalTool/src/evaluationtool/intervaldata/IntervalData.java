@@ -22,7 +22,7 @@ public class IntervalData implements Data {
 	private String[] ACTIVITIES;
 	
 	// LinkedList containing all start- and endpoints
-	LinkedList<DataSet> events = new LinkedList<DataSet>();
+	LinkedList<Activity> events = new LinkedList<Activity>();
 		
 	// Visualization track
 	IntervalDataVisualization vis;
@@ -53,7 +53,7 @@ public class IntervalData implements Data {
 	 * @param activitytype
 	 */
 	public void createAndAddEvent(long timestampStart, long timestampEnd, int activitytype){	
-		DataSet set = new DataSet(timestampStart, timestampEnd, activitytype);
+		Activity set = new Activity(timestampStart, timestampEnd, activitytype);
 		addEvent(set);
 	}
 	
@@ -63,7 +63,7 @@ public class IntervalData implements Data {
 	 * @param timestampEnd
 	 * @param activitytype
 	 */
-	public void addEvent(DataSet set){
+	public void addEvent(Activity set){
 
 		mergeOverlappingActivities(set);
 		
@@ -79,10 +79,10 @@ public class IntervalData implements Data {
 		events.add(set);
 	}
 	
-	public void mergeOverlappingActivities(DataSet set) {
+	public void mergeOverlappingActivities(Activity set) {
 		// First check for overlaps
 				for(int i = 0; i < events.size(); i++){
-					if(DataSet.doOverlap(events.get(i), set)){
+					if(Activity.doOverlap(events.get(i), set)){
 						// Merge events
 						set.timestampStart = Math.min(set.timestampStart, events.get(i).timestampStart);
 						set.timestampEnd = Math.max(set.timestampEnd, events.get(i).timestampEnd);
@@ -99,7 +99,7 @@ public class IntervalData implements Data {
 	public void endActivityAt(long timestamp){
 		int currentActivity = getActivityAt(((IntervalDataVisualization)vis).getCurrentMenuActivity(), timestamp);
 		
-		if(currentActivity != DataSet.NO_ACTIVITY)
+		if(currentActivity != Activity.NO_ACTIVITY)
 			events.get(currentActivity).timestampEnd = timestamp;
 	}
 	
@@ -110,7 +110,7 @@ public class IntervalData implements Data {
 	public void deleteActivityAt(long timestamp){
 		int currentActivity = getActivityAt(((IntervalDataVisualization)vis).getCurrentMenuActivity(), timestamp);
 		
-		if(currentActivity != DataSet.NO_ACTIVITY)
+		if(currentActivity != Activity.NO_ACTIVITY)
 			events.remove(currentActivity);
 	}
 	
@@ -141,8 +141,8 @@ public class IntervalData implements Data {
 	/*
 	 * Getter methods for data, offset and playback speed
 	 */
-	public DataSet[] getEvents(){
-		return events.toArray(new DataSet[events.size()]);
+	public Activity[] getEvents(){
+		return events.toArray(new Activity[events.size()]);
 	}
 	
 	public long getOffset(){
@@ -170,14 +170,14 @@ public class IntervalData implements Data {
 		
 		for(int i = 0; i < events.size(); i++){
 			// Return activity if it is either of the right kind or if no type is requested
-			if((events.get(i).activitytype == requestedActivity || requestedActivity == DataSet.NO_ACTIVITY)
+			if((events.get(i).activitytype == requestedActivity || requestedActivity == Activity.NO_ACTIVITY)
 				&& events.get(i).timestampStart < timestamp 
 				&& (events.get(i).timestampEnd > timestamp || events.get(i).timestampEnd == 0))
 				
 				return i;
 		}
 
-		return DataSet.NO_ACTIVITY;
+		return Activity.NO_ACTIVITY;
 	}
 
 	public long getLength() {
@@ -198,8 +198,8 @@ public class IntervalData implements Data {
 	 */
 	public void orderEvents() {
 
-		LinkedList<DataSet> eventsOld = events;
-		events = new LinkedList<DataSet>();
+		LinkedList<Activity> eventsOld = events;
+		events = new LinkedList<Activity>();
 		
 		while(!eventsOld.isEmpty()){
 			addEvent(eventsOld.pop());

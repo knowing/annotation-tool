@@ -3,7 +3,7 @@ package evaluationtool.gui;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-import evaluationtool.intervaldata.DataSet;
+import evaluationtool.intervaldata.Activity;
 import evaluationtool.intervaldata.IntervalData;
 
 public class ShortcutKeyListener implements KeyListener{
@@ -30,7 +30,7 @@ public class ShortcutKeyListener implements KeyListener{
 			
 			// 0 is activity 10
 			if(ke.getKeyCode() == 48){
-				activity = DataSet.NO_ACTIVITY;
+				activity = Activity.NO_ACTIVITY;
 			}
 			else{
 				activity = ke.getKeyCode() - 49;
@@ -44,7 +44,7 @@ public class ShortcutKeyListener implements KeyListener{
 					if(!data.isLocked()){
 						if(activity >= 0)
 							data.addEventAtCurrentPosition(activity);
-						else if(activity == DataSet.NO_ACTIVITY){
+						else if(activity == Activity.NO_ACTIVITY){
 							data.deleteActivityAtCurrentPosition();
 						}
 					}

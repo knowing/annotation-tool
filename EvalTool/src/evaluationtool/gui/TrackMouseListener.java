@@ -22,7 +22,6 @@ public class TrackMouseListener implements MouseWheelListener, MouseListener, Mo
 	protected long draggingStartTime;
 	
 	protected int tempMouseX = 0;
-	protected int tempMouseY = 0;
 	
 	public TrackMouseListener(Visualization s, TrackVisualization tv) {
 		source = s;

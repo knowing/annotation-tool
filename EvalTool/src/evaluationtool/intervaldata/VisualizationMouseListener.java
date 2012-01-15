@@ -19,7 +19,7 @@ import evaluationtool.gui.Visualization;
 public class VisualizationMouseListener extends TrackMouseListener{
 
 	// Editing activities
-	DataSet draggedEvent;
+	Activity draggedEvent;
 	int draggedPart;
 	
 	// Casts
