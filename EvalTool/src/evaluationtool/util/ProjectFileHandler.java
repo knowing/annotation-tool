@@ -31,18 +31,13 @@ public class ProjectFileHandler {
 	public static String loadProjectFile(String path, DataModel model){
 		
 		// Extract archive into a temporary folder
-		File f = new File("\\temp");
-		f.deleteOnExit();
+		File temp = new File("\\temp");
 		
+		
+		 deleteTemporaryFiles(temp);
+		 
 		// Create temp directory if it does not exist
-		f.mkdir();
-		
-		// Empty directory
-		String[] filesInTemp = f.list();
-		for(int i = 0; i < filesInTemp.length; i++){
-			f = new File(filesInTemp[i]);
-			f.delete();
-		}
+		temp.mkdir();
 		
 		BufferedOutputStream dest = null;
 		
@@ -55,8 +50,7 @@ public class ProjectFileHandler {
 		            int count;
 		            byte data[] = new byte[1024];
 		            // Write file in temp directory
-		            FileOutputStream fos = new 
-		            FileOutputStream("\\temp\\" + entry.getName());
+		            FileOutputStream fos = new FileOutputStream("\\temp\\" + entry.getName());
 		            
 		            dest = new BufferedOutputStream(fos, 1024);
 		            
@@ -72,7 +66,7 @@ public class ProjectFileHandler {
 		        	 return ioe.getMessage();
 		         }
 		      
-		 f = new File("\\temp\\project.cfg");
+		 File f = new File("\\temp\\project.cfg");
 		 
 		 if(!f.exists()){
 			 return "Not a project file. No project.cfg";
@@ -117,8 +111,20 @@ public class ProjectFileHandler {
 			catch(IOException ioe){
 				System.err.println("Project file error: " + ioe.getMessage());
 			}
-		
+
 		return null;
+	}
+
+	private static void deleteTemporaryFiles(File temp) {
+		if(temp.exists()){
+			// Empty directory
+			String[] filesInTemp = temp.list();
+			for(int i = 0; i < filesInTemp.length; i++){
+				File t = new File(filesInTemp[i]).getAbsoluteFile();
+				t.delete();
+			}
+		 temp.delete();
+		}
 	}
 
 	/**
@@ -166,6 +172,9 @@ public class ProjectFileHandler {
 				fw.write("\n" + model.VIDEOPATH_LINE + model.getVideoPath() + "\n\n");
 			}
 			
+			File savepath = new File("\\temp\\save\\");
+			savepath.mkdirs();
+			
 			// Save data path
 			fw.write("# Data tracks");
 			for(int i = 0; i < model.getLoadedDataTracks().size(); i++){
@@ -176,7 +185,12 @@ public class ProjectFileHandler {
 					while(nameExists(model, USER_GENERATED_TRACK_PREFIX + tempNumber + ".arff")){
 						tempNumber++;
 					}
-					model.getLoadedDataTracks().get(i).setSource(USER_GENERATED_TRACK_PREFIX + tempNumber + ".arff");
+					model.getLoadedDataTracks().get(i).setSource(savepath.getAbsolutePath() + "\\" + USER_GENERATED_TRACK_PREFIX + tempNumber + ".arff");
+					
+					// Save track. If the track cannot be saved, continue with next track
+					if(!model.saveTrack(i, model.getLoadedDataTracks().get(i).getSource())){
+						continue;
+					}
 				}	
 				
 				if(getFilenameFromPath(model.getLoadedDataTracks().get(i).getSource()) != null){
@@ -218,27 +232,11 @@ public class ProjectFileHandler {
 				   zipout.write(data, 0, count);
 		         }
 			}
-		
-		File tempDir = new File("\\temp");
-		tempDir.deleteOnExit();
-		// Create temp directory if it does not exist
-		tempDir.mkdir();
-		
+			
+		File temp = new File("\\temp");
+
 		// Add data tracks
 		for(int i = 0; i < model.getLoadedDataTracks().size(); i++){
-			
-			// Check if a track has to be saved first
-			if(model.getLoadedDataTracks().get(i).getSource().contains(USER_GENERATED_TRACK_PREFIX)){
-				System.out.print("Trying to save user generated track...");
-
-				File trackFile = new File("\\temp\\" + model.getLoadedDataTracks().get(i).getSource());
-				trackFile.createNewFile();
-				
-				// Save track. If the track cannot be saved, continue with next track
-				if(!model.saveTrack(i, trackFile.getAbsolutePath())){
-					continue;
-				}
-			}
 			
 			fi = new FileInputStream(model.getLoadedDataTracks().get(i).getSource());
 			entry = new ZipEntry(getFilenameFromPath(model.getLoadedDataTracks().get(i).getSource()));
@@ -265,11 +263,12 @@ public class ProjectFileHandler {
 		   zipout.write(data, 0, count);
          }
 			
-			
+         deleteTemporaryFiles(temp);
+         
 		} catch (FileNotFoundException e) {
-			return "File not found" + e.getMessage();
+			return "ProjectFileHandler - File not found" + e.getMessage();
 		} catch (IOException e) {
-			return "IOException - " + e.getMessage();
+			return "ProjectFileHandler - IOException - " + e.getMessage();
 		}
 		
 		return null;
@@ -283,7 +282,7 @@ public class ProjectFileHandler {
 	 */
 	private static boolean nameExists(DataModel model, String name){
 		for(int i = 0; i < model.getLoadedDataTracks().size(); i++){
-			if(model.getLoadedDataTracks().get(i).getSource().equals(name))
+			if(getFilenameFromPath(model.getLoadedDataTracks().get(i).getSource()).equals(getFilenameFromPath(name)))
 				return true;
 		}
 		

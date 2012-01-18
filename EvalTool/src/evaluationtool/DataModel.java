@@ -19,9 +19,11 @@ import de.lmu.ifi.dbs.knowing.core.util.ResultsUtil;
 import de.sendsor.SDRConverter;
 
 import evaluationtool.gui.EvalGUI;
+import evaluationtool.intervaldata.Activity;
 import evaluationtool.intervaldata.IntervalData;
 import evaluationtool.intervaldata.IntervalDataVisualization;
 import evaluationtool.pointdata.PointData;
+import evaluationtool.pointdata.Timestamp;
 import evaluationtool.sensordata.DataSet;
 import evaluationtool.sensordata.SensorData;
 import evaluationtool.util.ProjectFileHandler;
@@ -182,13 +184,13 @@ public class DataModel {
 				Instances ins = arffout.getInstances();
 				
 				track.orderEvents();
-				evaluationtool.intervaldata.Activity[] events = track.getEvents();
+				LinkedList<Activity> events = track.getEvents();
 				
-				for(int i = 0; i < events.length; i++){
+				for(int i = 0; i < track.getNEvents(); i++){
 					DenseInstance instance = new DenseInstance(3);
-					instance.setValue(ins.attribute(0), events[i].timestampStart);
-					instance.setValue(ins.attribute(1), events[i].timestampEnd);
-					instance.setValue(ins.attribute(2), events[i].activitytype);
+					instance.setValue(ins.attribute(0), events.get(i).timestampStart);
+					instance.setValue(ins.attribute(1), events.get(i).timestampEnd);
+					instance.setValue(ins.attribute(2), events.get(i).activitytype);
 					
 					ins.add(instance);
 				}
@@ -217,11 +219,11 @@ public class DataModel {
 				Instances ins = arffout.getInstances();
 				
 				track.orderPoints();
-				long[] points = track.getPoints();
+				int nPoints = track.getNPoints();
 				
-				for(int i = 0; i < points.length; i++){
-					DenseInstance instance = new DenseInstance(3);
-					instance.setValue(ins.attribute(0), points[i]);
+				for(int i = 0; i < nPoints; i++){
+					DenseInstance instance = new DenseInstance(1);
+					instance.setValue(ins.attribute(0), track.removeSettingsFromTimestamp(track.getPoint(i)));
 					
 					ins.add(instance);
 				}

@@ -53,8 +53,7 @@ public class IntervalData implements Data {
 	 * @param activitytype
 	 */
 	public void createAndAddEvent(long timestampStart, long timestampEnd, int activitytype){	
-		Activity set = new Activity(timestampStart, timestampEnd, activitytype);
-		addEvent(set);
+		addEvent(timestampStart, timestampEnd, activitytype);
 	}
 	
 	/**
@@ -63,32 +62,46 @@ public class IntervalData implements Data {
 	 * @param timestampEnd
 	 * @param activitytype
 	 */
-	public void addEvent(Activity set){
-
-		mergeOverlappingActivities(set);
+	public void addEvent(long start, long end, int activity){
+		Activity set;
+		
+		if(end != 0)
+			set = new Activity(removeSettingsFromTimestamp(start), removeSettingsFromTimestamp(end), activity); 
+		else
+			set = new Activity(removeSettingsFromTimestamp(start), 0, activity); 
 		
 		// Sort by starttime
 		for(int i = 0; i < events.size(); i++){
 			if(set.timestampStart < events.get(i).timestampStart){
 				events.add(i, set);
+				mergeOverlappingActivities(i);
+				vis.getTrackVisualization().releaseEvent();
 				return;
 			}
 		}
 		
 		// Add as last element
 		events.add(set);
+		mergeOverlappingActivities(events.size() - 1);
+		vis.getTrackVisualization().releaseEvent();
 	}
 	
-	public void mergeOverlappingActivities(Activity set) {
+	/**
+	 * Combines two activities if they overlap
+	 * @param draggedEvent
+	 */
+	public void mergeOverlappingActivities(int draggedEventIndex) {
+		Activity draggedEvent = events.get(draggedEventIndex);
 		// First check for overlaps
 				for(int i = 0; i < events.size(); i++){
-					if(Activity.doOverlap(events.get(i), set)){
+					if(Activity.doOverlap(events.get(i), draggedEvent)){
 						// Merge events
-						set.timestampStart = Math.min(set.timestampStart, events.get(i).timestampStart);
-						set.timestampEnd = Math.max(set.timestampEnd, events.get(i).timestampEnd);
+						draggedEvent.timestampStart = Math.min(draggedEvent.timestampStart, events.get(i).timestampStart);
+						draggedEvent.timestampEnd = Math.max(draggedEvent.timestampEnd, events.get(i).timestampEnd);
 						
 						// Delete existing event
 						events.remove(i);
+						vis.getTrackVisualization().releaseEvent();
 					}
 				}
 	}
@@ -100,18 +113,29 @@ public class IntervalData implements Data {
 		int currentActivity = getActivityAt(((IntervalDataVisualization)vis).getCurrentMenuActivity(), timestamp);
 		
 		if(currentActivity != Activity.NO_ACTIVITY)
-			events.get(currentActivity).timestampEnd = timestamp;
+			events.get(currentActivity).timestampEnd = removeSettingsFromTimestamp(timestamp);
+		
+		vis.getTrackVisualization().releaseEvent();
 	}
 	
 	public void deleteActivityAtCurrentPosition() {
 		deleteActivityAt(vis.getTrackVisualization().getPosition());
 	}
 	
+	/**
+	 * Removes all activities that happen at the speciefied time.
+	 * @param timestamp
+	 */
 	public void deleteActivityAt(long timestamp){
-		int currentActivity = getActivityAt(((IntervalDataVisualization)vis).getCurrentMenuActivity(), timestamp);
+		int currentActivity = Activity.NO_ACTIVITY;
 		
-		if(currentActivity != Activity.NO_ACTIVITY)
-			events.remove(currentActivity);
+		for(int i = 0; i < ACTIVITIES.length; i++){
+			currentActivity = getActivityAt(i, timestamp);
+			
+			if(currentActivity != -1){
+				events.remove(currentActivity);
+			}
+		}
 	}
 	
 	public Visualization getVisualization() {
@@ -141,8 +165,19 @@ public class IntervalData implements Data {
 	/*
 	 * Getter methods for data, offset and playback speed
 	 */
-	public Activity[] getEvents(){
-		return events.toArray(new Activity[events.size()]);
+	public long getEventStart(int i){
+		return addSettingsToTimestamp(events.get(i).timestampStart);
+	}
+	
+	public long getEventEnd(int i){
+		if(events.get(i).timestampEnd != 0)
+			return addSettingsToTimestamp(events.get(i).timestampEnd);
+		else
+			return 0;
+	}
+	
+	public int getEventActivity(int i){
+		return events.get(i).activitytype;
 	}
 	
 	public long getOffset(){
@@ -171,8 +206,8 @@ public class IntervalData implements Data {
 		for(int i = 0; i < events.size(); i++){
 			// Return activity if it is either of the right kind or if no type is requested
 			if((events.get(i).activitytype == requestedActivity || requestedActivity == Activity.NO_ACTIVITY)
-				&& events.get(i).timestampStart < timestamp 
-				&& (events.get(i).timestampEnd > timestamp || events.get(i).timestampEnd == 0))
+				&& getEventStart(i) < timestamp 
+				&& (getEventEnd(i) > timestamp || getEventEnd(i) == 0))
 				
 				return i;
 		}
@@ -185,7 +220,7 @@ public class IntervalData implements Data {
 			return 0;
 		}
 		else{
-			return events.getLast().timestampEnd - events.getFirst().timestampStart;
+			return getEventEnd(events.size() - 1) - getEventStart(0);
 		}
 	}
 
@@ -202,15 +237,69 @@ public class IntervalData implements Data {
 		events = new LinkedList<Activity>();
 		
 		while(!eventsOld.isEmpty()){
-			addEvent(eventsOld.pop());
+			readdEvent(eventsOld.poll());
 		}
 	}
 
+	private void readdEvent(Activity set){
+		for(int i = 0; i < events.size(); i++){
+			if(set.timestampStart < events.get(i).timestampStart){
+				events.add(i, set);
+				return;
+			}
+		}
+		
+		// Add as last element
+		events.add(set);
+	}
+	
 	public boolean isLocked() {
 		return locked;
 	}
 	
 	public void setLocked(boolean b) {
 		locked = b;
+	}
+
+	public void toggleEventAtCurrentPosition(int activity) {
+		int currentActivity = getActivityAt(activity, vis.getTrackVisualization().getPosition());
+		
+		if(currentActivity == -1){
+			addEventAtCurrentPosition(activity);
+		}
+		else{
+			events.get(currentActivity).timestampEnd = removeSettingsFromTimestamp(vis.getTrackVisualization().getPosition());
+		}
+		
+	}
+	
+	public long addSettingsToTimestamp(long time) {
+		return (long)(time / getPlaybackSpeed() + getOffset());
+	}
+	public long removeSettingsFromTimestamp(long time){
+		return (long)((time - getOffset()) * getPlaybackSpeed());
+	}
+
+	public int getNEvents() {
+		return events.size();
+	}
+	
+	public LinkedList<Activity> getEvents(){
+		return events;
+	}
+	public void moveStartpoint(int draggedEvent, long time) {
+		events.get(draggedEvent).timestampStart = removeSettingsFromTimestamp(time);
+		if(events.get(draggedEvent).timestampStart > events.get(draggedEvent).timestampEnd){
+			events.get(draggedEvent).timestampEnd = events.get(draggedEvent).timestampStart;
+		}
+	}
+	
+	public void moveEndpoint(int draggedEvent, long time) {
+		events.get(draggedEvent).timestampEnd = removeSettingsFromTimestamp(time);
+	}
+
+	public void moveEvent(int draggedEvent, float f) {
+		events.get(draggedEvent).timestampStart += f * playbackSpeed;
+		events.get(draggedEvent).timestampEnd += f * playbackSpeed;
 	}
 }

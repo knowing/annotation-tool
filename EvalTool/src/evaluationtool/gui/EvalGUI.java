@@ -15,7 +15,7 @@ import uk.co.caprica.vlcj.component.*;
 
 public class EvalGUI extends WindowAdapter{
 
-  private String windowTitle = "EvalTool";
+  private String windowTitle = "EvalTool ";
   
   // Model
   private DataModel model;

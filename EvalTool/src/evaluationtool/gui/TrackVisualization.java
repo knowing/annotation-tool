@@ -47,15 +47,19 @@ abstract public class TrackVisualization extends JPanel{
 	// Reference to the model
 	protected DataModel model;
 	
+	// Reference to data source
+	protected Data data;
+	
 	public TrackVisualization(Data d) {
 		this.setFocusable(true);
 		this.addKeyListener(d.getModel().getGUI().getShortcutKeyListener());
+		data = d;
 	}
 	
 	public void paint(Graphics g){
 		// Graphics2D object
 		Graphics2D g2d = (Graphics2D) g;
-	
+		
 		// Activate anti-aliasing
 		g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
@@ -112,7 +116,7 @@ abstract public class TrackVisualization extends JPanel{
 		g2d.fillRect(0, this.getHeight() - TIMELINE_HEIGHT, this.getWidth(), TIMELINE_HEIGHT);
 				
 		// Determine grid resolution
-		float i = -offset;
+		float i = mapPixelToTime(0);
 		float timeBetweenBars = (this.getWidth() / pixelsPerMillisecond) / n_bars;
 		
 		float xCoord = mapTimeToPixel(i);
@@ -147,7 +151,7 @@ abstract public class TrackVisualization extends JPanel{
 		
 		// Draw information on current mouse position
 		if(coordinatesPopup != null){
-			String timestamp = TimestampConverter.getVideoTimestamp((long)(coordinatesPopup.x / pixelsPerMillisecond - offset));
+			String timestamp = TimestampConverter.getVideoTimestamp((long)mapPixelToTime(coordinatesPopup.x));
 			
 			// Adjust length of popup to text
 			coordinatesPopup.width = g2d.getFontMetrics(g2d.getFont()).stringWidth(timestamp) + 10;
@@ -169,6 +173,7 @@ abstract public class TrackVisualization extends JPanel{
 	 */
 	public float mapTimeToPixel(float time){
 		/*
+		 * Calculate data offset and playback speed, then add view offset and zoom
 		 * Position from 0:		 (time 			 * pixelsPerMillisecond
 		 * Add offset:		   	 (time + offset) * pixelsPerMillisecond
 		 */
@@ -176,7 +181,7 @@ abstract public class TrackVisualization extends JPanel{
 	}
 	
 	public long mapPixelToTime(float pixel){
-		return (long) ((pixel / pixelsPerMillisecond) - offset);
+		return (long)(pixel / pixelsPerMillisecond - offset);
 	}
 	
 	/**

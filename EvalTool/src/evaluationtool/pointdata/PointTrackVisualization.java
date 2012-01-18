@@ -15,7 +15,6 @@ public class PointTrackVisualization extends TrackVisualization{
 
 	// Painting variables
 	private int n_events 			= 0;
-	long[] points;
 	
 	// Data source
 	PointData dataSource;
@@ -44,8 +43,7 @@ public class PointTrackVisualization extends TrackVisualization{
 	
 	public void updateDataReferences(){
 		// Update data reference
-		points = dataSource.getPoints();
-		n_events = points.length;
+		n_events = dataSource.getNPoints();
 	}
 	
 	/**
@@ -58,11 +56,13 @@ public class PointTrackVisualization extends TrackVisualization{
 							
 		g2d.setStroke(new BasicStroke(1));
 		int additionalInfo = -1;
+		
+		Point mp = this.getMousePosition();
 	
 		// Draw data
 		for(int i = 0; i < n_events; i++){
 								
-					if(this.getMousePosition() != null && (pointRectangles[i].contains(this.getMousePosition()))){
+					if(mp != null && (pointRectangles[i].contains(mp))){
 						if(dataSource.isLocked())
 							g2d.setColor(Color.BLACK);
 						else	
@@ -103,7 +103,7 @@ public class PointTrackVisualization extends TrackVisualization{
 		int boxY = (int)(pointRectangles[i].getY() + pointRectangles[i].getHeight() / 2 - boxHeight / 2);
 		
 		// Start info
-		info = TimestampConverter.getVideoTimestamp(points[i]);
+		info = TimestampConverter.getVideoTimestamp(dataSource.getPoint(i));
 		Rectangle2D.Float infoBox = new Rectangle2D.Float(0, boxY, this.getWidth(), boxHeight);
 		
 		g2d.setColor(timelineColorTrack);
@@ -122,7 +122,7 @@ public class PointTrackVisualization extends TrackVisualization{
 		pointRectangles = new RoundRectangle2D.Float[n_events];
 		
 		for(int i = 0; i < n_events; i++){
-			pointRectangles[i] = new RoundRectangle2D.Float(mapTimeToPixel(points[i]) - 5, 1, 10,  this.getHeight() - TIMELINE_HEIGHT - 2f, 3, 3);	
+			pointRectangles[i] = new RoundRectangle2D.Float(mapTimeToPixel(dataSource.getPoint(i)) - 5, 1, 10,  this.getHeight() - TIMELINE_HEIGHT - 2f, 3, 3);	
 		}
 	}
 

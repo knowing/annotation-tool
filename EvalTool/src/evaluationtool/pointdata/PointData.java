@@ -19,7 +19,7 @@ public class PointData implements Data {
 	String source = "";
 	
 	// LinkedList containing all points
-	LinkedList<Long> points = new LinkedList<Long>();
+	LinkedList<Timestamp> points = new LinkedList<Timestamp>();
 		
 	// Visualization track
 	PointDataVisualization vis;
@@ -36,29 +36,29 @@ public class PointData implements Data {
 	}
 	
 	public void addPointAtCurrentPosition() {
-			addPoint(vis.getTrackVisualization().getPosition());
+			addPoint(new Timestamp(removeSettingsFromTimestamp(vis.getTrackVisualization().getPosition())));
 	}
 	
 	/**
 	 * Adds a point to the list
 	 * @param time
 	 */
-	public void addPoint(long time){
-
+	public void addPoint(Timestamp t){
 		// Sort by starttime
 		for(int i = 0; i < points.size(); i++){
-			if(time < points.get(i)){
-				points.add(i, time);
+			if(t.timestamp < addSettingsToTimestamp(points.get(i).timestamp)){
+				points.add(i, t);
 				return;
 			}
 		}
 		
 		// Add as last element
-		points.add(time);
+		points.add(t);
 	}
 	
-	public void deletePoint(int index){
-		points.remove(index);
+	public void deletePoint(int i){
+		if(points.size() > i)
+			points.remove(i);
 	}
 	
 	public Visualization getVisualization() {
@@ -73,14 +73,23 @@ public class PointData implements Data {
 		return model;
 	}
 
+	/**
+	 * Manipulates original data
+	 */
 	public void setOffset(long o){
 		offset = o;
+
 		vis.updateInfo();
 		getVisualization().repaint();
 	}
 	
+	public void movePoint(int i, long time){
+		points.get(i).timestamp = time;
+	}
+	
 	public void setPlaybackSpeed(float p){
 		playbackSpeed = Math.max(p, 0.0001f);
+		
 		vis.updateInfo();
 		getVisualization().repaint();
 	}
@@ -88,14 +97,8 @@ public class PointData implements Data {
 	/*
 	 * Getter methods for data, offset and playback speed
 	 */
-	public long[] getPoints(){
-		long[] temp = new long[points.size()];
-		
-		for(int i = 0; i < points.size(); i++){
-			temp[i] = points.get(i);
-		}
-		
-		return temp;
+	public long getPoint(int i){
+		return addSettingsToTimestamp(points.get(i).timestamp);
 	}
 	
 	public long getOffset(){
@@ -111,11 +114,13 @@ public class PointData implements Data {
 	}
 	
 	public long getLength() {
+		orderPoints();
+		
 		if(points.size() < 2){
 			return 0;
 		}
 		else{
-			return points.getLast() - points.getFirst();
+			return addSettingsToTimestamp(points.getLast().timestamp - points.getFirst().timestamp);
 		}
 	}
 
@@ -127,9 +132,9 @@ public class PointData implements Data {
 	 * This will bring the points in proper order
 	 */
 	public void orderPoints() {
-
-		LinkedList<Long> pointsOld = points;
-		points = new LinkedList<Long>();
+		System.out.println("Reordering ponits");
+		LinkedList<Timestamp> pointsOld = points;
+		points = new LinkedList<Timestamp>();
 		
 		while(!pointsOld.isEmpty()){
 			addPoint(pointsOld.pop());
@@ -144,8 +149,14 @@ public class PointData implements Data {
 		locked = b;
 	}
 
-	public void movePoint(int draggedPoint, long newTime) {
-		points.remove(draggedPoint);
-		points.add(draggedPoint, newTime);
+	public long addSettingsToTimestamp(long time) {
+		return (long)(time / getPlaybackSpeed() + getOffset());
+	}
+	public long removeSettingsFromTimestamp(long time){
+		return (long)((time - getOffset()) * getPlaybackSpeed());
+	}
+
+	public int getNPoints() {
+		return points.size();
 	}
 }

@@ -39,7 +39,7 @@ public class VisualizationMouseListener extends TrackMouseListener{
 			draggedPoint = pointTrack.getPointAt(e.getPoint());
 			if(draggedPoint != -1){
 				// Set point to the cursor position
-				pointVis.getDataSource().movePoint(draggedPoint, track.mapPixelToTime(e.getX()));
+				pointVis.getDataSource().movePoint(draggedPoint, track.mapPixelToTime(e.getX() - pointVis.getDataSource().getPoint(draggedPoint)));
 				source.repaint();
 			}
 		}
@@ -49,12 +49,12 @@ public class VisualizationMouseListener extends TrackMouseListener{
 		super.mouseClicked(e);
 		
 		if(e.getButton() == MouseEvent.BUTTON3 && !pointVis.isLocked()){
-			int temp = pointTrack.getPointAt(e.getPoint());
+			draggedPoint = pointTrack.getPointAt(e.getPoint());
 			
-			if(pointTrack.getPointAt(e.getPoint()) == -1)
-				pointVis.getDataSource().addPoint(track.mapPixelToTime(e.getX()));
+			if(draggedPoint == -1)
+				pointVis.getDataSource().addPoint(new Timestamp(pointVis.getDataSource().removeSettingsFromTimestamp(track.mapPixelToTime(e.getX()))));
 			else
-				pointVis.getDataSource().deletePoint(temp);
+				pointVis.getDataSource().deletePoint(draggedPoint);
 			
 			source.repaint();
 		}
@@ -69,7 +69,7 @@ public class VisualizationMouseListener extends TrackMouseListener{
 		super.mouseDragged(e);
 
 		if(draggedPoint != -1 && !pointVis.isLocked()){
-			pointVis.getDataSource().movePoint(draggedPoint, track.mapPixelToTime(e.getX()));		
+			pointVis.getDataSource().movePoint(draggedPoint, pointVis.getDataSource().removeSettingsFromTimestamp(track.mapPixelToTime(e.getX())));
 			source.repaint();
 		}
 	}

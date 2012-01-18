@@ -19,7 +19,7 @@ import evaluationtool.gui.Visualization;
 public class VisualizationMouseListener extends TrackMouseListener{
 
 	// Editing activities
-	Activity draggedEvent;
+	int draggedEvent;
 	int draggedPart;
 	
 	// Casts
@@ -48,7 +48,7 @@ public class VisualizationMouseListener extends TrackMouseListener{
 	public void mouseExited(MouseEvent e) {
 		super.mouseExited(e);
 		
-		draggedEvent = null;
+		draggedEvent = -1;
 	}
 	
 	public void mousePressed(MouseEvent e) {
@@ -57,15 +57,15 @@ public class VisualizationMouseListener extends TrackMouseListener{
 		// Drag startpoint, endpoint or a whole interval
 		if(e.getButton() == MouseEvent.BUTTON1 && !intervalVis.isLocked()){
 			draggedEvent = intervalTrack.getEventAt(e.getPoint());
-			if(draggedEvent != null){
+			if(draggedEvent != -1){
 				draggedPart = intervalTrack.getPartAt(e.getPoint());
 				
 				// Set point to the cursor position
 				if(draggedPart == IntervalTrackVisualization.STARTPOINT){
-					draggedEvent.timestampStart = track.mapPixelToTime(e.getX());
+					intervalVis.getDataSource().moveStartpoint(draggedEvent, track.mapPixelToTime(e.getX()));
 				}
 				else if(draggedPart == IntervalTrackVisualization.ENDPOINT){
-					draggedEvent.timestampEnd = track.mapPixelToTime(e.getX());				
+					intervalVis.getDataSource().moveEndpoint(draggedEvent, track.mapPixelToTime(e.getX()));		
 				}
 			}
 		}
@@ -74,31 +74,33 @@ public class VisualizationMouseListener extends TrackMouseListener{
 	public void mouseReleased(MouseEvent e) {
 		super.mouseReleased(e);
 		
-		draggedEvent = null;
+		draggedEvent = -1;
 	}
 	
 	public void mouseDragged(MouseEvent e) {
 		super.mouseDragged(e);
 		
-			if(draggedEvent != null){
+			if(draggedEvent != -1 && intervalVis.getDataSource().getEvents().size() > draggedEvent){
 				if(draggedPart == IntervalTrackVisualization.STARTPOINT){
-					draggedEvent.timestampStart += (e.getX() - tempMouseX) / intervalVis.getPixelsPerMillisecond();
-					
-					if(draggedEvent.timestampEnd != 0)
-						draggedEvent.timestampEnd = Math.max(draggedEvent.timestampStart, draggedEvent.timestampEnd);
+					intervalVis.getDataSource().moveStartpoint(draggedEvent, track.mapPixelToTime(e.getX()));		
 				}
 				else if(draggedPart == IntervalTrackVisualization.ENDPOINT){
-					draggedEvent.timestampEnd += (e.getX() - tempMouseX) / intervalVis.getPixelsPerMillisecond();
-					draggedEvent.timestampStart = Math.min(draggedEvent.timestampStart, draggedEvent.timestampEnd);
+					intervalVis.getDataSource().moveEndpoint(draggedEvent, track.mapPixelToTime(e.getX()));		
 				}
 				else if(draggedPart == IntervalTrackVisualization.WHOLE_EVENT){
-					draggedEvent.timestampStart += (e.getX() - tempMouseX) / intervalVis.getPixelsPerMillisecond();
-					draggedEvent.timestampEnd += (e.getX() - tempMouseX) / intervalVis.getPixelsPerMillisecond();
+					intervalVis.getDataSource().moveEvent(draggedEvent, (e.getX() - tempMouseX) / intervalVis.getPixelsPerMillisecond());		
 				}
 				
 				intervalVis.getDataSource().mergeOverlappingActivities(draggedEvent);
 				source.repaint();
 				tempMouseX = e.getX();
 			}
+	}
+	
+	/**
+	 * Should be called when an activity is removed or merged, so draggedEvent does not point to a wrong or null element
+	 */
+	public void releaseEvent(){
+		draggedEvent = -1;
 	}
 }

@@ -15,6 +15,7 @@ import evaluationtool.intervaldata.IntervalData;
 import evaluationtool.intervaldata.IntervalDataVisualization;
 import evaluationtool.pointdata.PointData;
 import evaluationtool.pointdata.PointDataVisualization;
+import evaluationtool.pointdata.Timestamp;
 import evaluationtool.sensordata.DataSet;
 import evaluationtool.sensordata.SensorData;
 
@@ -260,7 +261,7 @@ public class FileImporter {
 				long firstTimestamp = (long)ins.get(0).value(0);
 
 				for(int i = 0; i < ins.size(); i++){
-					((PointData)newData).addPoint((long)ins.get(i).value(0) - firstTimestamp);
+					((PointData)newData).addPoint(new Timestamp((long)ins.get(i).value(0) - firstTimestamp));
 				}
 			}
 		}

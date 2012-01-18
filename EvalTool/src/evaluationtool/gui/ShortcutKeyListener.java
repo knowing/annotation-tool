@@ -5,6 +5,7 @@ import java.awt.event.KeyListener;
 
 import evaluationtool.intervaldata.Activity;
 import evaluationtool.intervaldata.IntervalData;
+import evaluationtool.pointdata.PointData;
 
 public class ShortcutKeyListener implements KeyListener{
 	
@@ -25,7 +26,6 @@ public class ShortcutKeyListener implements KeyListener{
 		
 		if(ke.isControlDown() && ke.getKeyCode() >= 48 && ke.getKeyCode() <= 57){
 			
-			IntervalData data;
 			int activity = 0;
 			
 			// 0 is activity 10
@@ -36,17 +36,25 @@ public class ShortcutKeyListener implements KeyListener{
 				activity = ke.getKeyCode() - 49;
 			}
 			
-			// If an interval track is unlocked, add activity
+			// If an interval track is unlocked, add activity, for an unlocked point track, add point
 			for(int i = 0; i < gui.getModel().getLoadedDataTracks().size(); i++){
 
 				if(gui.getModel().getLoadedDataTracks().get(i) instanceof IntervalData){
-					data = (IntervalData) gui.getModel().getLoadedDataTracks().get(i);
+					IntervalData data = (IntervalData) gui.getModel().getLoadedDataTracks().get(i);
 					if(!data.isLocked()){
+						System.out.println("Changing activity");
 						if(activity >= 0)
-							data.addEventAtCurrentPosition(activity);
+							data.toggleEventAtCurrentPosition(activity);
 						else if(activity == Activity.NO_ACTIVITY){
 							data.deleteActivityAtCurrentPosition();
 						}
+					}
+				}
+				else if(gui.getModel().getLoadedDataTracks().get(i) instanceof PointData){
+					PointData data = (PointData) gui.getModel().getLoadedDataTracks().get(i);
+					if(!data.isLocked()){
+							System.out.println("Adding point");
+							data.addPointAtCurrentPosition();
 					}
 				}
 			}

@@ -21,7 +21,6 @@ public class IntervalTrackVisualization extends TrackVisualization{
 	// Painting variables
 	private int n_events 			= 0;
 	private int n_activities 		= 0;
-	private Activity[] events 		= null;
 
 	// Data source
 	IntervalData dataSource;
@@ -55,8 +54,7 @@ public class IntervalTrackVisualization extends TrackVisualization{
 	
 	public void updateDataReferences(){
 		// Update data reference
-		events = dataSource.getEvents();
-		n_events = events.length;
+		n_events = dataSource.getNEvents();
 		n_activities = dataSource.getPossibleActivities().length;
 	}
 	
@@ -70,6 +68,8 @@ public class IntervalTrackVisualization extends TrackVisualization{
 							
 		g2d.setStroke(new BasicStroke(1));
 	
+		int additionalInfo = -1;
+		
 		// Draw data
 		for(int i = 0; i < n_events; i++){
 				
@@ -77,13 +77,13 @@ public class IntervalTrackVisualization extends TrackVisualization{
 					if(p != null && (intervals[i].contains(p)
 													    && !startpoints[i].contains(p)
 													    && !(endpoints[i] != null && endpoints[i].contains(p)))){
-						g2d.setColor(new Color((events[i].activitytype * 30) % 255, (events[i].activitytype * 75) % 255, (events[i].activitytype * 120) % 255, 210));
+						g2d.setColor(new Color((dataSource.getEventActivity(i) * 30) % 255, (dataSource.getEventActivity(i) * 75) % 255, (dataSource.getEventActivity(i) * 120) % 255, 210));
 						g2d.fill(intervals[i]);
 						
-						displayInformationAbout(i, g2d);
+						additionalInfo = i;
 					}
 					else{
-						g2d.setColor(new Color((events[i].activitytype * 30) % 255, (events[i].activitytype * 75) % 255, (events[i].activitytype * 120) % 255, 150));
+						g2d.setColor(new Color((dataSource.getEventActivity(i) * 30) % 255, (dataSource.getEventActivity(i) * 75) % 255, (dataSource.getEventActivity(i) * 120) % 255, 150));
 						g2d.fill(intervals[i]);
 					}
 					
@@ -104,6 +104,9 @@ public class IntervalTrackVisualization extends TrackVisualization{
 						}
 					}
 		}
+		
+		if(additionalInfo != -1)
+			displayInformationAbout(additionalInfo, g2d);
 		
 		// Draw table
 		for(int i = 0; i < n_activities; i++){
@@ -138,16 +141,16 @@ public class IntervalTrackVisualization extends TrackVisualization{
 		int boxY = (int)(intervals[i].getY() + intervals[i].getHeight() / 2 - boxHeight / 2);
 		
 		// Start info
-		infoStart = "From: " + TimestampConverter.getVideoTimestamp(events[i].timestampStart);
+		infoStart = "From: " + TimestampConverter.getVideoTimestamp(dataSource.getEventStart(i));
 		RoundRectangle2D.Float infoStartBox = new RoundRectangle2D.Float(0, boxY, 
 				g2d.getFontMetrics().stringWidth(infoStart) + 15f, boxHeight,
 				10f, 10f);
 		
 		// If there is a defined end, show info about end and total length
-		if(events[i].timestampEnd != 0){
+		if(dataSource.getEventEnd(i) != 0){
 			String infoEnd, infoLength;
-			infoLength  = "Length: " + TimestampConverter.getVideoTimestamp(events[i].timestampEnd - events[i].timestampStart);
-			infoEnd = "To: " + TimestampConverter.getVideoTimestamp(events[i].timestampEnd);
+			infoLength  = "Length: " + TimestampConverter.getVideoTimestamp(dataSource.getEventEnd(i) - dataSource.getEventStart(i));
+			infoEnd = "To: " + TimestampConverter.getVideoTimestamp(dataSource.getEventEnd(i));
 			
 			RoundRectangle2D.Float infoEndBox = new RoundRectangle2D.Float(this.getWidth() - (g2d.getFontMetrics().stringWidth(infoEnd) + 15f), boxY, 
 					g2d.getFontMetrics().stringWidth(infoEnd) + 15f, boxHeight,
@@ -199,23 +202,23 @@ public class IntervalTrackVisualization extends TrackVisualization{
 		for(int i = 0; i < n_events; i++){
 			
 			// Create startpoint
-			startpoints[i] = 	new RoundRectangle2D.Float(mapTimeToPixel((float)events[i].timestampStart) - 5, (float)events[i].activitytype / n_activities * (this.getHeight() - TIMELINE_HEIGHT), 
+			startpoints[i] = 	new RoundRectangle2D.Float(mapTimeToPixel((float)dataSource.getEventStart(i)) - 5, (float)dataSource.getEventActivity(i) / n_activities * (this.getHeight() - TIMELINE_HEIGHT), 
 						   							  10,  (float)(this.getHeight() - TIMELINE_HEIGHT) / n_activities - 1, 7, 7);
 			
-			if(events[i].timestampEnd != 0){
+			if(dataSource.getEventEnd(i) != 0){
 				// Create interval
-				intervals[i] = 		new RoundRectangle2D.Float(mapTimeToPixel((float)events[i].timestampStart), (float)events[i].activitytype / n_activities * (this.getHeight() - TIMELINE_HEIGHT), 
-													   	  mapTimeToPixel((float)events[i].timestampEnd) - mapTimeToPixel((float)events[i].timestampStart),  (float)(this.getHeight() - TIMELINE_HEIGHT) / n_activities,
+				intervals[i] = 		new RoundRectangle2D.Float(mapTimeToPixel((float)dataSource.getEventStart(i)), (float)dataSource.getEventActivity(i) / n_activities * (this.getHeight() - TIMELINE_HEIGHT), 
+													   	  mapTimeToPixel((float)dataSource.getEventEnd(i)) - mapTimeToPixel((float)dataSource.getEventStart(i)),  (float)(this.getHeight() - TIMELINE_HEIGHT) / n_activities,
 													   	  1, 1);
 				// Create endpoint
-				endpoints[i] = 		new RoundRectangle2D.Float(mapTimeToPixel((float)events[i].timestampEnd) - 5, (float)events[i].activitytype / n_activities * (this.getHeight() - TIMELINE_HEIGHT), 
+				endpoints[i] = 		new RoundRectangle2D.Float(mapTimeToPixel((float)dataSource.getEventEnd(i)) - 5, (float)dataSource.getEventActivity(i) / n_activities * (this.getHeight() - TIMELINE_HEIGHT), 
 					   	  								   10,  (float)(this.getHeight() - TIMELINE_HEIGHT) / n_activities - 1, 
 					   	  								   7, 7);
 
 			}
 			else{
-				intervals[i] = new RoundRectangle2D.Float(mapTimeToPixel((float)events[i].timestampStart), (float)events[i].activitytype / n_activities * (this.getHeight() - TIMELINE_HEIGHT), 
-						   					    this.getWidth() - mapTimeToPixel((float)events[i].timestampStart), (float)(this.getHeight() - TIMELINE_HEIGHT) / n_activities, 1, 1);
+				intervals[i] = new RoundRectangle2D.Float(mapTimeToPixel((float)dataSource.getEventStart(i)), (float)dataSource.getEventActivity(i) / n_activities * (this.getHeight() - TIMELINE_HEIGHT), 
+						   					    this.getWidth() - mapTimeToPixel((float)dataSource.getEventStart(i)), (float)(this.getHeight() - TIMELINE_HEIGHT) / n_activities, 1, 1);
 				endpoints[i] = null;			
 			}		
 		}
@@ -230,14 +233,14 @@ public class IntervalTrackVisualization extends TrackVisualization{
 	 * @param p
 	 * @return
 	 */
-	public Activity getEventAt(Point p) {
+	public int getEventAt(Point p) {
 		for(int i = 0; i < n_events; i++){
 			// Endpoints have to be checked for null pointer
 			if(startpoints[i].contains(p) || (endpoints[i] != null && endpoints[i].contains(p)) || intervals[i].contains(p))
-				return events[i];
+				return i;
 		}
 		
-		return null;
+		return -1;
 	}
 	
 	/**
@@ -257,5 +260,9 @@ public class IntervalTrackVisualization extends TrackVisualization{
 		
 		// This should not happen, as getEventAt should be called before
 		return 0;
+	}
+	
+	public void releaseEvent(){
+		listener.releaseEvent();
 	}
 }

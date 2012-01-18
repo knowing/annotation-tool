@@ -148,6 +148,10 @@ public class IntervalDataVisualization extends Visualization implements Componen
 	public void updatePopupMenuForTimestamp(long timestamp, int activity){
 		currentMenuTime = timestamp;
 		currentMenuActivity = activity;
+		
+		startActivityItem.setEnabled(!isLocked());
+		endActivityItem.setEnabled(!isLocked());
+		deleteActivityItem.setEnabled(!isLocked());
 	}
 	
 	public JPopupMenu getPopupMenu(){
@@ -224,5 +228,4 @@ public class IntervalDataVisualization extends Visualization implements Componen
 	public IntervalTrackVisualization getTrackVisualization() {
 		return trackvis;
 	}
-
 }
