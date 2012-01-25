@@ -15,6 +15,8 @@ public class PointTrackVisualization extends TrackVisualization{
 
 	// Painting variables
 	private int n_events 			= 0;
+	private int first 				= 0;
+	private int last 				= 0;
 	
 	// Data source
 	PointData dataSource;
@@ -51,6 +53,8 @@ public class PointTrackVisualization extends TrackVisualization{
 	 * @param g2d
 	 */
 	public void paintTracks(Graphics2D g2d){
+		calculateFirstAndLastPaintedPoint();
+		
 		// Create start, end and interval Rectangles
 		createRectangles();
 							
@@ -60,7 +64,7 @@ public class PointTrackVisualization extends TrackVisualization{
 		Point mp = this.getMousePosition();
 	
 		// Draw data
-		for(int i = 0; i < n_events; i++){
+		for(int i = first; i < last; i++){
 								
 					if(mp != null && (pointRectangles[i].contains(mp))){
 						if(dataSource.isLocked())
@@ -113,6 +117,20 @@ public class PointTrackVisualization extends TrackVisualization{
 		g2d.setColor(fontColorTrack);
 		g2d.drawString(info, (int)(pointRectangles[i].getX() - g2d.getFontMetrics().stringWidth(info) / 2), (int)(infoBox.getY() + 13));
 	}
+	
+	private void calculateFirstAndLastPaintedPoint(){
+		first = 0;
+		// Get first and last displayed point
+		while(first < n_events && dataSource.getPoint(first) < this.mapPixelToTime(0)){
+			first++;
+		}
+		
+		last = first;
+		
+		while(last < n_events && mapTimeToPixel(dataSource.getPoint(last)) <= this.getWidth()){
+			last++;
+		}
+	}
 
 	/**
 	 * Creates all event-related rectangles that need to be drawn
@@ -122,7 +140,10 @@ public class PointTrackVisualization extends TrackVisualization{
 		pointRectangles = new RoundRectangle2D.Float[n_events];
 		
 		for(int i = 0; i < n_events; i++){
-			pointRectangles[i] = new RoundRectangle2D.Float(mapTimeToPixel(dataSource.getPoint(i)) - 5, 1, 10,  this.getHeight() - TIMELINE_HEIGHT - 2f, 3, 3);	
+			if(i < first || i > last)
+				pointRectangles[i] = null;
+			else
+				pointRectangles[i] = new RoundRectangle2D.Float(mapTimeToPixel(dataSource.getPoint(i)) - 5, 1, 10,  this.getHeight() - TIMELINE_HEIGHT - 2f, 3, 3);	
 		}
 	}
 

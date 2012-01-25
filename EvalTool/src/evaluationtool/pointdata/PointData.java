@@ -20,6 +20,7 @@ public class PointData implements Data {
 	
 	// LinkedList containing all points
 	LinkedList<Timestamp> points = new LinkedList<Timestamp>();
+	long[] quickPoints;
 		
 	// Visualization track
 	PointDataVisualization vis;
@@ -48,17 +49,33 @@ public class PointData implements Data {
 		for(int i = 0; i < points.size(); i++){
 			if(t.timestamp < addSettingsToTimestamp(points.get(i).timestamp)){
 				points.add(i, t);
+				createQuickPoints();
 				return;
 			}
 		}
 		
 		// Add as last element
 		points.add(t);
+		createQuickPoints();
+	}
+	
+	public void createQuickPoints() {
+		quickPoints = new long[points.size()];
+		for(int i = 0; i < quickPoints.length; i++){
+			quickPoints[i] = points.get(i).timestamp;
+			System.out.println("#" + i);
+		}
+	}
+
+	public void addLastPoint(Timestamp t){
+		points.add(t);
 	}
 	
 	public void deletePoint(int i){
-		if(points.size() > i)
+		if(points.size() > i){
 			points.remove(i);
+			createQuickPoints();
+		}
 	}
 	
 	public Visualization getVisualization() {
@@ -84,7 +101,8 @@ public class PointData implements Data {
 	}
 	
 	public void movePoint(int i, long time){
-		points.get(i).timestamp = time;
+		points.remove(i);
+		addPoint(new Timestamp(time));
 	}
 	
 	public void setPlaybackSpeed(float p){
@@ -98,7 +116,10 @@ public class PointData implements Data {
 	 * Getter methods for data, offset and playback speed
 	 */
 	public long getPoint(int i){
-		return addSettingsToTimestamp(points.get(i).timestamp);
+		if(quickPoints != null && quickPoints.length > i)
+			return addSettingsToTimestamp(quickPoints[i]);
+		else
+			return 0;
 	}
 	
 	public long getOffset(){
@@ -114,7 +135,6 @@ public class PointData implements Data {
 	}
 	
 	public long getLength() {
-		orderPoints();
 		
 		if(points.size() < 2){
 			return 0;
@@ -126,19 +146,6 @@ public class PointData implements Data {
 
 	public void setSource(String filename) {
 		this.source = filename;
-	}
-	
-	/**
-	 * This will bring the points in proper order
-	 */
-	public void orderPoints() {
-		System.out.println("Reordering ponits");
-		LinkedList<Timestamp> pointsOld = points;
-		points = new LinkedList<Timestamp>();
-		
-		while(!pointsOld.isEmpty()){
-			addPoint(pointsOld.pop());
-		}
 	}
 
 	public boolean isLocked() {
@@ -157,6 +164,6 @@ public class PointData implements Data {
 	}
 
 	public int getNPoints() {
-		return points.size();
+		return quickPoints.length;
 	}
 }

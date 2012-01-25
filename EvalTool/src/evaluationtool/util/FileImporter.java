@@ -251,7 +251,7 @@ public class FileImporter {
 			weka.core.converters.ArffLoader arffin = new ArffLoader();
 			arffin.setFile(new File(src));
 
-			if(		arffin.getStructure().numAttributes() > 0 &&
+			if(		arffin.getStructure().numAttributes() == 1 &&
 					arffin.getStructure().attribute(0).name().equals("timestamp")){
 	
 				newData = new PointData(model, src);
@@ -261,8 +261,11 @@ public class FileImporter {
 				long firstTimestamp = (long)ins.get(0).value(0);
 
 				for(int i = 0; i < ins.size(); i++){
-					((PointData)newData).addPoint(new Timestamp((long)ins.get(i).value(0) - firstTimestamp));
+					System.out.println("Importing arff point data. Point " + i);
+					newData.addLastPoint(new Timestamp((long)ins.get(i).value(0) - firstTimestamp));
 				}
+				
+				newData.createQuickPoints();
 			}
 		}
 		

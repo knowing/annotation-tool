@@ -218,7 +218,6 @@ public class DataModel {
 				
 				Instances ins = arffout.getInstances();
 				
-				track.orderPoints();
 				int nPoints = track.getNPoints();
 				
 				for(int i = 0; i < nPoints; i++){
