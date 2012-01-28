@@ -119,9 +119,9 @@ public class Stepcounter {
 		int previousX, previousY, previousZ;
 		
 		for(int i = BUFFER; i < valuesY.length - 1; i++){
-			averageX = averageArray(valuesX, i - BUFFER, i);
-			averageY = averageArray(valuesY, i - BUFFER, i);
-			averageZ = averageArray(valuesZ, i - BUFFER, i);
+			averageX = Math.abs(averageArray(valuesX, i - BUFFER, i));
+			averageY = Math.abs(averageArray(valuesY, i - BUFFER, i));
+			averageZ = Math.abs(averageArray(valuesZ, i - BUFFER, i));
 			
 			previousX = currentX;
 			previousY = currentY;
@@ -143,9 +143,8 @@ public class Stepcounter {
 			if(freezeFor == 0 && 
 					currentY >= THRESHOLD && currentY >= previousY && currentY > nextY &&
 											 currentZ >= previousZ && currentZ > nextZ){
-				System.out.println("ADDING point " + (TimestampConverter.getVideoTimestamp(timestamps[i - ESTIMATED_STEPLENGTH / 2] - timestamps[0])));
-				addTimestamp(list, timestamps[i - ESTIMATED_STEPLENGTH / 2]);
-				freezeFor = 5;
+				addTimestamp(list, timestamps[i]);
+				freezeFor = 10;
 			}
 			
 			/*
