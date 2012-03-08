@@ -251,6 +251,10 @@ public class DataModel {
 	public String saveConfiguration(){
 		File f = new File(CONFIG_PATH);
 		
+		if(PREDEFINED_ACTIVITIES == null){
+			System.err.println("No activities in config.cfg. Please make sure there is a valid config.cfg in the programs folder.");
+		}
+		
 		try(FileWriter fw = new FileWriter(f)){
 			if(!f.canWrite()){
 				throw new IOException("File is read-only");

@@ -1,7 +1,7 @@
 package evaluationtool.sensordata;
 
 /**
- * Represents one three dimensional sensor value - timestamp pair
+ * Represents one multi dimensional value-timestamp pair
  * @author anfi
  *
  */

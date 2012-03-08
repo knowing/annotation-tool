@@ -13,6 +13,7 @@ import javax.swing.*;
 
 import evaluationtool.Data;
 import evaluationtool.gui.TrackOptionsDialog;
+import evaluationtool.gui.TrackVisualization;
 import evaluationtool.gui.Visualization;
 
 public class SensorDataVisualization extends Visualization implements ComponentListener {
@@ -165,7 +166,7 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 	}
 
 	@Override
-	public JPanel getTrackVisualization() {
+	public TrackVisualization getTrackVisualization() {
 		return trackvis;
 	}
 }

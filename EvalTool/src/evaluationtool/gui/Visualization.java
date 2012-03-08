@@ -10,5 +10,5 @@ public abstract class Visualization extends JPanel{
 	abstract public void updateLayout();
 	abstract public Data getDataSource();
 	
-	abstract public JPanel getTrackVisualization();
+	abstract public TrackVisualization getTrackVisualization();
 }

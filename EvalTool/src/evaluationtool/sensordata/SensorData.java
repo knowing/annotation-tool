@@ -80,7 +80,7 @@ public class SensorData implements Data{
 	 * @return
 	 */
 	public float getTimeAt(int pos){
-		return data[pos].time;
+		return (data[pos].time * playbackSpeed) + offset;
 	}
 	
 	/*
