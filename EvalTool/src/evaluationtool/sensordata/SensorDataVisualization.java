@@ -5,6 +5,8 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.geom.RoundRectangle2D;
@@ -16,7 +18,7 @@ import evaluationtool.gui.TrackOptionsDialog;
 import evaluationtool.gui.TrackVisualization;
 import evaluationtool.gui.Visualization;
 
-public class SensorDataVisualization extends Visualization implements ComponentListener {
+public class SensorDataVisualization extends Visualization implements ComponentListener, ActionListener{
 	
 	// Menu
 	JPanel menu = new JPanel();
@@ -24,6 +26,11 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 	JButton remove = new JButton("Remove");
 	JButton toggleView = new JButton("Compact view");
 	JButton trackParameters = new JButton("");
+	
+	// PopupMenu
+	JPopupMenu popupMenu = new JPopupMenu();
+	JMenuItem syncPositionItem;
+	long position = 0;
 	
 	// Track 
 	SensorTrackVisualization trackvis;
@@ -59,6 +66,12 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 		menu.setPreferredSize(new Dimension(200, this.getHeight()));
 		this.add(menu, BorderLayout.WEST);
 		this.add(trackvis, BorderLayout.CENTER);
+		
+		// PopupMenu
+		popupMenu = new JPopupMenu();
+		syncPositionItem = new JMenuItem("Synchronize this point to current playback position");
+		popupMenu.add(syncPositionItem);
+		syncPositionItem.addActionListener(this);
 		
 		// Info dialog
 		to = new TrackOptionsDialog(null, dataSource);
@@ -168,5 +181,17 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 	@Override
 	public TrackVisualization getTrackVisualization() {
 		return trackvis;
+	}
+
+	public JPopupMenu getPopupMenu(long mapPixelToTime) {
+		position = mapPixelToTime;
+		return popupMenu;
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if(e.getSource() == syncPositionItem){
+			dataSource.setOffset(dataSource.getOffset() - position + this.getTrackVisualization().getPosition());
+		}
 	}
 }

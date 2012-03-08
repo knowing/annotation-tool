@@ -10,6 +10,8 @@ import java.awt.geom.RoundRectangle2D;
 import evaluationtool.gui.TrackMouseListener;
 import evaluationtool.gui.TrackVisualization;
 import evaluationtool.gui.Visualization;
+import evaluationtool.intervaldata.IntervalDataVisualization;
+import evaluationtool.intervaldata.IntervalTrackVisualization;
 import evaluationtool.sensordata.SensorTrackVisualization;
 
 /**
@@ -19,8 +21,14 @@ import evaluationtool.sensordata.SensorTrackVisualization;
  */
 public class VisualizationMouseListener extends TrackMouseListener implements MouseWheelListener, MouseListener, MouseMotionListener{
 	
-	public VisualizationMouseListener(Visualization s, TrackVisualization tv) {
+	// Casts
+	SensorDataVisualization sensorVis;
+	SensorTrackVisualization sensorTrack;
+
+	public VisualizationMouseListener(Visualization s, SensorTrackVisualization tv) {
 		super(s, tv);
+		sensorVis = (SensorDataVisualization) s;
+		sensorTrack = (SensorTrackVisualization) tv;
 	}
 
 	boolean shiftingTime = false;
@@ -36,6 +44,9 @@ public class VisualizationMouseListener extends TrackMouseListener implements Mo
 		
 		if(e.getButton() == MouseEvent.BUTTON2){
 				((SensorTrackVisualization)track).toggleCompactView();
+		}
+		else if(e.getButton() == MouseEvent.BUTTON3){
+			sensorVis.getPopupMenu(track.mapPixelToTime(e.getX())).show(track, e.getX(), e.getY());
 		}
 	}
 }

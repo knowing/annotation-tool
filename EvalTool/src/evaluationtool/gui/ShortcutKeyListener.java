@@ -23,8 +23,8 @@ public class ShortcutKeyListener implements KeyListener{
 		else if(ke.getKeyCode() == 32){
 			gui.playpause();
 		}
-		
-		if(ke.isControlDown() && ke.getKeyCode() >= 48 && ke.getKeyCode() <= 57){
+
+		if((ke.getKeyCode() >= 48 && ke.getKeyCode() <= 57) || ke.getKeyCode() == 80){
 			
 			int activity = 0;
 			
@@ -39,7 +39,7 @@ public class ShortcutKeyListener implements KeyListener{
 			// If an interval track is unlocked, add activity, for an unlocked point track, add point
 			for(int i = 0; i < gui.getModel().getLoadedDataTracks().size(); i++){
 
-				if(gui.getModel().getLoadedDataTracks().get(i) instanceof IntervalData){
+				if(gui.getModel().getLoadedDataTracks().get(i) instanceof IntervalData && ke.getKeyCode() != 80){
 					IntervalData data = (IntervalData) gui.getModel().getLoadedDataTracks().get(i);
 					if(!data.isLocked()){
 						System.out.println("Changing activity");
@@ -50,7 +50,7 @@ public class ShortcutKeyListener implements KeyListener{
 						}
 					}
 				}
-				else if(gui.getModel().getLoadedDataTracks().get(i) instanceof PointData){
+				else if(gui.getModel().getLoadedDataTracks().get(i) instanceof PointData && ke.getKeyCode() == 80){
 					PointData data = (PointData) gui.getModel().getLoadedDataTracks().get(i);
 					if(!data.isLocked()){
 							System.out.println("Adding point");

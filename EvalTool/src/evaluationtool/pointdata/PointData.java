@@ -164,6 +164,8 @@ public class PointData implements Data {
 	}
 
 	public int getNPoints() {
-		return quickPoints.length;
+		if(quickPoints != null)
+			return quickPoints.length;
+		else return 0;
 	}
 }
