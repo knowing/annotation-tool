@@ -149,7 +149,7 @@ public class PointTrackVisualization extends TrackVisualization{
 
 	public int getPointAt(Point point) {
 		for(int i = 0; i < n_events; i++){
-			if(pointRectangles[i].contains(point))
+			if(pointRectangles[i] != null && pointRectangles[i].contains(point))
 				return i;
 		}
 		

@@ -30,7 +30,7 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 	// PopupMenu
 	JPopupMenu popupMenu = new JPopupMenu();
 	JMenuItem syncPositionItem;
-	long position = 0;
+	long menuPosition = 0;
 	
 	// Track 
 	SensorTrackVisualization trackvis;
@@ -184,14 +184,13 @@ public class SensorDataVisualization extends Visualization implements ComponentL
 	}
 
 	public JPopupMenu getPopupMenu(long mapPixelToTime) {
-		position = mapPixelToTime;
+		menuPosition = mapPixelToTime;
 		return popupMenu;
 	}
 
-	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == syncPositionItem){
-			dataSource.setOffset(dataSource.getOffset() - position + this.getTrackVisualization().getPosition());
+			dataSource.setOffset(dataSource.getOffset() - menuPosition + this.getTrackVisualization().getPosition());
 		}
 	}
 }

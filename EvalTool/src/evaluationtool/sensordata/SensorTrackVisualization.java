@@ -108,12 +108,12 @@ public class SensorTrackVisualization extends TrackVisualization{
 				if(compactView){
 					// Go through dimensions
 					for(int d = 0; d < dataDimension; d++){
-						verticalCoordinate[d]  = (this.getHeight() - TIMELINE_HEIGHT) 	/ 2f + ((this.getHeight() - TIMELINE_HEIGHT) / (1.1f * dataResolution)) * dataSource.getValueAt(d, i);
+						verticalCoordinate[d]  = (this.getHeight() - TIMELINE_HEIGHT) 	/ 2f + ((this.getHeight() - TIMELINE_HEIGHT) / (1.1f * dataResolution)) * -dataSource.getValueAt(d, i);
 					}
 				}
 				else{
 					for(int d = 0; d < dataDimension; d++){
-						verticalCoordinate[d]  = (this.getHeight() - TIMELINE_HEIGHT) * (2 * d + 1) / (2f * dataDimension) + ((this.getHeight() - TIMELINE_HEIGHT) / ((dataDimension + 0.1f) * dataResolution)) * dataSource.getValueAt(d, i);
+						verticalCoordinate[d]  = (this.getHeight() - TIMELINE_HEIGHT) * (2 * d + 1) / (2f * dataDimension) + ((this.getHeight() - TIMELINE_HEIGHT) / ((dataDimension + 0.1f) * dataResolution)) * -dataSource.getValueAt(d, i);
 					}
 				}
 				

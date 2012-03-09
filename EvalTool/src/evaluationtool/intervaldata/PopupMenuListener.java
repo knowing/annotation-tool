@@ -16,10 +16,14 @@ public class PopupMenuListener implements ActionListener{
 	}
 	
 	public void actionPerformed(ActionEvent ae) {
-		int activitytype;
-		activitytype = Integer.parseInt(ae.getActionCommand().substring(1));
 		
-		if(!vis.isLocked()){
+		if(ae.getSource() == vis.syncPositionItem){
+			vis.getDataSource().setOffset(vis.getDataSource().getOffset() - vis.getCurrentMenuTime() + vis.getTrackVisualization().getPosition());
+		}
+		else if(!vis.isLocked()){
+			int activitytype;
+			activitytype = Integer.parseInt(ae.getActionCommand().substring(1));
+			
 			if(activitytype == Activity.NO_ACTIVITY){
 				vis.getDataSource().endActivityAt(vis.getCurrentMenuTime());
 			}

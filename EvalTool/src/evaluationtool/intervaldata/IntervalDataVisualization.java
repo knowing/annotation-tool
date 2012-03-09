@@ -32,7 +32,7 @@ public class IntervalDataVisualization extends Visualization implements Componen
 	JMenuItem startActivityItem;
 	JMenuItem endActivityItem;
 	JMenuItem deleteActivityItem;
-	
+	JMenuItem syncPositionItem;
 	// The current position of the popupmenu in milliseconds relative to this track
 	long currentMenuTime = 0;
 	int currentMenuActivity = 0;
@@ -75,6 +75,7 @@ public class IntervalDataVisualization extends Visualization implements Componen
 		startActivityItem = new JMenuItem("Start activity");
 		endActivityItem = new JMenuItem("End activity");
 		deleteActivityItem = new JMenuItem("Delete activity");
+		syncPositionItem = new JMenuItem("Synchronize this point to current playback position");
 		
 		startActivityItem.setActionCommand("#" + Activity.CURRENT_ACTIVITY);
 		endActivityItem.setActionCommand("#" + Activity.NO_ACTIVITY);
@@ -86,6 +87,8 @@ public class IntervalDataVisualization extends Visualization implements Componen
 		endActivityItem.addActionListener(popuplistener);
 		popupMenu.add(deleteActivityItem);
 		deleteActivityItem.addActionListener(popuplistener);
+		popupMenu.add(syncPositionItem);
+		syncPositionItem.addActionListener(popuplistener);
 		
 		// Add tracks
 		menu.setPreferredSize(new Dimension(200, this.getHeight()));

@@ -58,6 +58,9 @@ public class VisualizationMouseListener extends TrackMouseListener{
 			
 			source.repaint();
 		}
+		else if(e.getButton() == MouseEvent.BUTTON3 && pointVis.isLocked()){
+			pointVis.getPopupMenu(track.mapPixelToTime(e.getX())).show(track, e.getX(), e.getY());
+		}
 	}
 	
 	public void mouseReleased(MouseEvent e) {

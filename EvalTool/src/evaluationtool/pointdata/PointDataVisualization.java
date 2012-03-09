@@ -3,6 +3,8 @@ package evaluationtool.pointdata;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.geom.RoundRectangle2D;
@@ -18,7 +20,7 @@ import evaluationtool.gui.TrackOptionsDialog;
 import evaluationtool.gui.Visualization;
 
 
-public class PointDataVisualization extends Visualization implements ComponentListener {
+public class PointDataVisualization extends Visualization implements ComponentListener, ActionListener {
 	
 	// Menu
 	JPanel menu = new JPanel();
@@ -29,6 +31,11 @@ public class PointDataVisualization extends Visualization implements ComponentLi
 	
 	// Track 
 	PointTrackVisualization trackvis;
+	
+	// PopupMenu
+	JPopupMenu popupMenu = new JPopupMenu();
+	JMenuItem syncPositionItem;
+	long menuPosition = 0;
 	
 	// Data arrays
 	PointData dataSource;
@@ -45,6 +52,12 @@ public class PointDataVisualization extends Visualization implements ComponentLi
 		
 		// Will be overwritten anyway, just set this in case repaint is called earlier
 		trackvis.setAlternativeColorScheme(false);
+		
+		// PopupMenu
+		popupMenu = new JPopupMenu();
+		syncPositionItem = new JMenuItem("Synchronize this point to current playback position");
+		popupMenu.add(syncPositionItem);
+		syncPositionItem.addActionListener(this);
 		
 		// Set Layout
 		this.setLayout(new BorderLayout());
@@ -177,6 +190,17 @@ public class PointDataVisualization extends Visualization implements ComponentLi
 
 	public PointTrackVisualization getTrackVisualization() {
 		return trackvis;
+	}
+	
+	public void actionPerformed(ActionEvent e) {
+		if(e.getSource() == syncPositionItem){
+			dataSource.setOffset(dataSource.getOffset() - menuPosition + this.getTrackVisualization().getPosition());
+		}
+	}
+
+	public JPopupMenu getPopupMenu(long mapPixelToTime) {
+		menuPosition = mapPixelToTime;
+		return popupMenu;
 	}
 
 }
