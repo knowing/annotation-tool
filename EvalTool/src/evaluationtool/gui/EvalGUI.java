@@ -179,14 +179,18 @@ public class EvalGUI extends WindowAdapter{
 	    // Playback controls
 	    globalzoomCheckbox 		= new JCheckBox("Global zoom");
 	    globalzoomCheckbox.setSelected(true);
-	    position 				= new JLabel();
+	    globalzoomCheckbox.setToolTipText("Sets all tracks to the same zoom level");
+	    position 				= new JLabel("-");
+	    position.setToolTipText("You can change playback speed using UP and DOWN on your keyboard");
 	    positionslider			= new JSlider(JSlider.HORIZONTAL, 0, 1000, 0);
 	    playPauseButton 		= new JButton(pauseIcon);
+	    playPauseButton.setToolTipText("Play/Pause");
 	    stopButton 				= new JButton(stopIcon);
+	    stopButton.setToolTipText("Stop");
 	    skipFrameButton 		= new JButton(skipFrameIcon);
+	    skipFrameButton.setToolTipText("Forward one frame");
 	    muteButton 				= new JButton(muteIcon);
-	    position 				= new JLabel("-");
-    
+	    muteButton.setToolTipText("Mute/Unmute");
     
 	    menubar.add(file);
 	    menubar.add(globalzoomCheckbox);
