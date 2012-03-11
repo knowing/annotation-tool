@@ -17,7 +17,6 @@ public class Stepdetector {
 	private int[] THRESHOLD = new int[3];
 	private boolean[] THRESHOLD_DIRECTION = new boolean[3];
 	boolean dataLoaded = false;
-	private final int BUFFER = 10;
 	
 	long[] timestamps;
 	int[] valuesX, valuesY, valuesZ;
@@ -44,7 +43,7 @@ public class Stepdetector {
 		jfc.showOpenDialog(null);
 		File input = jfc.getSelectedFile();
 		dataLoaded = loadData(input);
-		if(dataLoaded && valuesY.length > BUFFER){
+		if(dataLoaded && valuesY.length > 0){
 			jfc = new JFileChooser();
 			jfc.showOpenDialog(null);
 			File output = jfc.getSelectedFile();
@@ -131,7 +130,7 @@ public class Stepdetector {
 		int yOkay = 0;
 		int zOkay = 0;
 		
-		for(int i = BUFFER; i < valuesY.length - BUFFER; i++){
+		for(int i = 0; i < valuesY.length; i++){
 
 			System.out.println(TimestampConverter.getVideoTimestamp(timestamps[i] - timestamps[0]));
 			

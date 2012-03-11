@@ -120,8 +120,8 @@ public class IntervalTrackVisualization extends TrackVisualization{
 		// Draw table
 		for(int i = 0; i < dataSource.getPossibleActivities().length; i++){
 			g2d.drawLine(0, i / n_activities, this.getWidth(), i / n_activities);
-			g2d.drawString(dataSource.getPossibleActivities()[i], 
-						      this.getWidth() / 2 - g2d.getFontMetrics(g2d.getFont()).stringWidth(dataSource.getPossibleActivities()[i]) / 2, 
+			g2d.drawString("(" + (i+1) + ") " + dataSource.getPossibleActivities()[i], 
+						      this.getWidth() / 2 - g2d.getFontMetrics(g2d.getFont()).stringWidth("(" + (i+1) + ") " + dataSource.getPossibleActivities()[i]) / 2, 
 						      i * (this.getHeight() - TIMELINE_HEIGHT) / n_activities + 14);
 		}	
 	}

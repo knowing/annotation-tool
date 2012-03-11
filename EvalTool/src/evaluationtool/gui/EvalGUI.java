@@ -433,4 +433,11 @@ public class EvalGUI extends WindowAdapter{
 				  model.getLoadedDataTracks().get(i).getVisualization().getTrackVisualization().repaint();
 		  }
 	}
+
+	public void increaseRate() {
+		mediaPlayerComponent.getMediaPlayer().setRate(Math.min(10f, mediaPlayerComponent.getMediaPlayer().getRate() + 0.1f));	
+	}
+	public void decreaseRate() {
+		mediaPlayerComponent.getMediaPlayer().setRate(Math.max(0.0f, mediaPlayerComponent.getMediaPlayer().getRate() - 0.1f));	
+	}
 }

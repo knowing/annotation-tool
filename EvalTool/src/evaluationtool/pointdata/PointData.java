@@ -20,6 +20,8 @@ public class PointData implements Data {
 	
 	// LinkedList containing all points
 	LinkedList<Timestamp> points = new LinkedList<Timestamp>();
+	
+	// To improve performance, data is also held in an array
 	long[] quickPoints;
 		
 	// Visualization track
@@ -63,7 +65,6 @@ public class PointData implements Data {
 		quickPoints = new long[points.size()];
 		for(int i = 0; i < quickPoints.length; i++){
 			quickPoints[i] = points.get(i).timestamp;
-			System.out.println("#" + i);
 		}
 	}
 

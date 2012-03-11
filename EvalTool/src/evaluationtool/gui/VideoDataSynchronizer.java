@@ -139,7 +139,7 @@ public class VideoDataSynchronizer {
 				  // For improved performance, update only if position changed
 				  if(pos != tempPos){
 					  // Set values to label and all visualizations
-					  lab.setText(TimestampConverter.getVideoTimestamp((long)(pos * length)) + "/" + TimestampConverter.getVideoTimestamp(length));		  
+					  lab.setText(TimestampConverter.getVideoTimestamp((long)(pos * length)) + "/" + TimestampConverter.getVideoTimestamp(length) + "@" + (int)(10 * mediaPlayerComponent.getMediaPlayer().getRate())/10.0 + "x");		  
 					  gui.getModel().setPlaybackPosition(pos, false);  
 				  } 
 				  

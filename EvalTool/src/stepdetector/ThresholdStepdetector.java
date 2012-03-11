@@ -14,10 +14,9 @@ import evaluationtool.util.TimestampConverter;
 
 public class ThresholdStepdetector {
 	
-	private int[] THRESHOLD = new int[3];
-	private boolean[] THRESHOLD_DIRECTION = new boolean[3];
+	private int[] threshold = new int[3];
+	private boolean[] threshold_min = new boolean[3];
 	boolean dataLoaded = false;
-	private final int BUFFER = 10;
 	
 	long[] timestamps;
 	int[] valuesX, valuesY, valuesZ;
@@ -26,25 +25,25 @@ public class ThresholdStepdetector {
 		if(args.length == 6){
 			ThresholdStepdetector s = new ThresholdStepdetector(args);}
 		else{
-			args = new String[]{"pos", "-129", "pos", "-129", "pos", "0"};
+			args = new String[]{"min", "90", "min", "128", "min", "0"};
 			ThresholdStepdetector s = new ThresholdStepdetector(args);
 			}
 	}
 
 	ThresholdStepdetector(String[] args){
-		THRESHOLD_DIRECTION[0] 	= args[0].equals("pos");
-		THRESHOLD[0]			= Integer.parseInt(args[1]);
-		THRESHOLD_DIRECTION[1] 	= args[2].equals("pos");
-		THRESHOLD[1]			= Integer.parseInt(args[3]);
-		THRESHOLD_DIRECTION[2] 	= args[4].equals("pos");
-		THRESHOLD[2]			= Integer.parseInt(args[5]);
+		threshold_min[0] 	= args[0].equals("min");
+		threshold[0]			= Integer.parseInt(args[1]);
+		threshold_min[1] 	= args[2].equals("min");
+		threshold[1]			= Integer.parseInt(args[3]);
+		threshold_min[2] 	= args[4].equals("min");
+		threshold[2]			= Integer.parseInt(args[5]);
 		
 		
 		JFileChooser jfc = new JFileChooser();
 		jfc.showOpenDialog(null);
 		File input = jfc.getSelectedFile();
 		dataLoaded = loadData(input);
-		if(dataLoaded && valuesY.length > BUFFER){
+		if(dataLoaded && valuesY.length > 0){
 			jfc = new JFileChooser();
 			jfc.showOpenDialog(null);
 			File output = jfc.getSelectedFile();
@@ -53,9 +52,9 @@ public class ThresholdStepdetector {
 			saveFile(output, list);
 		}
 		
-		System.out.println("Offset: " + THRESHOLD_DIRECTION[0] + ", " + THRESHOLD[0] + " - " + 
-				THRESHOLD_DIRECTION[1] + ", " + THRESHOLD[1] + " - " + 
-				THRESHOLD_DIRECTION[2] + ", " + THRESHOLD[2]);
+		System.out.println("Offset: " + threshold_min[0] + ", " + threshold[0] + " - " + 
+				threshold_min[1] + ", " + threshold[1] + " - " + 
+				threshold_min[2] + ", " + threshold[2]);
 	}
 
 	private void saveFile(File output, LinkedList<Timestamp> list) {
@@ -126,15 +125,15 @@ public class ThresholdStepdetector {
 		// Add first point to synchronize
 		addTimestamp(list, timestamps[0]);
 		
-		for(int i = BUFFER; i < valuesX.length - BUFFER; i++){
+		for(int i = 0; i < valuesX.length; i++){
 			
 			freezeFor = Math.max(--freezeFor, 0);
 			
 			if(freezeFor == 0){
 				
-				if((THRESHOLD_DIRECTION[0] && valuesZ[i] > THRESHOLD[0]) || (!THRESHOLD_DIRECTION[0] && valuesZ[i] < THRESHOLD[0]) &&
-				   (THRESHOLD_DIRECTION[1] && valuesZ[i] > THRESHOLD[1]) || (!THRESHOLD_DIRECTION[1] && valuesZ[i] < THRESHOLD[1]) &&
-				   (THRESHOLD_DIRECTION[2] && valuesZ[i] > THRESHOLD[2]) || (!THRESHOLD_DIRECTION[2] && valuesZ[i] < THRESHOLD[2])){
+				if(((threshold_min[0] && valuesX[i] > threshold[0]) || (!threshold_min[0] && valuesX[i] < threshold[0])) ||
+				   ((threshold_min[1] && valuesY[i] > threshold[1]) || (!threshold_min[1] && valuesY[i] < threshold[1])) ||
+				   ((threshold_min[2] && valuesZ[i] > threshold[2]) || (!threshold_min[2] && valuesZ[i] < threshold[2]))){
 					addTimestamp(list, timestamps[i]);
 					freezeFor = 10;
 				}

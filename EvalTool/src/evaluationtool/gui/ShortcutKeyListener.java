@@ -23,6 +23,12 @@ public class ShortcutKeyListener implements KeyListener{
 		else if(ke.getKeyCode() == 32){
 			gui.playpause();
 		}
+		else if(ke.getKeyCode() == 38){
+			gui.increaseRate();
+		}
+		else if(ke.getKeyCode() == 40){
+			gui.decreaseRate();
+		}
 
 		if((ke.getKeyCode() >= 48 && ke.getKeyCode() <= 57) || ke.getKeyCode() == 80){
 			
