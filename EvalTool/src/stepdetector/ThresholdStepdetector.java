@@ -22,10 +22,10 @@ public class ThresholdStepdetector {
 	int[] valuesX, valuesY, valuesZ;
 	
 	public static void main(String[] args){
-		if(args.length == 6){
+		if(args.length >= 6){
 			ThresholdStepdetector s = new ThresholdStepdetector(args);}
 		else{
-			args = new String[]{"min", "90", "min", "128", "min", "0"};
+			args = new String[]{"min", "-129", "min", "-129", "min", "0"};
 			ThresholdStepdetector s = new ThresholdStepdetector(args);
 			}
 	}
@@ -131,8 +131,8 @@ public class ThresholdStepdetector {
 			
 			if(freezeFor == 0){
 				
-				if(((threshold_min[0] && valuesX[i] > threshold[0]) || (!threshold_min[0] && valuesX[i] < threshold[0])) ||
-				   ((threshold_min[1] && valuesY[i] > threshold[1]) || (!threshold_min[1] && valuesY[i] < threshold[1])) ||
+				if(((threshold_min[0] && valuesX[i] > threshold[0]) || (!threshold_min[0] && valuesX[i] < threshold[0])) &&
+				   ((threshold_min[1] && valuesY[i] > threshold[1]) || (!threshold_min[1] && valuesY[i] < threshold[1])) &&
 				   ((threshold_min[2] && valuesZ[i] > threshold[2]) || (!threshold_min[2] && valuesZ[i] < threshold[2]))){
 					addTimestamp(list, timestamps[i]);
 					freezeFor = 10;
@@ -142,7 +142,7 @@ public class ThresholdStepdetector {
 			/*
 			 * TEST, don't analyze all data
 			 */
-			if(timestamps[i] - timestamps[0] > 600000)
+			if(timestamps[i] - timestamps[0] > 2000000)
 				return list;
 		}
 		
