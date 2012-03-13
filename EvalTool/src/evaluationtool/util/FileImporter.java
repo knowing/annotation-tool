@@ -262,7 +262,7 @@ public class FileImporter {
 
 				for(int i = 0; i < ins.size(); i++){
 					System.out.println("Importing arff point data. Point " + i);
-					newData.addLastPoint(new Timestamp((long)ins.get(i).value(0) - firstTimestamp));
+					newData.addPoint(new Timestamp((long)ins.get(i).value(0) - firstTimestamp));
 				}
 				
 				newData.createQuickPoints();

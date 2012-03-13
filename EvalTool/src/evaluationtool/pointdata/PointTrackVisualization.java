@@ -107,7 +107,7 @@ public class PointTrackVisualization extends TrackVisualization{
 		int boxY = (int)(pointRectangles[i].getY() + pointRectangles[i].getHeight() / 2 - boxHeight / 2);
 		
 		// Start info
-		info = TimestampConverter.getVideoTimestamp(dataSource.getPoint(i));
+		info = "#" + i + ":" + TimestampConverter.getVideoTimestamp(dataSource.getPoint(i));
 		Rectangle2D.Float infoBox = new Rectangle2D.Float(0, boxY, this.getWidth(), boxHeight);
 		
 		g2d.setColor(timelineColorTrack);

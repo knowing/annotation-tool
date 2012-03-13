@@ -189,7 +189,7 @@ public class EvalGUI extends WindowAdapter{
 	    stopButton.setToolTipText("Stop");
 	    skipFrameButton 		= new JButton(skipFrameIcon);
 	    skipFrameButton.setToolTipText("Forward one frame");
-	    muteButton 				= new JButton(muteIcon);
+	    muteButton 				= new JButton(unmuteIcon);
 	    muteButton.setToolTipText("Mute/Unmute");
     
 	    menubar.add(file);

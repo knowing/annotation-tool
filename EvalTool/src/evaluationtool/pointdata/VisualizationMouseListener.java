@@ -51,10 +51,12 @@ public class VisualizationMouseListener extends TrackMouseListener{
 		if(e.getButton() == MouseEvent.BUTTON3 && !pointVis.isLocked()){
 			draggedPoint = pointTrack.getPointAt(e.getPoint());
 			
-			if(draggedPoint == -1)
+			if(draggedPoint == -1){
 				pointVis.getDataSource().addPoint(new Timestamp(pointVis.getDataSource().removeSettingsFromTimestamp(track.mapPixelToTime(e.getX()))));
-			else
+			}
+			else{	
 				pointVis.getDataSource().deletePoint(draggedPoint);
+			}
 			
 			source.repaint();
 		}

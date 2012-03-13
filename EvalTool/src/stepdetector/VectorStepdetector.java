@@ -14,13 +14,14 @@ import de.sendsor.SDRConverter;
 public class VectorStepdetector {
 	
 	private final int threshold = 90;
+	private final int threshold_angle = 60;
 	private int gravityX, gravityY, gravityZ;
 	
 	// Length of Buffer that is used to get gravity
 	private final int BUFFER_LENGTH = 200;
 	
 	// Prevent that a step is detected twice - in data samples
-	private final int MIN_STEPLENGTH = 20;
+	private final int MIN_STEPLENGTH = 5; // 200 ms
 	
 	// Loaded data
 	boolean dataLoaded = false;
@@ -125,13 +126,12 @@ public class VectorStepdetector {
 		double gravityLength = 0;
 		double scalar = 0;
 		double cosAngle = 0;
+		double angle = 0;
 		
 		for(int i = BUFFER_LENGTH; i < valuesX.length; i++){
 			
 			freezeFor = Math.max(--freezeFor, 0);
 			
-			if(freezeFor == 0){
-				
 				// Calculate gravity
 				gravityX = averageArray(valuesX, i - BUFFER_LENGTH, i);
 				gravityY = averageArray(valuesY, i - BUFFER_LENGTH, i);
@@ -141,10 +141,6 @@ public class VectorStepdetector {
 						  Math.pow(gravityY, 2) + 
 						  Math.pow(gravityZ, 2));
 				
-				 System.out.println("Gravity: (" + gravityX  + ", " + gravityY + ", " + gravityZ + ") Total = " + Math.sqrt(
-																																		  Math.pow(gravityX/64.0, 2) + 
-																																		  Math.pow(gravityY/64.0, 2) + 
-																																		  Math.pow(gravityZ/64.0, 2)) + "g");
 				// Apply "highpass"
 				normValueX = valuesX[i] - gravityX;
 				normValueY = valuesY[i] - gravityY;
@@ -160,23 +156,35 @@ public class VectorStepdetector {
 						  Math.pow(valuesY[i], 2) + 
 						  Math.pow(valuesZ[i], 2));
 				
-				System.out.println("Values: (" + normValueX + ", " + normValueY + ", " + normValueZ + ") Total = " + normLength);
+				
 				
 				scalar = (gravityX * valuesX[i] + gravityY * valuesY[i] + gravityZ * valuesZ[i]);
+				//scalar = (gravityX * normValueX + gravityY * normValueY + gravityZ * normValueZ);
 				cosAngle =  scalar / (vectorLength * gravityLength);
-				System.out.println("normLength = " + normLength);
+				angle = Math.acos(cosAngle) * 180 / Math.PI;
 				
-				if(normLength > threshold){
-					
-					addTimestamp(list, timestamps[i]);
-					freezeFor = MIN_STEPLENGTH;
+				if(normLength > threshold && angle > threshold_angle){
+					/*System.out.println("Gravity: (" + gravityX  + ", " + gravityY + ", " + gravityZ + ") Total = " + Math.sqrt(
+							  Math.pow(gravityX, 2) + 
+							  Math.pow(gravityY, 2) + 
+							  Math.pow(gravityZ, 2)));
+					System.out.println("Values: (" + normValueX + ", " + normValueY + ", " + normValueZ + ") Total = " + normLength);*/
+					System.out.println("Angle: " + cosAngle + ", Scalar: " + scalar + ", Angle: " + angle);
+
+					// Add step if freezetime is over, reset freezetime otherwise
+					if(freezeFor == 0){
+						addTimestamp(list, timestamps[i]);
+						freezeFor = MIN_STEPLENGTH;
+					}
+					else{
+						freezeFor = MIN_STEPLENGTH;
+					}
 				}
-			}
 			
 			/*
 			 * TEST, stop after ten minutes
 			 */
-			if(timestamps[i] - timestamps[0] > 600000)
+			if(timestamps[i] - timestamps[0] > 6000000)
 				return list;
 		}
 		
@@ -201,7 +209,7 @@ public class VectorStepdetector {
 	}
 	
 	private void addTimestamp(LinkedList<Timestamp> list, long time){
-		System.out.println("Adding at " + time);
+		System.out.println("Adding at " + time + " -------------> " + list.size());
 		Timestamp t = new Timestamp();
 		t.timestamp = time;
 		list.add(t);
