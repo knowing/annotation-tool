@@ -163,13 +163,15 @@ public class VectorStepdetector {
 				cosAngle =  scalar / (vectorLength * gravityLength);
 				angle = Math.acos(cosAngle) * 180 / Math.PI;
 				
+				if(angle > 15)
+				System.out.println("Length: " + normLength + ", Scalar: " + scalar + ", Angle: " + angle);
+				
 				if(normLength > threshold && angle > threshold_angle){
 					/*System.out.println("Gravity: (" + gravityX  + ", " + gravityY + ", " + gravityZ + ") Total = " + Math.sqrt(
 							  Math.pow(gravityX, 2) + 
 							  Math.pow(gravityY, 2) + 
 							  Math.pow(gravityZ, 2)));
 					System.out.println("Values: (" + normValueX + ", " + normValueY + ", " + normValueZ + ") Total = " + normLength);*/
-					System.out.println("Angle: " + cosAngle + ", Scalar: " + scalar + ", Angle: " + angle);
 
 					// Add step if freezetime is over, reset freezetime otherwise
 					if(freezeFor == 0){

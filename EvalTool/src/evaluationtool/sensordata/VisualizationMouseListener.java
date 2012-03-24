@@ -43,7 +43,7 @@ public class VisualizationMouseListener extends TrackMouseListener implements Mo
 		super.mouseClicked(e);
 		
 		if(e.getButton() == MouseEvent.BUTTON2){
-				((SensorTrackVisualization)track).toggleCompactView();
+				((SensorDataVisualization)sensorVis).toggleCompactView();
 		}
 		else if(e.getButton() == MouseEvent.BUTTON3){
 			sensorVis.getPopupMenu(track.mapPixelToTime(e.getX())).show(track, e.getX(), e.getY());
