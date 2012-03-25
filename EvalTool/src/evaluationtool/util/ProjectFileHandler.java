@@ -186,12 +186,17 @@ public class ProjectFileHandler {
 						tempNumber++;
 					}
 					model.getLoadedDataTracks().get(i).setSource(savepath.getAbsolutePath() + "\\" + USER_GENERATED_TRACK_PREFIX + tempNumber + ".arff");
-					
+				}	
+				
+				File test = new File(model.getLoadedDataTracks().get(i).getSource());
+				
+				// Check if file exists, otherwise save it
+				if(!test.exists()){
 					// Save track. If the track cannot be saved, continue with next track
 					if(!model.saveTrack(i, model.getLoadedDataTracks().get(i).getSource())){
 						continue;
 					}
-				}	
+				}
 				
 				if(getFilenameFromPath(model.getLoadedDataTracks().get(i).getSource()) != null){
 					fw.write("\n" + model.DATAPATH_LINE + getFilenameFromPath(model.getLoadedDataTracks().get(i).getSource()));

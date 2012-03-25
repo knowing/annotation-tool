@@ -24,7 +24,7 @@ public class PointDataVisualization extends Visualization implements ComponentLi
 	
 	// Menu
 	JPanel menu = new JPanel();
-	JLabel file = new JLabel();
+	JButton name = new JButton();
 	JButton remove = new JButton("Remove");
 	JButton toggleLock = new JButton("Lock");
 	JButton trackParameters = new JButton("");
@@ -68,6 +68,8 @@ public class PointDataVisualization extends Visualization implements ComponentLi
 		remove.addActionListener(menulistener);
 		toggleLock.addActionListener(menulistener);
 		toggleLock.setActionCommand("togglelocked");
+		name.addActionListener(menulistener);
+		name.setActionCommand("changename");
 		trackParameters.addActionListener(menulistener);
 		trackParameters.setActionCommand("options");
 		
@@ -90,11 +92,11 @@ public class PointDataVisualization extends Visualization implements ComponentLi
 			
 			menu.removeAll();
 			
-			file.setText(getDataSource().getSource());
+			name.setText(getDataSource().getSource());
 			
 			// Create menu
 			menu.setLayout(new GridLayout(Math.max(4, this.getHeight() / 30), 1));
-			menu.add(file);
+			menu.add(name);
 			menu.add(remove);
 			menu.add(toggleLock);
 			menu.add(trackParameters);
@@ -203,4 +205,8 @@ public class PointDataVisualization extends Visualization implements ComponentLi
 		return popupMenu;
 	}
 
+	public void rename(String newname) {
+		dataSource.setSource(newname);
+		name.setText(newname);
+	}
 }

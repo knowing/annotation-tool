@@ -135,7 +135,7 @@ public class DataModel {
 	 * Adds an empty interval track for annotations
 	 */
 	public void addIntervalTrack(){
-		Data newData = new IntervalData(this, "", PREDEFINED_ACTIVITIES);
+		Data newData = new IntervalData(this, JOptionPane.showInputDialog(this.getGUI(), "Enter name for new track") + ".arff", PREDEFINED_ACTIVITIES);
 		loadedDataTracks.add(newData);
 		
 		if(loadedDataTracks.size()%2 == 0)
@@ -147,7 +147,7 @@ public class DataModel {
 	}
 	
 	public void addPointsTrack() {
-		Data newData = new PointData(this, "");
+		Data newData = new PointData(this,  JOptionPane.showInputDialog(this.getGUI(), "Enter name for new track") + ".arff");
 		loadedDataTracks.add(newData);
 		
 		if(loadedDataTracks.size()%2 == 0)
