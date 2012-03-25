@@ -122,9 +122,6 @@ public class ThresholdStepdetector {
 		
 		int freezeFor = 0;
 		
-		// Add first point to synchronize
-		addTimestamp(list, timestamps[0]);
-		
 		for(int i = 0; i < valuesX.length; i++){
 			
 			freezeFor = Math.max(--freezeFor, 0);

@@ -113,9 +113,6 @@ public class VectorStepdetector {
 		
 		int freezeFor = 0;
 		
-		// Add first point to synchronize
-		addTimestamp(list, timestamps[0]);
-		
 		// Normalized values
 		int normValueX = 0;
 		int normValueY = 0;
