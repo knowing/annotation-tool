@@ -322,24 +322,20 @@ public class ProjectFileHandler {
 	public static void saveCurrentProject(EvalGUI gui){
 		 int videoAnswer = JOptionPane.showOptionDialog(gui.getActiveFrame(), "Do you want to include the video file in the archive?", "Video file", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 		 
-		 if(videoAnswer == JOptionPane.YES_OPTION){
-			  String result = saveProjectFile(gui.getModel(), gui.getModel().getProjectPath(), true);
+		 // (videoAnswer == JOptionPane.YES_OPTION) tells, whether the video is to be saved or not
+			  String result = saveProjectFile(gui.getModel(), gui.getModel().getProjectPath(), videoAnswer == JOptionPane.YES_OPTION);
 			  if(result != null){
-				  JOptionPane.showMessageDialog(gui.getActiveFrame(), "Error saving file: " + result, "Error" , JOptionPane.ERROR_MESSAGE);
+				  if(result.equals("SHOW_AGAIN")){
+					  JOptionPane.showMessageDialog(gui.getActiveFrame(), "File already exists", "Error" , JOptionPane.ERROR_MESSAGE);
+					  saveCurrentProject(gui);
+				  }
+				  else{
+					  JOptionPane.showMessageDialog(gui.getActiveFrame(), "Error saving file: " + result, "Error" , JOptionPane.ERROR_MESSAGE);
+				  }
 			  }
 			  else{
 				  JOptionPane.showMessageDialog(gui.getActiveFrame(), "File has been saved succesfully", "File saved" , JOptionPane.INFORMATION_MESSAGE);
 			  }
-		  }
-		  else if (videoAnswer == JOptionPane.NO_OPTION){
-			  String result = saveProjectFile(gui.getModel(), gui.getModel().getProjectPath(), false);
-			  if(result != null){
-				  JOptionPane.showMessageDialog(gui.getActiveFrame(), "Error saving file: " + result, "Error" , JOptionPane.ERROR_MESSAGE);
-			  }
-			  else{
-				  JOptionPane.showMessageDialog(gui.getActiveFrame(), "File has been saved succesfully", "File saved" , JOptionPane.INFORMATION_MESSAGE);
-			  }
-		  }
 	}
 	
 	public static String showSaveDialog(EvalGUI gui){
