@@ -32,8 +32,7 @@ public class ProjectFileHandler {
 		
 		// Extract archive into a temporary folder
 		File temp = new File("\\temp");
-		
-		
+			
 		 deleteTemporaryFiles(temp);
 		 
 		// Create temp directory if it does not exist
@@ -115,13 +114,13 @@ public class ProjectFileHandler {
 		return null;
 	}
 
-	private static void deleteTemporaryFiles(File temp) {
+	public static void deleteTemporaryFiles(File temp) {
 		if(temp.exists()){
 			// Empty directory
 			String[] filesInTemp = temp.list();
 			for(int i = 0; i < filesInTemp.length; i++){
-				File t = new File(filesInTemp[i]).getAbsoluteFile();
-				t.delete();
+				File t = new File(temp.getAbsolutePath() + "\\" + filesInTemp[i]);
+				System.out.println(t.delete() + " for " + t.getAbsolutePath());
 			}
 		 temp.delete();
 		}
@@ -325,13 +324,8 @@ public class ProjectFileHandler {
 		 // (videoAnswer == JOptionPane.YES_OPTION) tells, whether the video is to be saved or not
 			  String result = saveProjectFile(gui.getModel(), gui.getModel().getProjectPath(), videoAnswer == JOptionPane.YES_OPTION);
 			  if(result != null){
-				  if(result.equals("SHOW_AGAIN")){
 					  JOptionPane.showMessageDialog(gui.getActiveFrame(), "File already exists", "Error" , JOptionPane.ERROR_MESSAGE);
-					  saveCurrentProject(gui);
-				  }
-				  else{
-					  JOptionPane.showMessageDialog(gui.getActiveFrame(), "Error saving file: " + result, "Error" , JOptionPane.ERROR_MESSAGE);
-				  }
+					  showSaveDialog(gui);
 			  }
 			  else{
 				  JOptionPane.showMessageDialog(gui.getActiveFrame(), "File has been saved succesfully", "File saved" , JOptionPane.INFORMATION_MESSAGE);
@@ -356,24 +350,14 @@ public class ProjectFileHandler {
 			 
 			  int videoAnswer = JOptionPane.showOptionDialog(gui.getActiveFrame(), "Do you want to include the video file in the archive?", "Video file", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 				
-			  if(videoAnswer == JOptionPane.YES_OPTION){
-				  String result = saveProjectFile(gui.getModel(), path, true);
+				  String result = saveProjectFile(gui.getModel(), path, videoAnswer == JOptionPane.YES_OPTION);
 				  if(result != null){
-					  JOptionPane.showMessageDialog(gui.getActiveFrame(), "Error saving file: " + result, "Error" , JOptionPane.ERROR_MESSAGE);
+					  JOptionPane.showMessageDialog(gui.getActiveFrame(), "File already exists", "Error" , JOptionPane.ERROR_MESSAGE);
+					  showSaveDialog(gui);
 				  }
 				  else{
 					  JOptionPane.showMessageDialog(gui.getActiveFrame(), "File has been saved succesfully", "File saved" , JOptionPane.INFORMATION_MESSAGE);
 				  }
-			  }
-			  else if (videoAnswer == JOptionPane.NO_OPTION){
-				  String result = saveProjectFile(gui.getModel(), path, false);
-				  if(result != null){
-					  JOptionPane.showMessageDialog(gui.getActiveFrame(), "Error saving file: " + result, "Error" , JOptionPane.ERROR_MESSAGE);
-				  }
-				  else{
-					  JOptionPane.showMessageDialog(gui.getActiveFrame(), "File has been saved succesfully", "File saved" , JOptionPane.INFORMATION_MESSAGE);
-				  }
-			  }
 		  }
 		  
 		  return path;

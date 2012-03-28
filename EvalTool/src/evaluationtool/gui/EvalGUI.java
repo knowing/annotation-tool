@@ -4,11 +4,14 @@ import java.awt.*;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+
 import javax.swing.*;
 
 import com.sun.jna.NativeLibrary;
 
 import evaluationtool.DataModel;
+import evaluationtool.util.ProjectFileHandler;
 import evaluationtool.util.VLCPlayerHandler;
 
 import uk.co.caprica.vlcj.component.*;
@@ -400,6 +403,9 @@ public class EvalGUI extends WindowAdapter{
 		mediaPlayerComponent.getMediaPlayerFactory().release();
 		mediaPlayerComponent.release();
 
+		// Delete temp files
+		ProjectFileHandler.deleteTemporaryFiles(new File("\\temp"));
+		
 		// Exit
 		System.exit(0);	
 	}
