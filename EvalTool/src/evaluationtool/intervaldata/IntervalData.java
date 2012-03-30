@@ -18,6 +18,9 @@ public class IntervalData implements Data {
 	// Source file
 	String source = "";
 	
+	// Changes
+	boolean changed = false;
+	
 	// Possible activities
 	private String[] ACTIVITIES;
 	
@@ -104,6 +107,8 @@ public class IntervalData implements Data {
 						vis.getTrackVisualization().releaseEvent();
 					}
 				}
+				
+		vis.getTrackVisualization().repaint();
 	}
 
 	/**
@@ -206,8 +211,8 @@ public class IntervalData implements Data {
 		for(int i = 0; i < events.size(); i++){
 			// Return activity if it is either of the right kind or if no type is requested
 			if((events.get(i).activitytype == requestedActivity || requestedActivity == Activity.NO_ACTIVITY)
-				&& getEventStart(i) < timestamp 
-				&& (getEventEnd(i) > timestamp || getEventEnd(i) == 0))
+				&& getEventStart(i) <= timestamp 
+				&& (getEventEnd(i) >= timestamp || getEventEnd(i) == 0))
 				
 				return i;
 		}
@@ -270,7 +275,7 @@ public class IntervalData implements Data {
 		else{
 			events.get(currentActivity).timestampEnd = removeSettingsFromTimestamp(vis.getTrackVisualization().getPosition());
 		}
-		
+		vis.getTrackVisualization().repaint();
 	}
 	
 	public long addSettingsToTimestamp(long time) {
@@ -296,10 +301,17 @@ public class IntervalData implements Data {
 	
 	public void moveEndpoint(int draggedEvent, long time) {
 		events.get(draggedEvent).timestampEnd = removeSettingsFromTimestamp(time);
+		if(events.get(draggedEvent).timestampEnd < events.get(draggedEvent).timestampStart){
+			events.get(draggedEvent).timestampStart = events.get(draggedEvent).timestampEnd;
+		}
 	}
 
 	public void moveEvent(int draggedEvent, float f) {
 		events.get(draggedEvent).timestampStart += f * playbackSpeed;
 		events.get(draggedEvent).timestampEnd += f * playbackSpeed;
+	}
+
+	public boolean getChanged() {
+		return !vis.isLocked();
 	}
 }

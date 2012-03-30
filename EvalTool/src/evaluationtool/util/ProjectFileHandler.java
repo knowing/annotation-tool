@@ -190,9 +190,10 @@ public class ProjectFileHandler {
 				File test = new File(model.getLoadedDataTracks().get(i).getSource());
 				
 				// Check if file exists, otherwise save it
-				if(!test.exists()){
+				if(!test.exists() || model.getLoadedDataTracks().get(i).getChanged()){
 					// Save track. If the track cannot be saved, continue with next track
 					if(!model.saveTrack(i, model.getLoadedDataTracks().get(i).getSource())){
+						System.out.println("Could not save file");
 						continue;
 					}
 				}

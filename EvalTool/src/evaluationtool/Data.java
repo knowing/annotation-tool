@@ -26,4 +26,6 @@ public interface Data {
 	public DataModel getModel();
 
 	public void setSource(String filename);
+
+	public boolean getChanged();
 }

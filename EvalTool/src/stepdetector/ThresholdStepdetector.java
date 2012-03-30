@@ -139,7 +139,7 @@ public class ThresholdStepdetector {
 			/*
 			 * TEST, don't analyze all data
 			 */
-			if(timestamps[i] - timestamps[0] > 2000000)
+			if(timestamps[i] - timestamps[0] > 3000000)
 				return list;
 		}
 		

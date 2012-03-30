@@ -149,4 +149,10 @@ public class SensorData implements Data{
 	public void setSource(String filename) {
 		this.source = filename;
 	}
+
+	@Override
+	public boolean getChanged() {
+		// Can never be changed
+		return false;
+	}
 }

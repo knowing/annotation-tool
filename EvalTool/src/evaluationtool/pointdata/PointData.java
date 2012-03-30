@@ -169,4 +169,8 @@ public class PointData implements Data {
 			return quickPoints.length;
 		else return 0;
 	}
+	
+	public boolean getChanged() {
+		return !vis.isLocked();
+	}
 }

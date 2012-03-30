@@ -25,7 +25,7 @@ public class MenuButtonListener implements ActionListener{
 			source.showOptionsDialog();
 		}
 		else if(ae.getActionCommand().equals("changename")){
-			String newname = JOptionPane.showInputDialog(source, "Rename track, include file extension", source.getName());
+			String newname = JOptionPane.showInputDialog(source, "Rename track, include file extension", "", JOptionPane.QUESTION_MESSAGE);
 			if(newname.equals("")){
 				JOptionPane.showMessageDialog(source, "Name must not be empty", "Error", JOptionPane.ERROR_MESSAGE);
 			}
