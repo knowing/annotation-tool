@@ -179,12 +179,6 @@ public class VectorStepdetector {
 						freezeFor = MIN_STEPLENGTH;
 					}
 				}
-			
-			/*
-			 * TEST, stop after ten minutes
-			 */
-			if(timestamps[i] - timestamps[0] > 6000000)
-				return list;
 		}
 		
 		return list;

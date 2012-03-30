@@ -80,7 +80,7 @@ public class SensorData implements Data{
 	 * @return
 	 */
 	public float getTimeAt(int pos){
-		return (data[pos].time * playbackSpeed) + offset;
+		return addSettingsToTimestamp(data[pos].time);
 	}
 	
 	/*
@@ -154,5 +154,12 @@ public class SensorData implements Data{
 	public boolean getChanged() {
 		// Can never be changed
 		return false;
+	}
+	
+	public long addSettingsToTimestamp(long time) {
+		return (long)(time / getPlaybackSpeed() + getOffset());
+	}
+	public long removeSettingsFromTimestamp(long time){
+		return (long)((time - getOffset()) * getPlaybackSpeed());
 	}
 }

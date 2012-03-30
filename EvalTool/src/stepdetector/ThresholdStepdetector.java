@@ -135,12 +135,6 @@ public class ThresholdStepdetector {
 					freezeFor = 10;
 				}
 			}
-			
-			/*
-			 * TEST, don't analyze all data
-			 */
-			if(timestamps[i] - timestamps[0] > 3000000)
-				return list;
 		}
 		
 		return list;

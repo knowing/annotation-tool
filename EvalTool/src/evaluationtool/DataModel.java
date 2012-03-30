@@ -167,7 +167,7 @@ public class DataModel {
 	}
 	
 	/**
-	 * Saves an interval track to the specified path
+	 * Saves a track to the specified path
 	 * @param i
 	 * @param string
 	 */
