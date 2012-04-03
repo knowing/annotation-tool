@@ -208,5 +208,6 @@ public class PointDataVisualization extends Visualization implements ComponentLi
 	public void rename(String newname) {
 		dataSource.setSource(newname);
 		name.setText(newname);
+		name.setToolTipText(newname);
 	}
 }

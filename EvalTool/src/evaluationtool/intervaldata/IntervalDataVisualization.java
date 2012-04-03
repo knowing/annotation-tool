@@ -237,5 +237,6 @@ public class IntervalDataVisualization extends Visualization implements Componen
 	public void rename(String newname) {
 		dataSource.setSource(newname);
 		name.setText(newname);
+		name.setToolTipText(newname);
 	}
 }
