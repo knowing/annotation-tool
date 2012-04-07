@@ -11,4 +11,8 @@ public abstract class Visualization extends JPanel{
 	abstract public Data getDataSource();
 	
 	abstract public TrackVisualization getTrackVisualization();
+	
+	public String getName(){
+		return getDataSource().getSource();
+	}
 }

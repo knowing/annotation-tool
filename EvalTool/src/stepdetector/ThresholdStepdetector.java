@@ -120,19 +120,19 @@ public class ThresholdStepdetector {
 	private LinkedList<Timestamp> detectSteps(File output) {
 		LinkedList<Timestamp> list = new LinkedList<Timestamp>();
 		
-		int freezeFor = 0;
+		int counter = 0;
 		
 		for(int i = 0; i < valuesX.length; i++){
 			
-			freezeFor = Math.max(--freezeFor, 0);
+			counter = Math.max(--counter, 0);
 			
-			if(freezeFor == 0){
+			if(counter == 0){
 				
 				if(((threshold_min[0] && valuesX[i] > threshold[0]) || (!threshold_min[0] && valuesX[i] < threshold[0])) &&
 				   ((threshold_min[1] && valuesY[i] > threshold[1]) || (!threshold_min[1] && valuesY[i] < threshold[1])) &&
 				   ((threshold_min[2] && valuesZ[i] > threshold[2]) || (!threshold_min[2] && valuesZ[i] < threshold[2]))){
 					addTimestamp(list, timestamps[i]);
-					freezeFor = 10;
+					counter = 10;
 				}
 			}
 		}
