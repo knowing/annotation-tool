@@ -15,7 +15,7 @@ import evaluationtool.util.TimestampConverter;
 public class VectorStepdetector {
 	
 	private final int threshold = 90;
-	private final int threshold_angle = 60;
+	private final int threshold_angle = 40;
 	private int gravityX, gravityY, gravityZ;
 	
 	// Length of Buffer that is used to get gravity

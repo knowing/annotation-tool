@@ -110,7 +110,12 @@ public class FileImporter {
 			sdrc.setFile(new File(src));
 			Instances ins = sdrc.getDataSet();
 			
+			// If data has absolute timestamp (time set properly), set beginning to 0, otherwise keep it
 			long firstTimestamp = (long)ins.get(0).value(0);
+			// Ok, time seems to be relative, it is unlikely that the data was recorded in 1970
+			if(firstTimestamp < 31536000000l){
+				firstTimestamp = 0;
+			}
 			
 			newData = new SensorData(model, ins.size(), src);	
 
@@ -135,7 +140,12 @@ public class FileImporter {
 				
 				Instances ins = arffin.getDataSet();
 				
+				// If data has absolute timestamp (time set properly), set beginning to 0, otherwise keep it
 				long firstTimestamp = (long)ins.get(0).value(0);
+				// Ok, time seems to be relative, it is unlikely that the data was recorded in 1970
+				if(firstTimestamp < 31536000000l){
+					firstTimestamp = 0;
+				}
 				
 				newData = new SensorData(model, ins.size(), src);	
 				
@@ -212,8 +222,12 @@ public class FileImporter {
 				
 				Instances ins = arffin.getDataSet();
 
-				//long firstTimestamp = (long)ins.get(0).value(0);
-				long firstTimestamp = 0;
+				// If data has absolute timestamp (time set properly), set beginning to 0, otherwise keep it
+				long firstTimestamp = (long)ins.get(0).value(0);
+				// Ok, time seems to be relative, it is unlikely that the data was recorded in 1970
+				if(firstTimestamp < 31536000000l){
+					firstTimestamp = 0;
+				}
 
 				for(int i = 0; i < ins.size(); i++){
 					((IntervalData)newData).createAndAddEvent((long)ins.get(i).value(0) - firstTimestamp, (long)ins.get(i).value(1) - firstTimestamp, (int)ins.get(i).value(2));
