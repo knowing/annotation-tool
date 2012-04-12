@@ -12,7 +12,6 @@ import de.sendsor.SDRConverter;
 /**
  * Abstract stepdetector, only the actual step recognition and file selection have to be implemented
  * @author anfi
- *
  */
 public abstract class Stepdetector {
 
