@@ -28,7 +28,8 @@ public class VLCPlayerHandler {
 	  if(chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION){	 
 		  String path = chooser.getSelectedFile().getAbsolutePath();
 		  model.setVLCPath(path);
-
+		  model.loadConfiguration();
+		  
 		  // Save config and wait for error message
 		  String s  = model.saveConfiguration();
 		
@@ -38,6 +39,7 @@ public class VLCPlayerHandler {
 			}
 		  else
 			System.out.println("Wrote config");
+			
 	  }  
 	  else{
 		   JOptionPane.showMessageDialog(gui, "This program does not work without VLC. Quitting.", "Error", JOptionPane.ERROR_MESSAGE);	
