@@ -158,10 +158,10 @@ public class PointData implements Data {
 	}
 
 	public long addSettingsToTimestamp(long time) {
-		return (long)(time / getPlaybackSpeed() + getOffset());
+		return (long)(time * getPlaybackSpeed() + getOffset());
 	}
 	public long removeSettingsFromTimestamp(long time){
-		return (long)((time - getOffset()) * getPlaybackSpeed());
+		return (long)((time - getOffset()) / getPlaybackSpeed());
 	}
 
 	public int getNPoints() {
