@@ -12,15 +12,27 @@ import de.lmu.ifi.dbs.knowing.core.util.ResultsUtil;
 import de.sendsor.SDRConverter;
 import evaluationtool.util.TimestampConverter;
 
-public class ThresholdStepdetector {
+/**
+ * Detects steps by comparing each sample to three dimensional thresholds, if every value is larger than its threshold, a point annotation is set to mark a step in the data
+ * @author anfi
+ *
+ */
+public class ThresholdStepdetector extends Stepdetector{
 	
-	private int[] threshold = new int[3];
-	private boolean[] threshold_min = new boolean[3];
+	// Number that has to be reached
+	private int thresholdX,  thresholdY,  thresholdZ;
+	
+	// True if threshold is minimum, false for max.
+	private boolean thresholdDirectionX, thresholdDirectionY, thresholdDirectionZ;
+	
+	// Is source data loaded?
 	boolean dataLoaded = false;
 	
-	long[] timestamps;
-	int[] valuesX, valuesY, valuesZ;
-	
+	/**
+	 * Takes ("min"|"max") [value] for thre dimensions, e.g. 'min 10 min 10 min 10' if you want to detect every point where each value is larger than 10
+	 * If no parameter is given, the default is 'min -129 min -129 min 0'
+	 * @param args
+	 */
 	public static void main(String[] args){
 		if(args.length >= 6){
 			ThresholdStepdetector s = new ThresholdStepdetector(args);}
@@ -30,13 +42,17 @@ public class ThresholdStepdetector {
 			}
 	}
 
+	/**
+	 * Opens JFileChoosers to let the user determin input and output file. Input has to be a .sdr-File, output is always an arff file
+	 * @param args
+	 */
 	ThresholdStepdetector(String[] args){
-		threshold_min[0] 	= args[0].equals("min");
-		threshold[0]			= Integer.parseInt(args[1]);
-		threshold_min[1] 	= args[2].equals("min");
-		threshold[1]			= Integer.parseInt(args[3]);
-		threshold_min[2] 	= args[4].equals("min");
-		threshold[2]			= Integer.parseInt(args[5]);
+		thresholdDirectionX 	= args[0].equals("min");
+		thresholdX			= Integer.parseInt(args[1]);
+		thresholdDirectionY 	= args[2].equals("min");
+		thresholdY			= Integer.parseInt(args[3]);
+		thresholdDirectionZ 	= args[4].equals("min");
+		thresholdZ			= Integer.parseInt(args[5]);
 		
 		
 		JFileChooser jfc = new JFileChooser();
@@ -51,103 +67,41 @@ public class ThresholdStepdetector {
 			LinkedList<Timestamp> list = detectSteps(output);
 			saveFile(output, list);
 		}
-		
-		System.out.println("Offset: " + threshold_min[0] + ", " + threshold[0] + " - " + 
-				threshold_min[1] + ", " + threshold[1] + " - " + 
-				threshold_min[2] + ", " + threshold[2]);
 	}
 
-	private void saveFile(File output, LinkedList<Timestamp> list) {
-		weka.core.converters.ArffSaver arffout = new weka.core.converters.ArffSaver();
-		try {
-			output.createNewFile();
-			arffout.setFile(output);
-			LinkedList<String> atts = new LinkedList<String>();
-			
-			// Create structure for arff file
-			arffout.setStructure(ResultsUtil.timeSeriesResult(atts));
-			
-			Instances ins = arffout.getInstances();
-			
-			int nPoints = list.size();
-			
-			for(int i = 0; i < nPoints; i++){
-				DenseInstance instance = new DenseInstance(1);
-				instance.setValue(ins.attribute(0), list.get(i).timestamp);
-				
-				ins.add(instance);
-			}
-			
-			arffout.writeBatch();
-			
-		} catch (IOException e) {
-			System.err.println("Error saving user generated track: " + e + "\nSkipping track.");
-		}
-	}
 
-	private boolean loadData(File f){
-		// Load sdr file with SDRConverter
-		SDRConverter sdrc = new SDRConverter();
-		sdrc.setRelativeTimestamp(true);
-		sdrc.setAggregate(SDRConverter.AGGREGATE_NONE);
-				
-				try{	
-					sdrc.setFile(f);
-					Instances ins = sdrc.getDataSet();
-						
-					timestamps 		= new long[ins.size()];
-					valuesX 		= new int[ins.size()];
-					valuesY 		= new int[ins.size()];
-					valuesZ 		= new int[ins.size()];
-					
-					long firstTimestamp = (long) ins.get(0).value(0);
-			
-					for(int i = 0; i < ins.size(); i++){
-						timestamps[i] 	= (long)	ins.get(i).value(0) - firstTimestamp;
-						valuesX[i] 		= (int)		ins.get(i).value(1);
-						valuesY[i] 		= (int)		ins.get(i).value(2);
-						valuesZ[i]		= (int)		ins.get(i).value(3);
-					}
-					
-					return true;
-				}
-				catch(IOException ioe){
-					System.err.println(ioe);
-					return false;
-				}
-	}
 	
-	private LinkedList<Timestamp> detectSteps(File output) {
+	public LinkedList<Timestamp> detectSteps(File output) {
 		LinkedList<Timestamp> list = new LinkedList<Timestamp>();
 		
 		int counter = 0;
+		boolean checkX, checkY, checkZ;
 		
 		for(int i = 0; i < valuesX.length; i++){
 			
 			counter = Math.max(--counter, 0);
 			
+			// Check for step if counter is at 0
 			if(counter == 0){
 				
-				if(((threshold_min[0] && valuesX[i] > threshold[0]) || (!threshold_min[0] && valuesX[i] < threshold[0])) &&
-				   ((threshold_min[1] && valuesY[i] > threshold[1]) || (!threshold_min[1] && valuesY[i] < threshold[1])) &&
-				   ((threshold_min[2] && valuesZ[i] > threshold[2]) || (!threshold_min[2] && valuesZ[i] < threshold[2]))){
-					addTimestamp(list, timestamps[i]);
-					counter = 10;
-				}
+				// Check for all dimensions, whether the threshold is met
+				checkX = ((thresholdDirectionX && valuesX[i] > thresholdX) 
+						|| (!thresholdDirectionX && valuesX[i] < thresholdX));
+				checkY = ((thresholdDirectionY && valuesY[i] > thresholdY) 
+						|| (!thresholdDirectionY && valuesY[i] < thresholdY));
+				checkZ = ((thresholdDirectionZ && valuesZ[i] > thresholdZ) 
+						|| (!thresholdDirectionZ && valuesZ[i] < thresholdZ));
+				
+				// If all values are larger than than their threhsold, add a step
+				if(checkX && checkY && checkZ){
+							// Add step to output
+							addTimestamp(list, timestamps[i]);
+							// Set counter
+							counter = 10;
+						}
 			}
 		}
 		
 		return list;
-	}
-	
-	private void addTimestamp(LinkedList<Timestamp> list, long time){
-		System.out.println("Adding at " + time);
-		Timestamp t = new Timestamp();
-		t.timestamp = time;
-		list.add(t);
-	}
-	
-	class Timestamp{
-		public long timestamp;
 	}
 }

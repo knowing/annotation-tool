@@ -1,24 +1,28 @@
 package stepdetector;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.LinkedList;
 
 import javax.swing.JFileChooser;
 
-import weka.core.DenseInstance;
-import weka.core.Instances;
-import de.lmu.ifi.dbs.knowing.core.util.ResultsUtil;
-import de.sendsor.SDRConverter;
-import evaluationtool.util.TimestampConverter;
-
-public class VectorStepdetector {
+/**
+ * Detects steps by building a three-dimensional vector for each sample. It compares its length with a threshold and also calculates the angle between peak and gravity,
+ * a step is only set, if the angle is wide enough
+ * @author anfi
+ *
+ */
+public class VectorStepdetector extends Stepdetector {
 	
-	private final int threshold = 90;
-	private final int threshold_angle = 40;
+	// Minimu length of peak
+	private final int threshold = 120;
+	
+	// Minmum angle between peak vector and gravity
+	private final int threshold_angle = 60;
+	
+	// Saves the current calculation for gravity
 	private int gravityX, gravityY, gravityZ;
 	
-	// Length of Buffer that is used to get gravity
+	// Length of Buffer that is used to calculate gravity
 	private final int BUFFER_LENGTH = 200;
 	
 	// Prevent that a step is detected twice - in data samples
@@ -26,8 +30,6 @@ public class VectorStepdetector {
 	
 	// Loaded data
 	boolean dataLoaded = false;
-	long[] timestamps;
-	int[] valuesX, valuesY, valuesZ;
 	
 	public static void main(String[] args){
 			VectorStepdetector s = new VectorStepdetector(args);
@@ -48,68 +50,9 @@ public class VectorStepdetector {
 			saveFile(output, list);
 		}
 	}
-
-	private void saveFile(File output, LinkedList<Timestamp> list) {
-		weka.core.converters.ArffSaver arffout = new weka.core.converters.ArffSaver();
-		try {
-			output.createNewFile();
-			arffout.setFile(output);
-			LinkedList<String> atts = new LinkedList<String>();
-			
-			// Create structure for arff file
-			arffout.setStructure(ResultsUtil.timeSeriesResult(atts));
-			
-			Instances ins = arffout.getInstances();
-			
-			int nPoints = list.size();
-			
-			for(int i = 0; i < nPoints; i++){
-				DenseInstance instance = new DenseInstance(1);
-				instance.setValue(ins.attribute(0), list.get(i).timestamp);
-				
-				ins.add(instance);
-			}
-			
-			arffout.writeBatch();
-			
-		} catch (IOException e) {
-			System.err.println("Error saving user generated track: " + e + "\nSkipping track.");
-		}
-	}
-
-	private boolean loadData(File f){
-		// Load sdr file with SDRConverter
-		SDRConverter sdrc = new SDRConverter();
-		sdrc.setRelativeTimestamp(true);
-		sdrc.setAggregate(SDRConverter.AGGREGATE_NONE);
-				
-				try{	
-					sdrc.setFile(f);
-					Instances ins = sdrc.getDataSet();
-						
-					timestamps 		= new long[ins.size()];
-					valuesX 		= new int[ins.size()];
-					valuesY 		= new int[ins.size()];
-					valuesZ 		= new int[ins.size()];
-					
-					long firstTimestamp = (long) ins.get(0).value(0);
-			
-					for(int i = 0; i < ins.size(); i++){
-						timestamps[i] 	= (long)	ins.get(i).value(0) - firstTimestamp;
-						valuesX[i] 		= (int)		ins.get(i).value(1);
-						valuesY[i] 		= (int)		ins.get(i).value(2);
-						valuesZ[i]		= (int)		ins.get(i).value(3);
-					}
-					
-					return true;
-				}
-				catch(IOException ioe){
-					System.err.println(ioe);
-					return false;
-				}
-	}
 	
-	private LinkedList<Timestamp> detectSteps(File output) {
+
+	public LinkedList<Timestamp> detectSteps(File output) {
 		LinkedList<Timestamp> list = new LinkedList<Timestamp>();
 		
 		int freezeFor = 0;
@@ -144,6 +87,8 @@ public class VectorStepdetector {
 				normValueY = valuesY[i] - gravityY;
 				normValueZ = valuesZ[i] - gravityZ;
 				
+				
+				// Length of normalized vector
 				normLength =  Math.sqrt(
 						  Math.pow(normValueX, 2) + 
 						  Math.pow(normValueY, 2) + 
@@ -154,28 +99,19 @@ public class VectorStepdetector {
 						  Math.pow(valuesY[i], 2) + 
 						  Math.pow(valuesZ[i], 2));
 				
-				
-				
+				// Scalar between gravity and peak
 				scalar = (gravityX * valuesX[i] + gravityY * valuesY[i] + gravityZ * valuesZ[i]);
-				//scalar = (gravityX * normValueX + gravityY * normValueY + gravityZ * normValueZ);
+				
+				// Angle between gravity and the actual peak. This is not the normalized vector. The normalized vector could be used as well, but the threshold angle would change (increase).
 				cosAngle =  scalar / (vectorLength * gravityLength);
 				angle = Math.acos(cosAngle) * 180 / Math.PI;
 				
-				if(timestamps[i] > 1379000 && timestamps[i] < 1390000){
-					System.out.println(TimestampConverter.getVideoTimestamp(timestamps[i]));
-					System.out.println("Gravity: (" + gravityX  + ", " + gravityY + ", " + gravityZ + ") Total = " + Math.sqrt(
-							  Math.pow(gravityX, 2) + 
-							  Math.pow(gravityY, 2) + 
-							  Math.pow(gravityZ, 2)));
-					System.out.println("Values: (" + normValueX + ", " + normValueY + ", " + normValueZ + ") Total = " + normLength);
-					System.out.println("Angle = " + angle);
-				}
-
+				// If both thresholds are met, set a step
 				if(normLength > threshold && angle > threshold_angle){
 					
-
 					// Add step if freezetime is over, reset freezetime otherwise
 					if(freezeFor == 0){
+						System.out.println("Adding step\n-------------------------------------------------------->> " + list.size());
 						addTimestamp(list, timestamps[i]);
 						freezeFor = MIN_STEPLENGTH;
 					}
@@ -186,11 +122,11 @@ public class VectorStepdetector {
 	}
 	
 	/**
-	 * Calculates the average value of an int[] from position a to position b
+	 * Calculates the average value of an int[] from position a to position b. This is the way to get gravity.
 	 * @param a
 	 * @param from
 	 * @param to
-	 * @return
+	 * @return The average of all numbers in the specified area of the given array
 	 */
 	private int averageArray(int[] array, int a, int b){
 		int ret = 0;
@@ -200,16 +136,5 @@ public class VectorStepdetector {
 		}
 		
 		return ret / (b - a);
-	}
-	
-	private void addTimestamp(LinkedList<Timestamp> list, long time){
-		//System.out.println("Adding at " + time + " -------------> " + list.size());
-		Timestamp t = new Timestamp();
-		t.timestamp = time;
-		list.add(t);
-	}
-	
-	class Timestamp{
-		public long timestamp;
 	}
 }
