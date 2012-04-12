@@ -236,6 +236,10 @@ public class EvalGUI extends WindowAdapter{
    * Recreates the layout of panelSouth
    */
   public void updateFrames(){
+	  // Happens only if there is a problem loading vlc, in which case the gui will not show anyway
+	  if(dataContent == null)
+		  return;
+	  
 	  dataContent.removeAll();
 	  
 	  if(model.getLoadedDataTracks().size() == 0){
