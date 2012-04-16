@@ -27,19 +27,11 @@ public class VLCPlayerHandler {
 	  // If ok has been clicked, load the file
 	  if(chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION){	 
 		  String path = chooser.getSelectedFile().getAbsolutePath();
-		  model.setVLCPath(path);
-		  model.loadConfiguration();
 		  
-		  // Save config and wait for error message
-		  String s  = model.saveConfiguration();
-		
-		  // If there is an error, create a message dialog
-		  if(s != null){
-			JOptionPane.showMessageDialog(gui, "Error saving configuration: " + s, "File error", JOptionPane.ERROR_MESSAGE);			 
-			}
-		  else
-			System.out.println("Wrote config");
-			
+		  if(!model.setVLCPath(path)){
+			  JOptionPane.showMessageDialog(gui, "This program does not work without VLC. Quitting.", "Error", JOptionPane.ERROR_MESSAGE);	
+			   System.exit(0);
+		  }
 	  }  
 	  else{
 		   JOptionPane.showMessageDialog(gui, "This program does not work without VLC. Quitting.", "Error", JOptionPane.ERROR_MESSAGE);	

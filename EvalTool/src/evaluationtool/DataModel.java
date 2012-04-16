@@ -10,6 +10,8 @@ import java.util.*;
 
 import javax.swing.JOptionPane;
 
+import com.sun.jna.NativeLibrary;
+
 
 import weka.core.DenseInstance;
 import weka.core.Instances;
@@ -304,7 +306,6 @@ public class DataModel {
 			String line = br.readLine();
 
 			while(line != null){
-				// Ignore VLC path, load project
 				if (line.startsWith(PROJECTPATH_LINE)){
 						projectfile = line.substring(PROJECTPATH_LINE.length());
 						if(projectfile != ""){
@@ -342,7 +343,7 @@ public class DataModel {
 			// Check for VLC path only
 			while(line != null){
 				if	(line.startsWith(VLCPATH_LINE)){
-						vlcdir = line.substring(VLCPATH_LINE.length());
+						setVLCPath(line.substring(VLCPATH_LINE.length()));
 				}
 				line = br.readLine();
 			}
@@ -378,8 +379,19 @@ public class DataModel {
 		return vlcdir;
 	}
 	
-	public void setVLCPath(String path){
+	public boolean setVLCPath(String path){
+		if(path == null || path.equals("")){
+			return false;
+		}
+		
 		vlcdir = path;
+		System.out.println(getVLCPath());
+		
+		NativeLibrary.addSearchPath("libvlc",  path);
+
+		boolean pathOkay = gui.buildVideoFrame();
+		
+		return pathOkay;
 	}
 	
 	public String getProjectPath(){

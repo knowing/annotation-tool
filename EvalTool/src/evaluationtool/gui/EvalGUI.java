@@ -98,7 +98,7 @@ public class EvalGUI extends WindowAdapter{
   /**
    * Builds the frame for video
    */
-  private void buildVideoFrame(){
+  public boolean buildVideoFrame(){
 	  
 	videoFrame = new JFrame();
 	  
@@ -111,19 +111,23 @@ public class EvalGUI extends WindowAdapter{
 	videoFrame.addKeyListener(this.getShortcutKeyListener());
     
     // Create media player and ask for VLC path if necessary
-    while(mediaPlayerComponent == null){
+    if(mediaPlayerComponent == null){
 	    try{
-	    NativeLibrary.addSearchPath("libvlc",  model.getVLCPath());
 	    mediaPlayerComponent = new EmbeddedMediaPlayerComponent();
 	    }
 	    catch(Exception e){
 	    	VLCPlayerHandler.initLibVlc(model, videoFrame);
 	    }
     }
+    
+    // Return false of VLC is incorrect
+    if(mediaPlayerComponent == null)
+    	return false;
 	
 	// Add media player
 	videoFrame.setContentPane(mediaPlayerComponent);
 	videoFrame.setVisible(true);
+	return true;
   }
   
   /**
@@ -400,6 +404,7 @@ public class EvalGUI extends WindowAdapter{
 	public void stopProperly() {
 		// Stop thread
 		vi.setRunning(false);
+		model.saveConfiguration();
 		
 		// Stop media player properly
 		mediaPlayerComponent.getMediaPlayer().stop();
